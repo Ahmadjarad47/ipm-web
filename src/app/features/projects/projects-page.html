@@ -1,0 +1,135 @@
+<app-page-header title="المشاريع" subtitle="إدارة المشاريع ومتابعة تقدّمها">
+  <button *appCan="'projects.create'" type="button" class="btn btn--primary" (click)="create()">
+    <app-icon name="plus" [size]="16" /> مشروع جديد
+  </button>
+</app-page-header>
+
+<section class="card">
+  <div class="toolbar">
+    <input class="input" type="search" placeholder="بحث بالاسم أو الرمز" aria-label="بحث" [value]="search()" (input)="onSearch($event)" />
+    <select class="select" aria-label="تصفية بالحالة" [value]="filters()['statusId'] ?? ''" (change)="onFilter('statusId', $event)">
+      <option value="">كل الحالات</option>
+      @for (s of projectStatuses(); track s.id) {
+        <option [value]="s.id" [selected]="filters()['statusId'] === s.id">{{ s.name }}</option>
+      }
+    </select>
+    <select class="select" aria-label="تصفية بالمالك" [value]="filters()['ownerId'] ?? ''" (change)="onFilter('ownerId', $event)">
+      <option value="">كل المالكين</option>
+      @for (u of activeUsers(); track u.id) {
+        <option [value]="u.id" [selected]="filters()['ownerId'] === u.id">{{ u.name }}</option>
+      }
+    </select>
+    <select class="select" aria-label="تصفية بالعضو" [value]="filters()['memberId'] ?? ''" (change)="onFilter('memberId', $event)">
+      <option value="">كل الأعضاء</option>
+      @for (u of activeUsers(); track u.id) {
+        <option [value]="u.id" [selected]="filters()['memberId'] === u.id">{{ u.name }}</option>
+      }
+    </select>
+    <label class="date-field">
+      من
+      <input class="input ltr" type="date" aria-label="الفترة من" [value]="filters()['endFrom'] ?? ''" (change)="onFilter('endFrom', $event)" />
+    </label>
+    <label class="date-field">
+      إلى
+      <input class="input ltr" type="date" aria-label="الفترة إلى" [value]="filters()['startTo'] ?? ''" (change)="onFilter('startTo', $event)" />
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" [checked]="showArchived()" (change)="onArchived($event)" /> عرض المؤرشف
+    </label>
+    <span class="spacer"></span>
+    <div class="view-toggle" role="group" aria-label="طريقة العرض">
+      <button type="button" class="btn btn--sm btn--icon" [class.btn--primary]="view() === 'table'" [class.btn--ghost]="view() !== 'table'" aria-label="عرض جدول" [attr.aria-pressed]="view() === 'table'" (click)="setView('table')">
+        <app-icon name="list" [size]="16" />
+      </button>
+      <button type="button" class="btn btn--sm btn--icon" [class.btn--primary]="view() === 'cards'" [class.btn--ghost]="view() !== 'cards'" aria-label="عرض بطاقات" [attr.aria-pressed]="view() === 'cards'" (click)="setView('cards')">
+        <app-icon name="dashboard" [size]="16" />
+      </button>
+    </div>
+  </div>
+
+  @if (activeFilters().length) {
+    <div class="chips" role="group" aria-label="الفلاتر المفعّلة">
+      @for (f of activeFilters(); track f.key) {
+        <span class="chip">
+          {{ f.label }}
+          <button type="button" [attr.aria-label]="'إزالة فلتر ' + f.label" (click)="removeFilter(f)"><app-icon name="close" [size]="12" /></button>
+        </span>
+      }
+      <button type="button" class="btn btn--ghost btn--sm" (click)="store.clearFilters()">مسح الفلاتر</button>
+    </div>
+  }
+
+  @if (store.error(); as err) {
+    <app-error-state title="تعذّر تحميل المشاريع" [text]="err" (retry)="store.reload()" />
+  } @else if (firstLoad()) {
+    <div class="state-pad"><app-skeleton variant="table" [count]="6" /></div>
+  } @else if (store.isEmpty()) {
+    @if (activeFilters().length) {
+      <app-empty-state icon="folder" title="لا توجد مشاريع مطابقة" text="جرّب تعديل الفلاتر أو البحث.">
+        <button type="button" class="btn btn--outline" (click)="store.clearFilters()">مسح الفلاتر</button>
+      </app-empty-state>
+    } @else {
+      <app-empty-state icon="folder" title="لا توجد مشاريع بعد" text="ابدأ بإنشاء مشروعك الأول لتتبّع العمل والتقدّم.">
+        <button *appCan="'projects.create'" type="button" class="btn btn--primary" (click)="create()">
+          <app-icon name="plus" [size]="16" /> أنشئ أول مشروع
+        </button>
+      </app-empty-state>
+    }
+  } @else if (view() === 'table') {
+    <app-data-table
+      caption="قائمة المشاريع"
+      emptyTitle="لا توجد مشاريع"
+      [tableId]="tableId"
+      [rows]="store.items()"
+      [columns]="columns()"
+      [loading]="store.loading()"
+      [total]="store.total()"
+      [page]="store.query().page"
+      [pageSize]="store.query().pageSize"
+      [sort]="store.query().sort"
+      (sortChange)="store.setSort($event)"
+      (pageChange)="store.setPage($event)"
+      (pageSizeChange)="store.setPageSize($event)"
+      (rowClick)="open($event)"
+    />
+  } @else {
+    <div class="cards">
+      @for (p of store.items(); track p.id) {
+        <article class="card pcard">
+          <div class="row">
+            <span class="ltr code">{{ p.code }}</span>
+            <span class="spacer"></span>
+            @if (p.archived) {
+              <app-badge tone="neutral">مؤرشف</app-badge>
+            }
+            <app-status-badge [statusId]="p.statusId" />
+          </div>
+          <h3><a class="pcard-link" [routerLink]="['/projects', p.id]">{{ p.name }}</a></h3>
+          <app-project-progress [progress]="p.progress" />
+          <div class="row meta">
+            <app-avatar [name]="p.ownerId | userName" [size]="24" />
+            <span>{{ p.ownerId | userName }}</span>
+            <span class="spacer"></span>
+            <span class="muted">{{ p.endDate | appDate }}</span>
+          </div>
+        </article>
+      }
+    </div>
+    <app-paginator [page]="store.query().page" [pageSize]="store.query().pageSize" [total]="store.total()" (pageChange)="store.setPage($event)" />
+  }
+</section>
+
+<ng-template #codeTpl let-p><span class="ltr code">{{ p.code }}</span></ng-template>
+<ng-template #nameTpl let-p>
+  <a class="name-link" [routerLink]="['/projects', p.id]" (click)="$event.stopPropagation()"><strong>{{ p.name }}</strong></a>
+  @if (p.archived) {
+    <app-badge tone="neutral">مؤرشف</app-badge>
+  }
+</ng-template>
+<ng-template #statusTpl let-p><app-status-badge [statusId]="p.statusId" /></ng-template>
+<ng-template #progressTpl let-p><app-project-progress [progress]="p.progress" /></ng-template>
+<ng-template #ownerTpl let-p>
+  <span class="row owner"><app-avatar [name]="p.ownerId | userName" [size]="24" />{{ p.ownerId | userName }}</span>
+</ng-template>
+<ng-template #startTpl let-p>{{ p.startDate | appDate }}</ng-template>
+<ng-template #endTpl let-p>{{ p.endDate | appDate }}</ng-template>

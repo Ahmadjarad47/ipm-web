@@ -1,0 +1,18 @@
+.audit { overflow: hidden; }
+.filters { align-items: flex-end; flex-wrap: wrap; }
+.chk, .dt { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); }
+.actor { display: inline-flex; align-items: center; gap: var(--s-2); }
+.corr { font-size: var(--fs-xs); }
+.actions { display: flex; align-items: flex-start; gap: var(--s-3); flex-wrap: wrap; }
+.export { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; max-width: 280px; }
+.code { font-size: var(--fs-xs); font-weight: 700; }
+
+.banner { display: flex; align-items: center; gap: var(--s-2); margin: 0 0 var(--s-4); padding: var(--s-3) var(--s-4); border-radius: var(--r-md); font-size: var(--fs-sm); }
+.banner--ok { background: var(--c-success-bg); color: var(--c-success); }
+.banner--bad { background: var(--c-danger-bg); color: var(--c-danger); font-weight: 600; }
+
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); padding: var(--s-2) var(--s-4); border-bottom: 1px solid var(--c-border); }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding-block: 2px; padding-inline: var(--s-3) 4px; border-radius: var(--r-pill); background: var(--c-emerald-50); font-size: var(--fs-xs); }
+.chip-x { display: inline-grid; place-items: center; min-width: 24px; min-height: 24px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
+.chip-x:hover { background: var(--c-emerald-100); }
+.chip-x:focus-visible { outline: 2px solid var(--c-emerald-600); outline-offset: 1px; }

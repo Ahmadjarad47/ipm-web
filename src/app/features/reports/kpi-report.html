@@ -1,0 +1,205 @@
+<div class="toolbar-row no-print">
+  <p class="muted note">المؤشرات والتوزيع تتبع المشروع والفترة؛ الجداول تتبع كل المرشحات{{ truncated() ? ' (أول 100 عنصر؛ التصدير يشمل الكل)' : '' }}.</p>
+  @if (canExport()) {
+    <span class="spacer"></span>
+    @if (exportProgress() !== null) {
+      <span class="muted" role="status">جارٍ التصدير {{ exportProgress() }}%…</span>
+      <button type="button" class="btn btn--ghost btn--sm" (click)="cancelExport()">إلغاء</button>
+    } @else {
+      <button type="button" class="btn btn--outline btn--sm" (click)="exportCsv()"><app-icon name="download" [size]="16" /> تصدير CSV</button>
+    }
+    <button type="button" class="btn btn--outline btn--sm" (click)="print()">طباعة / PDF</button>
+  }
+</div>
+
+<header class="print-head">
+  <h2>تقرير المؤشرات</h2>
+  <ul>
+    @for (s of summary(); track s.label) {
+      <li><strong>{{ s.label }}:</strong> {{ s.value }}</li>
+    }
+    <li><strong>وقت الإنشاء:</strong> {{ generatedAt | appDate: true }}</li>
+  </ul>
+</header>
+
+@if (stats.error()) {
+  <section class="card block" aria-label="المؤشرات">
+    <app-error-state title="تعذّر تحميل المؤشرات" (retry)="stats.reload()" />
+  </section>
+} @else if (stats.isLoading() && !statsValue()) {
+  <app-skeleton variant="card" [count]="5" />
+} @else {
+  <section class="grid grid--4 kpis" aria-label="المؤشرات">
+    <app-kpi-card label="المشاريع النشطة" icon="folder" [value]="statsValue()?.activeProjects ?? 0" [loading]="stats.isLoading()"
+      hint="مشاريع غير مؤرشفة في فئة «نشط»." />
+    <app-kpi-card label="عناصر مفتوحة (كل العناصر)" icon="list" tone="info" [value]="statsValue()?.openWorkItems ?? 0" [loading]="stats.isLoading()"
+      hint="عناصر ليست في فئة «منجز» أو «ملغى»." />
+    <app-kpi-card label="عناصر متأخرة" icon="alert" tone="danger" [value]="statsValue()?.overdueWorkItems ?? 0" [loading]="stats.isLoading()"
+      hint="مفتوحة وتجاوزت تاريخ الاستحقاق (حسب المنطقة الزمنية للمؤسسة)." />
+    <app-kpi-card label="موافقات معلّقة" icon="approval" tone="gold" [value]="statsValue()?.pendingApprovals ?? 0" [loading]="stats.isLoading()"
+      hint="طلبات بانتظار قرار." />
+    <app-kpi-card label="عناصر محجوبة" icon="lock" tone="danger" [value]="statsValue()?.blockedItems ?? 0" [loading]="stats.isLoading()"
+      hint="مفتوحة وتحجبها اعتمادية غير مكتملة." />
+    <app-kpi-card label="نشاط Git" icon="git" [value]="statsValue()?.gitActivity ?? 0" [loading]="stats.isLoading()"
+      hint="أحداث Git خلال الفترة. لا يُعدّ مقياس إنجاز." />
+  </section>
+}
+
+<div class="grid grid--2 sections">
+  <section class="card card-body" aria-labelledby="kr-dist">
+    <h2 class="section-title" id="kr-dist">توزيع كل العناصر حسب فئة الحالة <app-help-tip [text]="helpAll" label="تعريف كل العناصر" /></h2>
+    <p class="muted def">كل العناصر (الأب والطرفية). العدّ حسب الفئة الثابتة للحالة لا حسب اسمها المعروض.</p>
+    <ul class="bars">
+      @for (b of categoryBars(); track b.key) {
+        <li>
+          <span class="lbl"><i [style.background]="b.color"></i>{{ b.label }}</span>
+          <span class="bar" aria-hidden="true"><span [style.width.%]="b.percent" [style.background]="b.color"></span></span>
+          <span class="num">{{ b.count }} <small class="muted">({{ b.percent }}%)</small></span>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="card card-body" aria-labelledby="kr-type">
+    <h2 class="section-title" id="kr-type">الإنجاز حسب النوع <app-help-tip [text]="helpLeaf" label="تعريف العناصر الطرفية" /></h2>
+    <p class="muted def">العناصر الطرفية فقط (دون أبناء، دون الملغاة): المنجز من الإجمالي.</p>
+    @if (typeRows().length) {
+      <ul class="types">
+        @for (t of typeRows(); track t.typeId) {
+          <li>
+            <app-type-chip [typeId]="t.typeId" />
+            <span class="progress" role="img" [attr.aria-label]="t.percent + '%'"><span [style.width.%]="t.percent"></span></span>
+            <span class="num">{{ t.done }}/{{ t.total }}</span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <app-empty-state icon="info" title="لا توجد بيانات" />
+    }
+  </section>
+</div>
+
+<section class="card card-body block" aria-labelledby="kr-matrix">
+  <h2 class="section-title" id="kr-matrix">الإنجاز حسب النوع والفئة <app-help-tip [text]="helpLeaf" label="تعريف العناصر الطرفية" /></h2>
+  <p class="muted def">العناصر الطرفية فقط: عدد العناصر لكل نوع في كل فئة حالة.</p>
+  @if (stats.error()) {
+    <app-error-state title="تعذّر تحميل الجدول" (retry)="stats.reload()" />
+  } @else if (typeRows().length) {
+    <div class="table-wrap">
+      <table class="tbl">
+        <caption class="sr-only">الإنجاز حسب النوع والفئة</caption>
+        <thead>
+          <tr>
+            <th scope="col">النوع</th>
+            @for (c of categories; track c.key) {
+              <th scope="col">{{ c.label }}</th>
+            }
+            <th scope="col">الإجمالي</th>
+            <th scope="col">الإنجاز</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of typeRows(); track t.typeId) {
+            <tr>
+              <th scope="row"><app-type-chip [typeId]="t.typeId" /></th>
+              @for (n of t.cells; track $index) {
+                <td class="numc">{{ n }}</td>
+              }
+              <td class="numc">{{ t.total }}</td>
+              <td class="numc">{{ t.percent }}%</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (!stats.isLoading()) {
+    <app-empty-state icon="info" title="لا توجد بيانات" />
+  }
+</section>
+
+<section class="card card-body block" aria-labelledby="kr-deps">
+  <h2 class="section-title" id="kr-deps">حالة الاعتماديات <app-help-tip [text]="helpDeps" label="تعريف الاعتماديات" /></h2>
+  <p class="muted def">تُحسب على كل العناصر ضمن النطاق.</p>
+  @if (stats.error()) {
+    <app-error-state title="تعذّر تحميل الاعتماديات" (retry)="stats.reload()" />
+  } @else {
+    <dl class="dep-grid">
+      <div><dt>عناصر محجوبة</dt><dd>{{ statsValue()?.dependencies?.blockedItems ?? '…' }}</dd></div>
+      <div><dt>عناصر حاجبة</dt><dd>{{ statsValue()?.dependencies?.blockingItems ?? '…' }}</dd></div>
+      <div><dt>عناصر باعتمادية مفتوحة</dt><dd>{{ statsValue() ? statsValue()!.dependencies.itemsWithOpenDependencyPct + '%' : '…' }}</dd></div>
+    </dl>
+  }
+</section>
+
+<section class="card card-body block" aria-labelledby="kr-proj">
+  <h2 class="section-title" id="kr-proj">تقدّم المشاريع</h2>
+  <p class="muted def">التقدم = العناصر الطرفية المنجزة ÷ المحسوبة (دون الملغاة)؛ «لا توجد بيانات» إن لم توجد عناصر محسوبة.</p>
+  @if (projectRows().length) {
+    <div class="table-wrap">
+      <table class="tbl">
+        <caption class="sr-only">تقدم المشاريع</caption>
+        <thead>
+          <tr><th scope="col">الرمز</th><th scope="col">المشروع</th><th scope="col">الحالة</th><th scope="col">التقدم</th><th scope="col">العناصر المحسوبة</th><th scope="col">متأخرة</th></tr>
+        </thead>
+        <tbody>
+          @for (p of projectRows(); track p.id) {
+            <tr>
+              <td dir="ltr" class="code">{{ p.code }}</td>
+              <td><a [routerLink]="['/projects', p.id]">{{ p.name }}</a></td>
+              <td><app-status-badge [statusId]="p.statusId" /></td>
+              <td>
+                @if (p.progress.percent !== null) {
+                  <span class="pct"><span class="progress"><span [style.width.%]="p.progress.percent"></span></span>{{ p.progress.percent }}%</span>
+                } @else {
+                  <span class="muted">لا توجد بيانات</span>
+                }
+              </td>
+              <td>{{ p.progress.doneLeaves }}/{{ p.progress.countedLeaves }}</td>
+              <td [class.danger]="p.overdueCount > 0">{{ p.overdueCount }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <app-empty-state icon="folder" title="لا توجد مشاريع" />
+  }
+</section>
+
+<section class="card card-body block" aria-labelledby="kr-over">
+  <h2 class="section-title" id="kr-over">العناصر المتأخرة</h2>
+  <p class="muted def">عناصر مفتوحة تجاوز استحقاقها تاريخ اليوم (حسب المنطقة الزمنية للمؤسسة).</p>
+  @if (items.error()) {
+    <app-error-state title="تعذّر تحميل العناصر" (retry)="items.reload()" />
+  } @else if (items.isLoading()) {
+    <app-skeleton variant="table" [count]="4" />
+  } @else if (overdueRows().length) {
+    <div class="table-wrap">
+      <table class="tbl">
+        <caption class="sr-only">العناصر المتأخرة</caption>
+        <thead>
+          <tr><th scope="col">المرجع</th><th scope="col">العنوان</th><th scope="col">المشروع</th><th scope="col">المكلّفون</th><th scope="col">الاستحقاق</th></tr>
+        </thead>
+        <tbody>
+          @for (r of overdueRows(); track r.item.id) {
+            <tr>
+              <td dir="ltr" class="code"><a [routerLink]="['/work-items', r.item.id]">{{ r.item.ref }}</a></td>
+              <td>{{ r.item.title }}</td>
+              <td>{{ r.project?.name ?? '—' }}</td>
+              <td>
+                @if (r.item.assigneeIds.length) {
+                  <app-avatar-stack [names]="r.item.assigneeIds | userNames" />
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td class="danger">{{ r.item.dueDate | appDate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <app-empty-state icon="checkCircle" title="لا توجد عناصر متأخرة" />
+  }
+</section>

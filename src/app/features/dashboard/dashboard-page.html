@@ -1,0 +1,269 @@
+<app-page-header [title]="greeting() + '، ' + (user()?.name ?? '')" subtitle="نظرة عامة على المشاريع وعناصر العمل والموافقات ضمن صلاحياتك." />
+
+<form class="card card-body fbar" aria-label="مرشحات لوحة القيادة" (submit)="$event.preventDefault()">
+  <div class="field">
+    <label for="db-project">المشروع</label>
+    <select id="db-project" class="select" [ngModel]="filters().projectId" name="project" (ngModelChange)="patch({ projectId: $event })">
+      <option value="">كل المشاريع</option>
+      @for (p of projects.items(); track p.id) {
+        @if (!p.archived) {
+          <option [value]="p.id">{{ p.name }}</option>
+        }
+      }
+    </select>
+  </div>
+  <div class="field">
+    <label for="db-period">الفترة <app-help-tip [text]="periodHelp" label="شرح احتساب الفترة" /></label>
+    <select id="db-period" class="select" [ngModel]="filters().period" name="period" (ngModelChange)="patch({ period: asPeriod($event) })">
+      @for (p of periods; track p.key) {
+        <option [value]="p.key">{{ p.label }}</option>
+      }
+    </select>
+  </div>
+  @if (filters().period === 'custom') {
+    <div class="field">
+      <label for="db-from">من</label>
+      <input id="db-from" type="date" class="input" dir="ltr" name="from" [ngModel]="filters().from" [max]="filters().to || null" (ngModelChange)="patch({ from: $event })" />
+    </div>
+    <div class="field">
+      <label for="db-to">إلى</label>
+      <input id="db-to" type="date" class="input" dir="ltr" name="to" [ngModel]="filters().to" [min]="filters().from || null" (ngModelChange)="patch({ to: $event })" />
+    </div>
+  }
+  <div class="field">
+    <label for="db-cat">فئة الحالة</label>
+    <select id="db-cat" class="select" [ngModel]="filters().category" name="category" (ngModelChange)="patch({ category: asCategory($event) })">
+      <option value="">كل الفئات</option>
+      @for (c of categories; track c.key) {
+        <option [value]="c.key">{{ c.label }}</option>
+      }
+    </select>
+  </div>
+  <div class="field">
+    <label for="db-user">المكلّف</label>
+    <select id="db-user" class="select" [ngModel]="filters().assigneeId" name="assignee" (ngModelChange)="patch({ assigneeId: $event })">
+      <option value="">الجميع</option>
+      @for (u of users.items(); track u.id) {
+        <option [value]="u.id">{{ u.name }}</option>
+      }
+    </select>
+  </div>
+</form>
+
+@if (stats.error()) {
+  <section class="card" aria-label="المؤشرات">
+    <app-error-state title="تعذّر تحميل المؤشرات" (retry)="stats.reload()" />
+  </section>
+} @else if (stats.isLoading() && !statsValue()) {
+  <app-skeleton variant="card" [count]="5" />
+} @else {
+  <section class="grid grid--4 kpis" aria-label="المؤشرات">
+    <app-kpi-card label="المشاريع النشطة" icon="folder" [value]="statsValue()?.activeProjects ?? 0" [loading]="stats.isLoading()"
+      [hint]="'من أصل ' + (statsValue()?.totalProjects ?? 0) + '. مشاريع غير مؤرشفة في فئة «نشط».'" link="/projects" />
+    <app-kpi-card label="عناصر عمل مفتوحة" icon="list" tone="info" [value]="statsValue()?.openWorkItems ?? 0" [loading]="stats.isLoading()"
+      [hint]="'ليست في فئة «منجز» أو «ملغى». ' + (statsValue()?.blockedItems ?? 0) + ' محجوبة باعتماديات.'" link="/work-items" />
+    <app-kpi-card label="عناصر عمل متأخرة" icon="alert" tone="danger" [value]="statsValue()?.overdueWorkItems ?? 0" [loading]="stats.isLoading()"
+      hint="مفتوحة وتجاوزت تاريخ الاستحقاق (حسب المنطقة الزمنية للمؤسسة)." link="/work-items" [queryParams]="{ overdue: 'true' }" />
+    <app-kpi-card label="موافقات بانتظارك" icon="approval" tone="gold" [value]="statsValue()?.pendingApprovals ?? 0" [loading]="stats.isLoading()"
+      hint="طلبات بانتظار قرارك الآن." link="/approvals" />
+    <app-kpi-card label="نشاط Git" icon="git" [value]="statsValue()?.gitActivity ?? 0" [loading]="stats.isLoading()"
+      hint="أحداث Git (دفع، طلبات دمج) خلال الفترة. لا يُعدّ مقياس إنجاز." />
+  </section>
+
+  <section class="card card-body deps" aria-labelledby="db-deps">
+    <h2 class="section-title" id="db-deps">
+      الاعتماديات
+      <app-help-tip text="«محجوب»: عنصر مفتوح يحجبه رابط من عنصر آخر لم يكتمل. «حاجب»: عنصر مفتوح يحجب غيره. النسبة = العناصر ذات اعتمادية مفتوحة ÷ عناصر النطاق." label="تعريف الاعتماديات" />
+    </h2>
+    <dl class="dep-grid">
+      <div><dt>عناصر محجوبة</dt><dd>{{ statsValue()?.dependencies?.blockedItems ?? 0 }}</dd></div>
+      <div><dt>عناصر حاجبة</dt><dd>{{ statsValue()?.dependencies?.blockingItems ?? 0 }}</dd></div>
+      <div><dt>عناصر باعتمادية مفتوحة</dt><dd>{{ statsValue()?.dependencies?.itemsWithOpenDependencyPct ?? 0 }}%</dd></div>
+    </dl>
+  </section>
+}
+
+<div class="layout">
+  <section class="card card-body" aria-labelledby="db-dist">
+    <h2 class="section-title" id="db-dist">
+      توزيع العناصر حسب الفئة
+      <app-help-tip text="يشمل كل العناصر في النطاق (الأب والطرفية) حسب فئة الحالة الثابتة. نسبة الإنجاز في الأسفل تخص العناصر الطرفية فقط." label="تعريف التوزيع" />
+    </h2>
+    <p class="muted def">كل العناصر (الأب والطرفية) في النطاق المختار.</p>
+    @if (stats.error()) {
+      <app-error-state title="تعذّر تحميل التوزيع" (retry)="stats.reload()" />
+    } @else if (stats.isLoading() && !statsValue()) {
+      <app-skeleton variant="lines" [count]="5" />
+    } @else {
+      <div class="dist">
+        <svg viewBox="0 0 42 42" class="donut" role="img" [attr.aria-label]="'مخطط دائري لتوزيع كل العناصر حسب الفئة، الإجمالي ' + totalItems()">
+          <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--c-emerald-50)" stroke-width="6" />
+          @for (s of donut(); track s.key) {
+            <circle cx="21" cy="21" r="15.915" fill="none" [attr.stroke]="s.color" stroke-width="6"
+              [attr.stroke-dasharray]="s.dash" [attr.stroke-dashoffset]="s.offset" transform="rotate(-90 21 21)" />
+          }
+          <text x="21" y="20" text-anchor="middle" class="donut-num">{{ totalItems() }}</text>
+          <text x="21" y="26" text-anchor="middle" class="donut-lbl">كل العناصر</text>
+        </svg>
+        <ul class="bars">
+          @for (b of categoryBars(); track b.key) {
+            <li>
+              <span class="lbl"><i [style.background]="b.color"></i>{{ b.label }}</span>
+              <span class="bar" aria-hidden="true"><span [style.width.%]="b.percent" [style.background]="b.color"></span></span>
+              <span class="num">{{ b.count }} <small class="muted">({{ b.percent }}%)</small></span>
+            </li>
+          }
+        </ul>
+      </div>
+      <table class="sr-only">
+        <caption>توزيع كل العناصر حسب فئة الحالة</caption>
+        <thead><tr><th scope="col">الفئة</th><th scope="col">العدد</th><th scope="col">النسبة</th></tr></thead>
+        <tbody>
+          @for (b of categoryBars(); track b.key) {
+            <tr><th scope="row">{{ b.label }}</th><td>{{ b.count }}</td><td>{{ b.percent }}%</td></tr>
+          }
+        </tbody>
+      </table>
+
+      @if (typeRows().length) {
+        <h3 class="sub">
+          الإنجاز حسب النوع <small class="muted">(العناصر الطرفية فقط)</small>
+        </h3>
+        <ul class="types">
+          @for (t of typeRows(); track t.typeId) {
+            <li>
+              <app-type-chip [typeId]="t.typeId" />
+              <span class="stack" role="img" [attr.aria-label]="t.name + ': ' + t.done + ' من ' + t.total + ' منجز'">
+                @for (s of t.segments; track s.key) {
+                  <span [style.width.%]="s.width" [style.background]="s.color" [title]="s.label + ': ' + s.count"></span>
+                }
+              </span>
+              <span class="num">{{ t.done }}/{{ t.total }}</span>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+
+  <section class="card card-body">
+    <h2 class="section-title">
+      تقدّم المشاريع
+      <a routerLink="/projects" class="btn btn--ghost btn--sm">عرض الكل</a>
+    </h2>
+    <ul class="projects">
+      @for (p of activeProjects(); track p.id) {
+        <li>
+          <a [routerLink]="['/projects', p.id]">
+            <div class="row">
+              <strong>{{ p.name }}</strong>
+              <span class="ltr muted">{{ p.code }}</span>
+              <span class="spacer"></span>
+              <app-status-badge [statusId]="p.statusId" />
+            </div>
+            <div class="row prog">
+              <span class="progress"><span [style.width.%]="p.progress.percent ?? 0"></span></span>
+              <strong class="pct">{{ p.progress.percent === null ? 'لا توجد بيانات' : p.progress.percent + '%' }}</strong>
+            </div>
+            <small class="muted">{{ p.progress.doneLeaves }} من {{ p.progress.countedLeaves }} عنصرًا طرفيًا منجزًا · ينتهي {{ p.endDate | appDate }}</small>
+          </a>
+        </li>
+      } @empty {
+        <app-empty-state icon="folder" title="لا توجد مشاريع" />
+      }
+    </ul>
+  </section>
+
+  <section class="card card-body" aria-labelledby="db-mine">
+    <h2 class="section-title" id="db-mine">
+      عناصر عملي
+      <a routerLink="/work-items" [queryParams]="{ mine: 'true' }" class="btn btn--ghost btn--sm">عرض الكل</a>
+    </h2>
+    @if (myItems.error()) {
+      <app-error-state title="تعذّر تحميل عناصر عملك" (retry)="myItems.reload()" />
+    } @else if (myItems.isLoading() && !myItemsValue().length) {
+      <app-skeleton variant="lines" [count]="4" />
+    } @else {
+      <ul class="list">
+        @for (w of myItemsValue(); track w.id) {
+          <li>
+            <a [routerLink]="['/work-items', w.id]">
+              <app-type-chip [typeId]="w.typeId" [iconOnly]="true" />
+              <span class="grow">
+                <span class="ltr muted">{{ w.ref }}</span>
+                {{ w.title }}
+              </span>
+              <app-priority-badge [priority]="w.priority" />
+              <app-status-badge [statusId]="w.statusId" />
+            </a>
+          </li>
+        } @empty {
+          <app-empty-state icon="checkCircle" title="لا توجد عناصر عمل مكلَّف بها" text="ستظهر هنا العناصر المكلَّف بها.">
+            <a class="btn btn--primary" routerLink="/work-items">استعرض كل عناصر العمل</a>
+          </app-empty-state>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="card card-body" aria-labelledby="db-appr">
+    <h2 class="section-title" id="db-appr">
+      موافقاتي المعلّقة
+      <a routerLink="/approvals" class="btn btn--ghost btn--sm">مركز الموافقات</a>
+    </h2>
+    @if (myApprovals.error()) {
+      <app-error-state title="تعذّر تحميل الموافقات" (retry)="myApprovals.reload()" />
+    } @else if (myApprovals.isLoading() && !myApprovalsValue().length) {
+      <app-skeleton variant="lines" [count]="3" />
+    } @else {
+      <ul class="list">
+        @for (a of myApprovalsValue(); track a.id) {
+          <li>
+            <a [routerLink]="['/approvals', a.id]">
+              <span class="grow">
+                {{ a.title }}
+                <small class="muted d-block">المرحلة {{ a.currentStage }} من {{ a.stages.length }} · {{ a.requesterId | userName }}</small>
+              </span>
+              <app-approval-status [status]="a.status" />
+            </a>
+          </li>
+        } @empty {
+          <app-empty-state icon="approval" title="لا شيء بانتظارك" text="لا توجد طلبات موافقة تحتاج قرارك الآن." />
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="card card-body span-2" aria-labelledby="db-act">
+    <h2 class="section-title" id="db-act">آخر النشاطات</h2>
+    @if (activity.error()) {
+      <app-error-state title="تعذّر تحميل النشاط" (retry)="activity.reload()" />
+    } @else if (activity.isLoading() && !activityValue().length) {
+      <app-skeleton variant="lines" [count]="5" />
+    } @else {
+      <ol class="timeline">
+        @for (e of activityValue(); track e.id) {
+          <li>
+            <app-avatar [name]="e.actorId | userName" [size]="30" />
+            <div>
+              <p>
+                <strong>{{ e.actorId | userName }}</strong> {{ actionLabel(e) }}
+                @if (activityLink(e); as link) {
+                  <a [routerLink]="link">{{ e.subjectLabel }}</a>
+                } @else {
+                  <span>{{ e.subjectLabel }}</span>
+                }
+              </p>
+              @for (c of e.changes; track c.field) {
+                <small class="muted d-block">{{ format.field(c.field) }}: {{ format.value(c, 'from') }} ← {{ format.value(c, 'to') }}</small>
+              }
+              <small class="muted">{{ e.at | relativeTime }}</small>
+            </div>
+          </li>
+        } @empty {
+          <app-empty-state icon="history" title="لا يوجد نشاط بعد" />
+        }
+      </ol>
+    }
+  </section>
+</div>

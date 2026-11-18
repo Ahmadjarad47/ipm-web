@@ -1,0 +1,113 @@
+// Checkbox matrices (hierarchy rules, allowed pairs, transitions): 20px inputs inside a 44px hit area,
+// sticky row/column headers, logical properties only.
+.mx-scroll {
+  overflow: auto;
+  max-block-size: min(70vh, 560px);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+}
+
+.mx {
+  border-collapse: separate;
+  border-spacing: 0;
+  inline-size: max-content;
+  min-inline-size: 100%;
+  font-size: var(--fs-sm);
+
+  th,
+  td {
+    padding: var(--s-1) var(--s-2);
+    border-inline-end: 1px solid var(--c-border);
+    border-block-end: 1px solid var(--c-border);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  thead th {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 2;
+    background: var(--c-surface-2);
+    font-weight: 600;
+  }
+
+  tbody th {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    background: var(--c-surface-2);
+    font-weight: 600;
+    text-align: start;
+  }
+
+  thead th.corner {
+    inset-inline-start: 0;
+    z-index: 3;
+    font-size: var(--fs-xs);
+    color: var(--c-muted);
+    text-align: start;
+  }
+
+  td.self {
+    background: var(--c-neutral-bg);
+  }
+
+  td.on {
+    background: var(--c-emerald-50);
+  }
+
+  .dot {
+    display: inline-block;
+    inline-size: 9px;
+    block-size: 9px;
+    margin-inline-end: 6px;
+    border-radius: 50%;
+    background: var(--sw);
+  }
+}
+
+.hit {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  cursor: pointer;
+
+  input {
+    inline-size: 20px;
+    block-size: 20px;
+    margin: 0;
+    accent-color: var(--c-emerald-700);
+    cursor: inherit;
+  }
+
+  input:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-xs);
+  color: var(--c-muted);
+}
+
+.savebar {
+  position: sticky;
+  inset-block-end: var(--s-3);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  padding: var(--s-3) var(--s-4);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md, 0 4px 16px rgb(0 0 0 / 12%));
+}

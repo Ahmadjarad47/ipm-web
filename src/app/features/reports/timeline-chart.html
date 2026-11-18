@@ -1,0 +1,100 @@
+<section class="card" aria-label="الخط الزمني">
+  <div class="toolbar">
+    <div class="row">
+      <label for="tl-zoom" class="muted">التقريب</label>
+      <select id="tl-zoom" class="select" (change)="zoom.set(asZoom($event))">
+        @for (z of zooms; track z.key) {
+          <option [value]="z.key" [selected]="z.key === zoom()">{{ z.label }}</option>
+        }
+      </select>
+    </div>
+    <button type="button" class="btn btn--ghost btn--sm" (click)="setAllCollapsed(!allCollapsed())">{{ allCollapsed() ? 'توسيع الكل' : 'طيّ الكل' }}</button>
+    <span class="spacer"></span>
+    @if (hasMore()) {
+      <span class="muted" role="status">عُرض {{ loadedCount() }} من {{ total() }} عنصرًا</span>
+      <button type="button" class="btn btn--outline btn--sm" [disabled]="loadingMore()" (click)="loadMore()">{{ loadingMore() ? 'جارٍ التحميل…' : 'تحميل المزيد' }}</button>
+    }
+  </div>
+
+  @if (data.isLoading()) {
+    <app-skeleton variant="chart" [count]="6" />
+  } @else if (data.error()) {
+    <app-error-state title="تعذّر تحميل الخط الزمني" (retry)="data.reload()" />
+  } @else if (!rows().length) {
+    <app-empty-state icon="calendar" title="لا توجد عناصر ضمن هذه المرشحات" text="غيّر الفترة أو المشروع أو فئة الحالة لعرض عناصر لها تواريخ." />
+  } @else {
+    <div #scroller class="scroller" tabindex="0" role="region" aria-label="مخطط الخط الزمني (قابل للتمرير أفقيًا)">
+      <div class="chart" [style.width.px]="labelWidth + trackWidth()">
+        <div class="line head">
+          <div class="lbl">العنصر</div>
+          <div class="track head-track" [style.width.px]="trackWidth()" aria-hidden="true">
+            @for (t of ticks(); track t.left) {
+              <span class="tick" [style.inset-inline-start.px]="t.left" [style.width.px]="t.width">{{ t.label }}</span>
+            }
+          </div>
+        </div>
+
+        @for (r of visibleRows(); track r.kind + r.id) {
+          <div class="line" [class.project]="r.kind === 'project'">
+            <div class="lbl">
+              @if (r.kind === 'project') {
+                <button type="button" class="toggle" [attr.aria-expanded]="!collapsed().has(r.id)" [attr.aria-label]="(collapsed().has(r.id) ? 'توسيع ' : 'طيّ ') + r.title"
+                  (click)="toggleGroup(r.id)">{{ collapsed().has(r.id) ? '+' : '−' }}</button>
+              }
+              @if (r.typeId) {
+                <app-type-chip [typeId]="r.typeId" [iconOnly]="true" />
+              }
+              <span class="ref" dir="ltr">{{ r.ref }}</span>
+              <span class="ttl" [title]="r.title">{{ r.title }}</span>
+            </div>
+            <div class="track" [style.width.px]="trackWidth()">
+              @for (t of ticks(); track t.left) {
+                <i class="grid-line" [style.inset-inline-start.px]="t.left"></i>
+              }
+              @if (r.diamond) {
+                <a class="diamond" [routerLink]="r.link" [attr.aria-label]="r.aria" (mouseenter)="showTip(r, $event)" (focus)="showTip(r, $event)" (mouseleave)="hideTip()" (blur)="hideTip()" (keydown.escape)="hideTip()" [attr.aria-describedby]="tip()?.row === r ? 'tl-tip' : null" [class.overdue]="r.overdue"
+                  [style.inset-inline-start.px]="diamondLeft(r)" [style.background]="r.color"></a>
+              } @else {
+                <a class="bar" [routerLink]="r.link" [attr.aria-label]="r.aria" (mouseenter)="showTip(r, $event)" (focus)="showTip(r, $event)" (mouseleave)="hideTip()" (blur)="hideTip()" (keydown.escape)="hideTip()" [attr.aria-describedby]="tip()?.row === r ? 'tl-tip' : null" [class.overdue]="r.overdue"
+                  [class.bar--project]="r.kind === 'project'" [style.inset-inline-start.px]="barLeft(r)" [style.width.px]="barWidth(r)"
+                  [style.background]="r.color"></a>
+              }
+            </div>
+          </div>
+        }
+
+        @if (todayLeft() !== null) {
+          <span class="today" aria-hidden="true" title="اليوم" [style.inset-inline-start.px]="labelWidth + todayLeft()!"></span>
+        }
+      </div>
+    </div>
+
+    @if (tip(); as t) {
+      <div id="tl-tip" class="tip" role="tooltip" [style.top.px]="t.top" [style.inset-inline-start.px]="t.inline">
+        <strong>{{ t.row.ref }} {{ t.row.title }}</strong>
+        <span>{{ range(t.row) }}</span>
+        @if (t.row.statusName) {
+          <span>الحالة: {{ t.row.statusName }}</span>
+        }
+        @if (t.row.assignees) {
+          <span>المكلّفون: {{ t.row.assignees }}</span>
+        }
+        @if (t.row.percent !== null) {
+          <span>التقدم: {{ t.row.percent }}%</span>
+        }
+        @if (t.row.overdue) {
+          <span class="late">متأخر</span>
+        }
+      </div>
+    }
+
+    <ul class="legend" aria-label="دليل الألوان">
+      @for (l of legend(); track l.name) {
+        <li><i class="sw" [style.background]="l.color"></i>{{ l.name }}</li>
+      }
+      <li><i class="sw sw--overdue"></i>متأخر</li>
+      <li><i class="sw sw--diamond"></i>تاريخ استحقاق فقط</li>
+      <li><i class="sw sw--today"></i>اليوم</li>
+    </ul>
+  }
+</section>

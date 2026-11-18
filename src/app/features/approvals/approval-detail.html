@@ -1,0 +1,189 @@
+@if (request(); as r) {
+  <app-page-header [title]="r.title" [crumbs]="[{ label: 'مركز الموافقات', link: '/approvals' }, { label: 'تفاصيل الطلب' }]">
+    @if (canRemind()) {
+      <button type="button" class="btn btn--outline" [disabled]="busy()" (click)="remind()">تذكير المعتمد</button>
+    }
+    @if (showResubmit()) {
+      <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="resubmit()">إعادة التقديم</button>
+    }
+  </app-page-header>
+
+  <div class="head card card-body">
+    <app-approval-status [status]="r.status" />
+    <span class="rev">الإصدار {{ r.revision }}</span>
+    @if (r.overdue) {
+      <app-badge tone="danger">متأخر</app-badge>
+    }
+    <span class="who"><app-avatar [name]="r.requesterId | userName" [size]="24" /> {{ r.requesterId | userName }}</span>
+    <span class="age muted">
+      أُنشئ {{ r.createdAt | appDate: true }} · <span [class.warn]="r.overdue">{{ age() }}</span>
+      @if (sla(); as text) {
+        · <span [class.warn]="r.overdue">{{ text }}</span>
+      }
+    </span>
+    <a class="subject" [routerLink]="subjectLink()">
+      {{ r.subjectType === 'project' ? 'عرض المشروع' : 'عرض عنصر العمل' }}
+    </a>
+  </div>
+
+  @if (remindMessage(); as m) {
+    <div class="banner banner--warn" role="alert"><app-icon name="alert" /><span>{{ m }}</span></div>
+  }
+
+  @if (r.status === 'Superseded') {
+    <div class="banner banner--warn" role="alert">
+      <app-icon name="alert" />
+      <span>
+        تغيّر حقل محمي أثناء المراجعة؛ هذا الإصدار لم يعد صالحًا للقرار.
+        @if (isRequester()) {
+          استخدم «إعادة التقديم» أعلاه لإنشاء إصدار جديد من الطلب بالقيم الحالية.
+        } @else {
+          بانتظار أن يعيد مقدّم الطلب تقديمه.
+        }
+      </span>
+      @if (showResubmit()) {
+        <button type="button" class="btn btn--primary btn--sm" [disabled]="busy()" (click)="resubmit()">إعادة التقديم</button>
+      }
+      <a class="banner-link" [routerLink]="subjectLink()">عرض {{ r.subjectType === 'project' ? 'المشروع' : 'عنصر العمل' }}</a>
+    </div>
+  }
+
+  <div class="layout">
+    <section class="card card-body" aria-labelledby="stages-title">
+      <h2 class="section-title" id="stages-title">مراحل الموافقة</h2>
+      <ol class="stepper">
+        @for (s of stages(); track s.stage.order) {
+          <li [class]="'step ' + s.state" [attr.aria-current]="s.state === 'active' ? 'step' : null">
+            <span class="marker" aria-hidden="true">
+              @if (s.state === 'pending') {
+                {{ s.stage.order }}
+              } @else {
+                <app-icon [name]="stageIcon(s.state)" [size]="14" />
+              }
+            </span>
+            <div class="body">
+              <div class="row">
+                <strong>{{ s.stage.order }}. {{ s.stage.name }}</strong>
+                <span class="state">{{ stateLabels[s.state] }}</span>
+                @if (s.state === 'active' && r.overdue) {
+                  <app-badge tone="danger">متأخر</app-badge>
+                }
+              </div>
+              <small class="muted">{{ s.kindLabel }}: {{ s.approver }}</small>
+              @if (s.state === 'active' && canReassign()) {
+                <button type="button" class="btn btn--outline btn--sm reassign" (click)="reassign(s.stage)">إعادة تعيين المعتمد</button>
+              }
+              @if (s.decision; as d) {
+                <div class="decision" [class.bad]="d.decision !== 'Approve'">
+                  <strong>{{ decisionLabel(d.decision) }}</strong> · {{ d.deciderId | userName }} · {{ d.at | appDate: true }}
+                  @if (d.onBehalfOf) {
+                    <app-badge tone="info">نيابةً عن {{ d.onBehalfOf | userName }}</app-badge>
+                  }
+                  @if (selfDecided(d)) {
+                    <app-badge tone="warning">استثناء: قرار ذاتي من مقدّم الطلب</app-badge>
+                  }
+                  @if (d.comment) {
+                    <p>{{ d.comment }}</p>
+                  }
+                </div>
+              }
+            </div>
+          </li>
+        }
+      </ol>
+
+      @if (pastDecisions().length) {
+        <details class="past">
+          <summary>قرارات الإصدارات السابقة ({{ pastDecisions().length }})</summary>
+          <ul>
+            @for (d of pastDecisions(); track $index) {
+              <li>
+                <span class="muted">الإصدار {{ d.revision }} · المرحلة {{ d.stageOrder }}</span><br />
+                <strong>{{ decisionLabel(d.decision) }}</strong> · {{ d.deciderId | userName }} · {{ d.at | appDate: true }}
+                @if (d.onBehalfOf) {
+                  <app-badge tone="info">نيابةً عن {{ d.onBehalfOf | userName }}</app-badge>
+                }
+                @if (d.comment) {
+                  <p>{{ d.comment }}</p>
+                }
+              </li>
+            }
+          </ul>
+        </details>
+      }
+    </section>
+
+    <div class="side">
+      <section class="card card-body" aria-labelledby="snap-title">
+        <h2 class="section-title" id="snap-title">لقطة الحقول المعتمدة</h2>
+        @if (snapshot().length) {
+          <dl class="kv">
+            @for (f of snapshot(); track f.label) {
+              <dt>{{ f.label }}</dt>
+              <dd [class.ltr]="!f.known">{{ f.value }}</dd>
+            }
+          </dl>
+        } @else {
+          <p class="muted">لا توجد حقول.</p>
+        }
+      </section>
+
+      @if (proposed().length) {
+        <section class="card card-body" aria-labelledby="prop-title">
+          <h2 class="section-title" id="prop-title">التعديلات المقترحة</h2>
+          <div class="scroll">
+            <table class="diff">
+              <caption class="sr-only">مقارنة القيم الحالية بالمقترحة</caption>
+              <thead>
+                <tr>
+                  <th scope="col">الحقل</th>
+                  <th scope="col">قبل</th>
+                  <th scope="col">بعد</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of proposed(); track row.field) {
+                  <tr [class.same]="!row.changed">
+                    <th scope="row">{{ row.label }}</th>
+                    <td class="before">{{ row.before }}</td>
+                    <td class="after">{{ row.after }}@if (!row.changed) { <small class="muted"> (دون تغيير)</small> }</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="muted note"><app-icon name="info" [size]="14" /> تُطبَّق تلقائيًا عند اكتمال الموافقة.</p>
+        </section>
+      }
+
+      @if (showDecisionPanel()) {
+        <section class="card card-body decide" aria-labelledby="decide-title">
+          <h2 class="section-title" id="decide-title">قرارك</h2>
+          <div class="field">
+            <label for="decision-comment">تعليق (اختياري عند الموافقة)</label>
+            <textarea id="decision-comment" class="textarea" [ngModel]="comment()" (ngModelChange)="comment.set($event)"></textarea>
+            <span class="hint">التعليق إلزامي عند الرفض أو الإرجاع، وسيُطلب منك في نافذة التأكيد.</span>
+          </div>
+          <div class="row">
+            <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="approve()">موافقة</button>
+            <button type="button" class="btn btn--danger" [disabled]="busy()" (click)="openDecision('Reject')">رفض…</button>
+            <button type="button" class="btn btn--outline" [disabled]="busy()" (click)="openDecision('Return')">إرجاع للتعديل…</button>
+          </div>
+        </section>
+      }
+    </div>
+  </div>
+
+  <section class="card card-body" aria-labelledby="cmt-title">
+    <h2 class="section-title" id="cmt-title">التعليقات</h2>
+    <app-comments-panel subjectType="approval" [subjectId]="r.id" [projectId]="r.projectId" />
+  </section>
+} @else if (notFound()) {
+  <app-empty-state icon="alert" title="الطلب غير موجود" text="قد يكون محذوفًا أو لا تملك صلاحية الاطلاع عليه.">
+    <a class="btn btn--outline" routerLink="/approvals">العودة إلى مركز الموافقات</a>
+  </app-empty-state>
+} @else if (resource.error()) {
+  <app-error-state title="تعذّر تحميل الطلب" (retry)="resource.reload()" />
+} @else {
+  <app-skeleton variant="detail" />
+}

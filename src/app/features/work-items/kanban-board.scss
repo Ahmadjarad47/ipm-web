@@ -1,0 +1,77 @@
+:host { display: block; }
+
+.board {
+  display: flex;
+  gap: var(--s-4);
+  align-items: flex-start;
+  overflow-x: auto;
+  padding: var(--s-4);
+}
+
+.col {
+  flex: 0 0 280px;
+  min-height: 160px;
+  border-radius: var(--r-lg);
+  background: var(--c-surface-2);
+  border: 2px solid transparent;
+  transition: border-color 0.15s, opacity 0.15s;
+
+  &.drop-ok { border-color: var(--c-emerald-500); background: var(--c-emerald-50); }
+  &.drop-no { opacity: 0.5; }
+}
+
+.col-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3);
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--status-color, var(--c-neutral)); }
+  .count { margin-inline-start: auto; font-size: var(--fs-xs); color: var(--c-muted); }
+}
+
+.cards { display: flex; flex-direction: column; gap: var(--s-2); padding: 0 var(--s-3) var(--s-3); }
+
+.kcard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  cursor: grab;
+
+  &.busy { opacity: 0.6; pointer-events: none; }
+  &.is-dragging { opacity: 0.4; }
+  .ref { font-size: var(--fs-xs); color: var(--c-muted); font-weight: 600; }
+  .title { font-weight: 600; color: var(--c-text); }
+  .due { font-size: var(--fs-xs); color: var(--c-muted); &.late { color: var(--c-danger); font-weight: 700; } }
+  .cfield { font-size: var(--fs-xs); }
+  .kebab { min-inline-size: 28px; min-block-size: 28px; padding: 0; }
+  .row { display: flex; align-items: center; gap: var(--s-2); }
+  .spacer { flex: 1; }
+}
+
+.none { text-align: center; padding: var(--s-3); }
+
+
+@media (max-width: 768px) {
+  .board {
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--s-4);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .col {
+    flex: 0 0 min(85vw, 280px);
+    scroll-snap-align: start;
+  }
+}
+
+@media (pointer: coarse), (max-width: 768px) {
+  .kcard .kebab { min-inline-size: 44px; min-block-size: 44px; }
+}
+
+.kcard .ref,
+.kcard .title { overflow-wrap: anywhere; }

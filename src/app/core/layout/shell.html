@@ -1,0 +1,139 @@
+<a class="skip-link" href="#main">تخطّي إلى المحتوى</a>
+
+<aside class="sidebar" [class.open]="sidebarOpen()" aria-label="القائمة الرئيسية">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">م</span>
+    <div>
+      <strong>إدارة المشاريع</strong>
+      <small>النظام الداخلي</small>
+    </div>
+  </div>
+
+  <nav class="nav">
+    @for (section of sections(); track $index) {
+      @if (section.title) {
+        <p class="nav-title">{{ section.title }}</p>
+      }
+      @for (item of section.items; track item.link) {
+        <a class="nav-link" [routerLink]="item.link" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: !!item.exact }">
+          <app-icon [name]="item.icon" />
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    }
+  </nav>
+
+  @if (auth.user(); as user) {
+    <div class="me">
+      <app-avatar [name]="user.name" [size]="36" />
+      <div class="me-info">
+        <strong>{{ user.name }}</strong>
+        <small>{{ user.title }}</small>
+      </div>
+      <button type="button" class="icon-btn" (click)="auth.logout()" aria-label="تسجيل الخروج" title="تسجيل الخروج">
+        <app-icon name="logout" />
+      </button>
+    </div>
+  }
+</aside>
+
+@if (sidebarOpen()) {
+  <div class="scrim" (click)="sidebarOpen.set(false)" aria-hidden="true"></div>
+}
+
+<div class="main-col">
+  <div class="top">
+    <app-offline-banner />
+    <header class="topbar">
+      <button type="button" class="btn btn--ghost btn--icon menu-btn" (click)="sidebarOpen.set(true)" aria-label="فتح القائمة">
+        <app-icon name="menu" />
+      </button>
+      <button type="button" class="search-trigger" (click)="openSearch()" aria-label="بحث شامل" aria-keyshortcuts="Control+K">
+        <app-icon name="search" [size]="16" />
+        <span>ابحث عن مشروع أو عنصر عمل أو صفحة…</span>
+        <kbd>{{ isMac ? '⌘' : 'Ctrl' }} K</kbd>
+      </button>
+      <div class="spacer"></div>
+
+      <div class="notif">
+        <button #notifBtn type="button" class="btn btn--ghost btn--icon" (click)="toggleNotif()"
+          [attr.aria-expanded]="notifOpen()" aria-haspopup="dialog" aria-controls="notif-panel"
+          [attr.aria-label]="notifications.unread() ? 'الإشعارات، ' + notifications.unread() + ' غير مقروء' : 'الإشعارات'">
+          <app-icon name="bell" />
+          @if (notifications.unread()) {
+            <span class="dot" aria-hidden="true">{{ notifications.unread() }}</span>
+          }
+        </button>
+        @if (notifOpen()) {
+          <div id="notif-panel" class="notif-panel card" role="dialog" aria-label="الإشعارات">
+            <header>
+              <strong>الإشعارات</strong>
+              @if (notifications.unread()) {
+                <button type="button" class="btn btn--ghost btn--sm" (click)="notifications.markAllRead()">تعليم الكل كمقروء</button>
+              }
+            </header>
+            <app-tabs [tabs]="notifTabs()" [(active)]="notifTab" idPrefix="notif-tab-" />
+            <ul aria-live="polite">
+              @for (n of visibleNotifications(); track n.id) {
+                <li>
+                  <button type="button" [class.unread]="!n.read" (click)="openNotification(n)">
+                    <strong>{{ n.title }}</strong>
+                    <span>{{ n.body }}</span>
+                    <small>{{ n.createdAt | relativeTime }}</small>
+                  </button>
+                </li>
+              } @empty {
+                <li class="empty muted">{{ notifTab() === 'unread' ? 'لا توجد إشعارات غير مقروءة' : 'لا توجد إشعارات' }}</li>
+              }
+            </ul>
+            <footer>
+              <a routerLink="/notifications" (click)="notifOpen.set(false)">عرض كل الإشعارات</a>
+            </footer>
+          </div>
+        }
+      </div>
+
+      @if (auth.user(); as user) {
+        <div class="user-menu">
+          <button #userBtn type="button" class="avatar-btn" (click)="toggleUserMenu()" aria-haspopup="menu"
+            [attr.aria-expanded]="userMenuOpen()" aria-controls="user-menu-list" [attr.aria-label]="'قائمة المستخدم: ' + user.name">
+            <app-avatar [name]="user.name" [size]="34" />
+          </button>
+          @if (userMenuOpen()) {
+            <div id="user-menu-list" class="menu card" role="menu" aria-label="قائمة المستخدم" (keydown)="onMenuKey($event)">
+              <div class="menu-head" role="presentation">
+                <strong>{{ user.name }}</strong>
+                <small class="muted">{{ user.email }}</small>
+              </div>
+              <a role="menuitem" routerLink="/profile" (click)="userMenuOpen.set(false)"><app-icon name="user" [size]="16" /> الملف الشخصي</a>
+              <a role="menuitem" routerLink="/profile" fragment="preferences" (click)="userMenuOpen.set(false)"><app-icon name="settings" [size]="16" /> التفضيلات</a>
+              <button type="button" role="menuitem" (click)="openShortcuts()"><app-icon name="info" [size]="16" /> اختصارات لوحة المفاتيح</button>
+              <button type="button" role="menuitem" class="danger" (click)="logout()"><app-icon name="logout" [size]="16" /> تسجيل الخروج</button>
+            </div>
+          }
+        </div>
+      }
+    </header>
+  </div>
+
+  @if (crumbs.crumbs().length > 1 && !crumbs.pageOwned()) {
+    <nav class="route-crumbs" aria-label="مسار التنقل">
+      <ol>
+        @for (c of crumbs.crumbs(); track c.label + (c.link ?? "")) {
+          <li>
+            @if (c.link && !$last) {
+              <a [routerLink]="c.link">{{ c.label }}</a>
+              <app-icon name="chevronLeft" [size]="12" />
+            } @else {
+              <span [attr.aria-current]="$last ? 'page' : null">{{ c.label }}</span>
+            }
+          </li>
+        }
+      </ol>
+    </nav>
+  }
+
+  <main id="main" class="content" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>
