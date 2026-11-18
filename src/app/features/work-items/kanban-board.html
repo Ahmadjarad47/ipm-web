@@ -1,0 +1,90 @@
+<div class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ announcement() }}</div>
+
+@if (failed()) {
+  <app-error-state text="تعذّر تحميل اللوحة." (retry)="board.reload()" />
+} @else if (board.isLoading() && !board.hasValue()) {
+  <app-skeleton variant="card" [count]="4" />
+} @else {
+  <div class="board" role="list" aria-label="لوحة كانبان" [attr.aria-busy]="board.isLoading()">
+    @for (col of columns(); track col.id) {
+      <section
+        class="col"
+        role="listitem"
+        [class.drop-ok]="isDropAllowed(col.id)"
+        [class.drop-no]="dragging() && !isDropAllowed(col.id)"
+        [attr.aria-label]="col.name + ' — ' + (byStatus().get(col.id)?.length ?? 0) + ' عنصر'"
+        (dragover)="onDragOver($event, col.id)"
+        (drop)="onDrop($event, col.id)"
+      >
+        <header class="col-head" [style.--status-color]="col.color">
+          <span class="dot"></span>
+          <strong>{{ col.name }}</strong>
+          <span class="count">{{ byStatus().get(col.id)?.length ?? 0 }}</span>
+        </header>
+        <div class="cards">
+          @for (item of byStatus().get(col.id) ?? []; track item.id) {
+            <ng-container *ngTemplateOutlet="card; context: { $implicit: item }" />
+          } @empty {
+            <p class="muted none">لا توجد عناصر</p>
+          }
+        </div>
+      </section>
+    }
+    @if (orphans().length) {
+      <section class="col" role="listitem" aria-label="حالات أخرى">
+        <header class="col-head">
+          <strong>حالات أخرى</strong>
+          <span class="count">{{ orphans().length }}</span>
+        </header>
+        <div class="cards">
+          @for (item of orphans(); track item.id) {
+            <ng-container *ngTemplateOutlet="card; context: { $implicit: item }" />
+          }
+        </div>
+      </section>
+    }
+  </div>
+}
+
+<ng-template #card let-item>
+  <article
+    class="kcard"
+    [class.busy]="busyId() === item.id"
+    [class.is-dragging]="dragging()?.id === item.id"
+    [attr.draggable]="targets().has(item.id)"
+    (dragstart)="onDragStart($event, item)"
+    (dragend)="dragging.set(null)"
+  >
+    <div class="row">
+      <span class="ltr ref">{{ item.ref }}</span>
+      <span class="spacer"></span>
+      <app-type-chip [typeId]="item.typeId" [iconOnly]="true" />
+      @if ((menus().get(item.id) ?? []).length) {
+        <app-action-menu
+          triggerClass="btn btn--ghost btn--icon kebab"
+          [label]="'نقل ' + ltr(item.ref) + ' إلى…'"
+          [entries]="menus().get(item.id) ?? []"
+          [disabled]="busyId() !== null"
+          (picked)="move(item, $event)"
+        >
+          <span aria-hidden="true">⋮</span>
+        </app-action-menu>
+      }
+    </div>
+    <a class="title" [routerLink]="['/work-items', item.id]">{{ item.title }}</a>
+    <div class="row">
+      <app-priority-badge [priority]="item.priority" />
+      <span class="spacer"></span>
+      <app-avatar-stack [names]="item.assigneeIds | userNames" [size]="22" [max]="3" />
+    </div>
+    @for (f of cardFields(item); track f.label) {
+      <span class="cfield"><span class="muted">{{ f.label }}:</span> {{ f.text }}</span>
+    }
+    @if (item.dev) {
+      <app-dev-indicator [dev]="item.dev" />
+    }
+    @if (item.dueDate) {
+      <span class="due" [class.late]="overdue(item)">{{ item.dueDate | appDate }}</span>
+    }
+  </article>
+</ng-template>

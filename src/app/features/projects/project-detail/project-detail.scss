@@ -1,0 +1,17 @@
+.code { font-weight: 700; color: var(--c-gold-600); align-self: center; }
+.desc { margin-bottom: var(--s-4); color: var(--c-text-2); max-width: 80ch; }
+.summary { margin-bottom: var(--s-4); }
+.rule { display: grid; gap: var(--s-2); margin-bottom: var(--s-5); }
+.rule-head { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2); }
+.rule-link { font-size: var(--fs-sm); font-weight: 600; }
+.rule-text, .rule-scope { margin: 0; font-size: var(--fs-sm); }
+.tabs-card { overflow: hidden; }
+.panel { padding: var(--s-5); }
+.loading { display: grid; gap: var(--s-4); }
+.code { overflow-wrap: anywhere; }
+
+@media (max-width: 768px) {
+  .panel { padding: var(--s-3); }
+  .desc { max-width: 100%; }
+  .toolbar { flex-wrap: wrap; }
+}

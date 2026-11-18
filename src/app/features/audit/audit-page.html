@@ -1,0 +1,118 @@
+<app-page-header title="سجل التدقيق" subtitle="سجل للقراءة فقط ولا يمكن تعديله أو حذفه (للإلحاق فقط)">
+  <div class="actions">
+    @if (auth.can('audit.view')) {
+      <button type="button" class="btn btn--outline" [disabled]="verifying()" (click)="verify()">
+        <app-icon name="shield" [size]="16" /> {{ verifying() ? 'جارٍ التحقق…' : 'التحقق من سلامة السجل' }}
+      </button>
+    }
+    @if (auth.can('audit.export')) {
+      <div class="export">
+        <button type="button" class="btn btn--outline" [disabled]="exporting() || !store.total()" (click)="exportCsv()">
+          <app-icon name="download" [size]="16" /> {{ exporting() ? 'جارٍ التصدير…' : 'تصدير CSV' }}
+        </button>
+        <small class="muted" aria-live="polite">سيُصدَّر {{ store.total() }} حدثًا حسب المرشحات الحالية. تُسجَّل عملية التصدير في سجل التدقيق.</small>
+      </div>
+    }
+  </div>
+</app-page-header>
+
+@if (verification(); as v) {
+  @if (v.ok) {
+    <p class="banner banner--ok" role="status"><app-icon name="checkCircle" [size]="18" /> سلسلة السجل سليمة: تم فحص {{ v.checked }} حدثًا دون أي عبث.</p>
+  } @else {
+    <p class="banner banner--bad" role="alert">
+      <app-icon name="alert" [size]="18" /> فشل التحقق: تم اكتشاف اختلاف في السلسلة عند الحدث
+      <span class="ltr code">{{ v.brokenAt }}</span> (بعد فحص {{ v.checked }} حدثًا).
+    </p>
+  }
+}
+@if (verifyFailed()) {
+  <p class="banner banner--bad" role="alert">تعذّر إجراء التحقق. حاول مرة أخرى.</p>
+}
+
+<div class="card audit">
+  <div class="toolbar filters">
+    <input type="search" class="input" placeholder="بحث نصي…" aria-label="بحث في السجل" [value]="ui().search" (input)="onSearch($event)" />
+    <select class="select" aria-label="المشروع" (change)="set('projectId', text($event))">
+      <option value="" [selected]="!ui().projectId">كل المشاريع</option>
+      @for (p of projects.items(); track p.id) {
+        <option [value]="p.id" [selected]="p.id === ui().projectId">{{ p.name }}</option>
+      }
+    </select>
+    <select class="select" aria-label="المنفّذ" (change)="set('actorId', text($event))">
+      <option value="" [selected]="!ui().actorId">كل المنفّذين</option>
+      @for (u of userItems(); track u.id) {
+        <option [value]="u.id" [selected]="u.id === ui().actorId">{{ u.name }}</option>
+      }
+    </select>
+    <select class="select" aria-label="نوع الموضوع" (change)="set('subjectType', text($event))">
+      <option value="" [selected]="!ui().subjectType">كل الأنواع</option>
+      @for (t of subjectTypes; track t[0]) {
+        <option [value]="t[0]" [selected]="t[0] === ui().subjectType">{{ t[1] }}</option>
+      }
+    </select>
+    <select class="select" aria-label="الإجراء" (change)="set('action', text($event))">
+      <option value="" [selected]="!ui().action">كل الإجراءات</option>
+      @for (a of actions; track a[0]) {
+        <option [value]="a[0]" [selected]="a[0] === ui().action">{{ a[1] }}</option>
+      }
+    </select>
+    <input type="text" class="input ltr" placeholder="معرّف الموضوع / عنصر العمل" aria-label="معرّف الموضوع أو عنصر العمل" [value]="ui().subjectId" (change)="set('subjectId', text($event).trim())" />
+    <input type="text" class="input ltr" placeholder="معرّف الارتباط" aria-label="معرّف الارتباط" [value]="ui().correlationId" (change)="set('correlationId', text($event).trim())" />
+    <label class="chk"><input type="checkbox" [checked]="ui().security" (change)="onSecurity($event)" /> أحداث أمنية فقط</label>
+    <label class="dt">من <input type="date" class="input" aria-label="من تاريخ" [value]="ui().from" (change)="set('from', text($event))" /></label>
+    <label class="dt">إلى <input type="date" class="input" aria-label="إلى تاريخ" [value]="ui().to" (change)="set('to', text($event))" /></label>
+  </div>
+  @if (chips().length) {
+    <div class="chips" role="group" aria-label="المرشحات النشطة">
+      @for (c of chips(); track c.key) {
+        <span class="chip">
+          {{ c.label }}
+          <button type="button" class="chip-x" [attr.aria-label]="'إزالة المرشح ' + c.label" (click)="clearOne(c.key)"><app-icon name="close" [size]="12" /></button>
+        </span>
+      }
+      <button type="button" class="btn btn--ghost btn--sm" (click)="clearAll()">مسح</button>
+    </div>
+  }
+  @if (store.error()) {
+    <app-error-state title="تعذّر تحميل السجل" [text]="store.error()!" (retry)="store.reload()" />
+  } @else {
+    <app-data-table
+      tableId="audit"
+      [rows]="store.items()"
+      [columns]="columns()"
+      [loading]="store.loading()"
+      [total]="store.total()"
+      [page]="store.query().page"
+      [pageSize]="store.query().pageSize"
+      [sort]="store.query().sort"
+      caption="سجل التدقيق"
+      emptyTitle="لا توجد أحداث مطابقة"
+      (sortChange)="store.setSort($event)"
+      (pageChange)="store.setPage($event)"
+      (pageSizeChange)="store.setPageSize($event)"
+      (rowClick)="open($event)"
+    />
+  }
+</div>
+
+<ng-template #timeCell let-row>{{ row.at | appDate: true }}</ng-template>
+<ng-template #actorCell let-row>
+  <span class="actor"><app-avatar [name]="row.actorId | userName" [size]="24" />{{ row.actorId | userName }}</span>
+</ng-template>
+<ng-template #actionCell let-row>
+  @if (actionLabel(row.action); as label) {
+    {{ label }}
+  } @else {
+    <span class="ltr">{{ row.action }}</span>
+  }
+</ng-template>
+<ng-template #subjectCell let-row>
+  {{ row.subjectLabel }} <small class="muted">· {{ typeLabel(row.subjectType) }}</small>
+</ng-template>
+<ng-template #securityCell let-row>
+  @if (row.security) {
+    <app-badge tone="danger">أمني</app-badge>
+  }
+</ng-template>
+<ng-template #corrCell let-row><span class="ltr muted corr">{{ row.correlationId }}</span></ng-template>

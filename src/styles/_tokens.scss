@@ -1,0 +1,146 @@
+// Design tokens — internal ERP identity (SRS §6.2):
+// dark emerald sidebar, ivory background, calm gold accents, white rounded cards.
+:root {
+  // Brand
+  --c-emerald-950: #072a20;
+  --c-emerald-900: #0b3d2e;
+  --c-emerald-800: #0f4d3a;
+  --c-emerald-700: #14614a;
+  --c-emerald-600: #1a7a5c;
+  --c-emerald-500: #23946f;
+  --c-emerald-100: #dcefe6;
+  --c-emerald-50: #eef7f2;
+
+  --c-gold-600: #86671e;
+  --c-gold-500: #c9a24a;
+  --c-gold-300: #e5cf91;
+  --c-gold-100: #f7efd9;
+
+  // Fixed brand surfaces that stay dark in every theme (sidebar, login hero, toasts)
+  --c-ink-1: #0b3d2e;
+  --c-ink-2: #072a20;
+  --c-on-gold: #072a20;
+  // Solid fills that carry white text
+  --c-primary: #14614a;
+  --c-primary-hover: #0f4d3a;
+  --c-danger-solid: #c0392b;
+
+  // Neutrals
+  --c-bg: #f8f5ee;
+  --c-surface: #ffffff;
+  --c-surface-2: #fbf9f4;
+  --c-border: #e9e3d6;
+  --c-border-strong: #d8d0bd;
+  --c-text: #1d2823;
+  --c-text-2: #4b5952;
+  --c-muted: #5f6d66;
+
+  // Semantic
+  --c-info: #2f6eb3;
+  --c-info-bg: #e7f0fa;
+  --c-success: #1c7b51;
+  --c-success-bg: #e3f4ea;
+  --c-warning: #966319;
+  --c-warning-bg: #fcf1dc;
+  --c-danger: #c0392b;
+  --c-danger-bg: #fbe8e5;
+  --c-neutral: #666c7a;
+  --c-neutral-bg: #eef0ef;
+
+  // Shape & depth
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+  --shadow-sm: 0 1px 2px rgb(16 40 30 / 6%);
+  --shadow-md: 0 4px 16px rgb(16 40 30 / 8%);
+  --shadow-lg: 0 18px 48px rgb(16 40 30 / 18%);
+
+  // Spacing scale
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+
+  // Type
+  --font: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, 'Noto Naskh Arabic', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --fs-2xl: 26px;
+
+  --sidebar-w: 264px;
+  --topbar-h: 64px;
+  --focus-ring: 0 0 0 2px var(--c-surface), 0 0 0 4px var(--c-emerald-600);
+  // Focus ring for the always-dark surfaces (sidebar, hero)
+  --focus-ring-on-dark: 0 0 0 2px var(--c-gold-300);
+
+  color-scheme: light;
+}
+
+// ---------- Dark theme ----------
+// Every token is re-derived. Text/background pairs are verified by docs/contrast-check.mjs (AA >= 4.5:1).
+// Applied by ThemeService via :root[data-theme='dark'], or automatically when the OS prefers dark and
+// the user did not force light (data-theme='light').
+@mixin dark-tokens {
+  --c-emerald-950: #031a13;
+  --c-emerald-900: #c4ecdb;
+  --c-emerald-800: #a9dfc6;
+  --c-emerald-700: #86d3b4;
+  --c-emerald-600: #52bb92;
+  --c-emerald-500: #44a883;
+  --c-emerald-100: #1f3b30;
+  --c-emerald-50: #1b3128;
+
+  --c-gold-600: #e2c36f;
+  --c-gold-500: #c9a24a;
+  --c-gold-300: #e5cf91;
+  --c-gold-100: #3a3120;
+
+  --c-primary: #1c7558;
+  --c-primary-hover: #18664d;
+  --c-danger-solid: #b5382b;
+
+  --c-bg: #0e1512;
+  --c-surface: #151f1a;
+  --c-surface-2: #1a2620;
+  --c-border: #2b3a32;
+  --c-border-strong: #3d4f45;
+  --c-text: #e8f0ec;
+  --c-text-2: #bccac2;
+  --c-muted: #9fb0a6;
+
+  --c-info: #7db8f0;
+  --c-info-bg: #172b40;
+  --c-success: #5fcf97;
+  --c-success-bg: #15321f;
+  --c-warning: #e8b455;
+  --c-warning-bg: #3a2c10;
+  --c-danger: #ff9585;
+  --c-danger-bg: #401d19;
+  --c-neutral: #a3aeaa;
+  --c-neutral-bg: #262f2b;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-md: 0 4px 16px rgb(0 0 0 / 45%);
+  --shadow-lg: 0 18px 48px rgb(0 0 0 / 60%);
+
+  color-scheme: dark;
+}
+
+:root[data-theme='dark'] {
+  @include dark-tokens;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include dark-tokens;
+  }
+}

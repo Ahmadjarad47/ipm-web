@@ -1,0 +1,95 @@
+<app-page-header title="مركز الموافقات" subtitle="قرارات الموافقة والمراجعة على المشاريع وعناصر العمل">
+  <a class="btn btn--outline" routerLink="/approvals/delegations">تفويضاتي</a>
+</app-page-header>
+
+<div class="card approvals">
+  <app-tabs [tabs]="tabs()" [active]="box()" (activeChange)="setBox($event)" />
+  <div class="toolbar">
+    <input type="search" class="input" placeholder="بحث في الطلبات…" aria-label="بحث في الطلبات" (input)="onSearch($event)" />
+    @if (bulkEnabled() && selectableOnPage()) {
+      <button type="button" class="btn btn--ghost btn--sm" (click)="selectAllOnPage()">تحديد كل ما يمكنني الموافقة عليه ({{ selectableOnPage() }})</button>
+    }
+  </div>
+
+  @if (store.error()) {
+    <app-error-state title="تعذّر تحميل الطلبات" [text]="store.error()!" (retry)="reload()" />
+  } @else if (firstLoad()) {
+    <app-skeleton variant="table" [count]="5" />
+  } @else if (store.isEmpty() && !store.query().search) {
+    <app-empty-state [icon]="empty().icon" [title]="empty().title" [text]="empty().text" />
+  } @else {
+    <app-data-table
+      tableId="approvals"
+      [rows]="store.items()"
+      [columns]="columns()"
+      [loading]="store.loading()"
+      [total]="store.total()"
+      [page]="store.query().page"
+      [pageSize]="store.query().pageSize"
+      [sort]="store.query().sort"
+      caption="طلبات الموافقة"
+      emptyTitle="لا توجد نتائج مطابقة"
+      emptyText="جرّب تغيير كلمات البحث."
+      (sortChange)="store.setSort($event)"
+      (pageChange)="store.setPage($event)"
+      (pageSizeChange)="store.setPageSize($event)"
+      (rowClick)="open($event)"
+    />
+  }
+</div>
+
+@if (bulkEnabled() && selectedCount()) {
+  <div class="bulkbar" role="region" aria-label="إجراءات جماعية">
+    <strong>{{ selectedCount() }} محدد</strong>
+    <button type="button" class="btn btn--primary" [disabled]="bulking()" (click)="bulkApprove()">موافقة على المحدد ({{ selectedCount() }})</button>
+    <button type="button" class="btn btn--ghost" (click)="clearSelection()">إلغاء التحديد</button>
+    <small class="note">الرفض والإرجاع غير متاحين جماعيًا لأن التعليق إلزامي؛ افتح الطلب لاتخاذ هذا القرار.</small>
+  </div>
+}
+
+<ng-template #selectCell let-row>
+  <input
+    type="checkbox"
+    class="chk"
+    [checked]="isSelected(row)"
+    [disabled]="!isSelectable(row)"
+    [attr.aria-label]="'تحديد ' + row.title"
+    [attr.title]="isSelectable(row) ? null : 'لا يمكنك اتخاذ قرار على هذا الطلب الآن'"
+    (click)="$event.stopPropagation()"
+    (change)="toggle(row, $any($event.target).checked)"
+  />
+</ng-template>
+<ng-template #titleCell let-row>
+  <strong class="title">{{ row.title }}</strong>
+  @if (row.revision > 1) {
+    <small class="muted"> · الإصدار {{ row.revision }}</small>
+  }
+  @if (isPending(row)) {
+    <div class="hint-row">
+      @if (row.canDecide) {
+        <app-badge tone="gold">بانتظار قرارك</app-badge>
+      } @else {
+        <small class="muted">ليس دورك الآن في هذا الطلب</small>
+      }
+    </div>
+  }
+</ng-template>
+<ng-template #requesterCell let-row>{{ row.requesterId | userName }}</ng-template>
+<ng-template #stageCell let-row>
+  <span class="mini" [attr.aria-label]="'المرحلة ' + stageText(row)">
+    <span class="dots" aria-hidden="true">
+      @for (d of dots(row); track $index) {
+        <i [class]="'dot ' + d"></i>
+      }
+    </span>
+    <span class="num ltr">{{ stageText(row) }}</span>
+  </span>
+  @if (row.overdue) {
+    <app-badge tone="danger">متأخر</app-badge>
+  }
+  @if (sla(row); as text) {
+    <small [class]="'sla ' + slaClass(row)">{{ text }}</small>
+  }
+</ng-template>
+<ng-template #statusCell let-row><app-approval-status [status]="row.status" /></ng-template>
+<ng-template #updatedCell let-row>{{ row.updatedAt | relativeTime }}</ng-template>

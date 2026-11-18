@@ -1,0 +1,109 @@
+<app-page-header title="عناصر العمل" subtitle="المهام والأخطاء وبقية عناصر العمل عبر المشاريع">
+  @if (canCreate()) {
+    <button type="button" class="btn btn--primary" (click)="openCreate()"><app-icon name="plus" /> إنشاء عنصر عمل</button>
+  }
+</app-page-header>
+
+<div class="card">
+  <div class="toolbar">
+    <input class="input search" type="search" placeholder="بحث بالمرجع أو العنوان" aria-label="بحث" [value]="store.query().search ?? ''" (input)="onSearch($event)" />
+    <app-filters-popover
+      [filters]="store.filters()"
+      [itemLabels]="itemLabels()"
+      (filtersChange)="setFilters($event)"
+      (itemPicked)="rememberItem($event)"
+      (clearAll)="clearFilters()"
+    />
+    <span class="spacer"></span>
+    <app-views-menu [userId]="userId()" [current]="currentView()" (apply)="applyView($event)" />
+    <div class="seg" role="group" aria-label="طريقة العرض">
+      <button type="button" class="btn btn--outline" [class.active]="view() === 'table'" [attr.aria-pressed]="view() === 'table'" (click)="setView('table')">
+        <app-icon name="list" /> جدول
+      </button>
+      <button type="button" class="btn btn--outline" [class.active]="view() === 'kanban'" [attr.aria-pressed]="view() === 'kanban'" (click)="setView('kanban')">
+        <app-icon name="board" /> كانبان
+      </button>
+    </div>
+  </div>
+
+  @if (chips().length) {
+    <div class="chips" role="group" aria-label="الفلاتر النشطة">
+      @for (chip of chips(); track chip.key + ':' + chip.value) {
+        <span class="chip">
+          {{ chip.text }}
+          <button type="button" class="chip-x" [attr.aria-label]="'إزالة الفلتر ' + chip.text" (click)="removeChip(chip)"><app-icon name="close" [size]="12" /></button>
+        </span>
+      }
+      <button type="button" class="btn btn--ghost" (click)="clearFilters()">مسح الكل</button>
+    </div>
+  }
+
+  @if (view() === 'table') {
+    @if (store.error(); as err) {
+      <app-error-state [text]="err" (retry)="store.reload()" />
+    } @else {
+      @if (store.items().length) {
+        <label class="checkbox page-select"><input type="checkbox" [checked]="pageAllSelected()" (change)="togglePage()" /> تحديد كل عناصر هذه الصفحة</label>
+      }
+      <app-data-table
+        [tableId]="'work-items'"
+        [rows]="store.items()"
+        [columns]="columns()"
+        [loading]="store.loading()"
+        [total]="store.total()"
+        [page]="store.query().page"
+        [pageSize]="store.query().pageSize"
+        [sort]="store.query().sort"
+        caption="عناصر العمل"
+        (sortChange)="store.setSort($event)"
+        (pageChange)="store.setPage($event)"
+        (pageSizeChange)="store.setPageSize($event)"
+        (rowClick)="open($event)"
+      />
+    }
+  } @else {
+    @if (selectedProject(); as project) {
+      <app-kanban-board [project]="project" [filters]="store.filters()" [search]="store.query().search ?? ''" [refreshKey]="boardRefresh()" />
+    } @else {
+      <div class="board-hint">
+        <p class="muted">اختر مشروعًا لعرض لوحة كانبان. تُبنى الأعمدة من سير عمل أنواع العناصر في المشروع المحدد.</p>
+        <label for="board-project">المشروع</label>
+        <select id="board-project" class="select" (change)="pickBoardProject($event)">
+          <option value="">— اختر مشروعًا —</option>
+          @for (p of projects.items(); track p.id) {
+            @if (!p.archived) {
+              <option [value]="p.id">{{ ltr(p.code) }} — {{ p.name }}</option>
+            }
+          }
+        </select>
+      </div>
+    }
+  }
+</div>
+
+@if (selectedCount() && view() === 'table') {
+  <div class="bulk-bar" role="region" aria-label="إجراءات جماعية">
+    <strong>تم تحديد {{ selectedCount() }}</strong>
+    <button type="button" class="btn btn--outline" [disabled]="bulkBusy()" (click)="bulk('assign')">تكليف</button>
+    <button type="button" class="btn btn--outline" [disabled]="bulkBusy()" (click)="bulk('priority')">الأولوية</button>
+    <button type="button" class="btn btn--outline" [disabled]="bulkBusy()" (click)="bulk('transition')">نقل الحالة</button>
+    <button type="button" class="btn btn--outline" [disabled]="bulkBusy()" (click)="bulk('dueDate')">تاريخ الاستحقاق</button>
+    <span class="spacer"></span>
+    <button type="button" class="btn btn--ghost" (click)="clearSelection()">إلغاء التحديد</button>
+  </div>
+}
+
+<ng-template #refCell let-row><span class="ltr ref">{{ row.ref }}</span></ng-template>
+<ng-template #typeCell let-row><app-type-chip [typeId]="row.typeId" /></ng-template>
+<ng-template #projectCell let-row><span class="ltr">{{ projects.get(row.projectId)?.code ?? '—' }}</span></ng-template>
+<ng-template #statusCell let-row><app-status-badge [statusId]="row.statusId" /></ng-template>
+<ng-template #priorityCell let-row><app-priority-badge [priority]="row.priority" /></ng-template>
+<ng-template #assigneesCell let-row><app-avatar-stack [names]="row.assigneeIds | userNames" [size]="26" /></ng-template>
+<ng-template #dueCell let-row>
+  <span [class.late]="overdue(row)">{{ row.dueDate | appDate }}</span>
+</ng-template>
+<ng-template #createdCell let-row>{{ row.createdAt | appDate }}</ng-template>
+<ng-template #selectCell let-row>
+  <input type="checkbox" [checked]="isSelected(row)" [attr.aria-label]="'تحديد ' + row.ref" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" (change)="toggleSelected(row)" />
+</ng-template>
+<ng-template #devCell let-row><app-dev-indicator [dev]="row.dev" /></ng-template>

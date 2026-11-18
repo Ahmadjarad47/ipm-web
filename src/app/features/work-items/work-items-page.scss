@@ -1,0 +1,75 @@
+.ref { font-weight: 600; color: var(--c-emerald-800); }
+.late { color: var(--c-danger); font-weight: 700; }
+.seg { display: inline-flex; gap: var(--s-1); }
+.seg .active { background: var(--c-emerald-50); border-color: var(--c-emerald-600); color: var(--c-emerald-800); }
+.search { min-inline-size: 220px; flex: 1 1 220px; max-inline-size: 360px; }
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-4);
+  border-block-end: 1px solid var(--c-border);
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 2px var(--s-2);
+  border-radius: var(--r-pill);
+  background: var(--c-emerald-50);
+  border: 1px solid var(--c-emerald-600);
+  color: var(--c-emerald-800);
+  font-size: var(--fs-sm);
+}
+.chip-x {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 22px;
+  block-size: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.chip-x:hover, .chip-x:focus-visible { background: var(--c-emerald-100, var(--c-emerald-50)); }
+.bulk-bar {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-block-start: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  background: var(--c-surface);
+  border: 1px solid var(--c-emerald-600);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md, 0 -4px 16px rgb(0 0 0 / 0.12));
+}
+.page-select { padding: var(--s-2) var(--s-4); font-size: var(--fs-sm); }
+.board-hint { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-5); max-inline-size: 420px; }
+
+.ref { overflow-wrap: anywhere; }
+
+@media (max-width: 768px) {
+  .search { min-inline-size: 0; max-inline-size: none; flex-basis: 100%; }
+  .seg { flex-wrap: wrap; }
+  .chips { padding-inline: var(--s-3); }
+  .bulk-bar { padding-inline: var(--s-3); }
+  .bulk-bar > .btn { flex: 1 1 auto; }
+}
+
+@media (pointer: coarse), (max-width: 768px) {
+  .chip { min-block-size: 44px; padding-block: 0; }
+  .chip-x { inline-size: 44px; block-size: 44px; margin-inline-end: calc(-1 * var(--s-2)); }
+}
+
+// keep the last rows reachable above the sticky bulk bar
+:host { display: block; padding-block-end: var(--s-4); }
+@media (pointer: coarse), (max-width: 768px) {
+  .page-select { min-block-size: 44px; display: flex; align-items: center; }
+}

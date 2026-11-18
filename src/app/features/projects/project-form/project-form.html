@@ -1,0 +1,109 @@
+<app-dialog-shell [title]="isEdit ? 'تعديل المشروع' : 'مشروع جديد'">
+  @if (formError(); as msg) {
+    <div class="alert alert--danger" role="alert">
+      <strong>{{ msg }}</strong>
+      @if (extraErrors().length) {
+        <ul>
+          @for (e of extraErrors(); track e.key) {
+            <li>{{ e.message }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+  <form [id]="uid" [formGroup]="form" (ngSubmit)="submit()" novalidate class="form-grid">
+    @if (!isEdit) {
+      <div class="field">
+        <label [attr.for]="uid + '-code'">رمز المشروع <span class="req">*</span></label>
+        <input [id]="uid + '-code'" class="input ltr" formControlName="code" maxlength="10" autocomplete="off" (input)="upperCode($event)" />
+        @if (showError('code')) {
+          <span class="error" role="alert">{{ serverErrors()['code'] || 'حروف لاتينية كبيرة وأرقام (2–10) وتبدأ بحرف' }}</span>
+        } @else {
+          <span class="hint">مثال: PRJ — يسبق أرقام عناصر العمل</span>
+        }
+      </div>
+    }
+    <div class="field" [class.span-2]="isEdit">
+      <label [attr.for]="uid + '-name'">اسم المشروع <span class="req">*</span></label>
+      <input [id]="uid + '-name'" class="input" formControlName="name" maxlength="120" />
+      @if (showError('name')) {
+        <span class="error" role="alert">{{ serverErrors()['name'] || 'الاسم مطلوب' }}</span>
+      }
+    </div>
+    <div class="field span-2">
+      <label [attr.for]="uid + '-desc'">الوصف</label>
+      <textarea [id]="uid + '-desc'" class="textarea" formControlName="description"></textarea>
+    </div>
+    <div class="field">
+      <label [attr.for]="uid + '-owner'">المالك <span class="req">*</span></label>
+      <select [id]="uid + '-owner'" class="select" formControlName="ownerId">
+        <option value="" disabled>اختر المالك</option>
+        @for (u of activeUsers(); track u.id) {
+          <option [value]="u.id">{{ u.name }}</option>
+        }
+      </select>
+      @if (showError('ownerId')) {
+        <span class="error" role="alert">{{ serverErrors()['ownerId'] || 'المالك مطلوب' }}</span>
+      }
+    </div>
+    @if (!isEdit) {
+      <div class="field">
+        <label [attr.for]="uid + '-template'">القالب</label>
+        <select [id]="uid + '-template'" class="select" formControlName="templateId" (change)="onTemplate($event)">
+          <option value="">بدون قالب</option>
+          @for (t of templates(); track t.id) {
+            <option [value]="t.id">{{ t.name }}</option>
+          }
+        </select>
+      </div>
+    }
+    @if (template(); as t) {
+      <div class="field span-2 tpl">
+        <p class="muted">{{ t.description }}</p>
+        <div class="tpl-types">
+          <span class="muted">الأنواع المسموحة:</span>
+          @for (id of t.allowedTypeIds; track id) {
+            <app-type-chip [typeId]="id" />
+          }
+        </div>
+        @if (suggestedMembers().total) {
+          <p class="muted">سيُضاف تلقائيًا {{ suggestedMembers().active }} عضوًا مقترحًا@if (suggestedMembers().active < suggestedMembers().total) { (تُتخطّى {{ suggestedMembers().total - suggestedMembers().active }} حسابات غير نشطة) }.</p>
+        }
+      </div>
+    }
+    <div class="field">
+      <label [attr.for]="uid + '-start'">تاريخ البداية <span class="req">*</span></label>
+      <input [id]="uid + '-start'" type="date" class="input ltr" formControlName="startDate" (change)="onStart()" />
+      @if (showError('startDate')) {
+        <span class="error" role="alert">{{ serverErrors()['startDate'] || 'التاريخ مطلوب' }}</span>
+      }
+    </div>
+    <div class="field">
+      <label [attr.for]="uid + '-end'">تاريخ النهاية <span class="req">*</span></label>
+      <input [id]="uid + '-end'" type="date" class="input ltr" formControlName="endDate" />
+      @if (serverErrors()['endDate']) {
+        <span class="error" role="alert">{{ serverErrors()['endDate'] }}</span>
+      } @else if (form.hasError('dateRange') && form.controls.endDate.touched) {
+        <span class="error" role="alert">تاريخ النهاية يجب ألا يسبق تاريخ البداية</span>
+      } @else if (form.controls.endDate.invalid && form.controls.endDate.touched) {
+        <span class="error" role="alert">التاريخ مطلوب</span>
+      }
+    </div>
+  </form>
+  @if (isEdit && changes().length) {
+    <section class="diff" aria-label="ملخص التغييرات">
+      <strong>التغييرات التي ستُحفظ</strong>
+      <ul>
+        @for (c of changes(); track c.label) {
+          <li><span class="muted">{{ c.label }}:</span> {{ c.from }} ← {{ c.to }}</li>
+        }
+      </ul>
+    </section>
+  }
+  <ng-container dialog-actions>
+    <button type="button" class="btn btn--outline" (click)="ref.close()">إلغاء</button>
+    <button type="submit" [attr.form]="uid" class="btn btn--primary" [disabled]="saving()">
+      {{ saving() ? 'جارٍ الحفظ…' : isEdit ? 'حفظ التعديلات' : 'إنشاء المشروع' }}
+    </button>
+  </ng-container>
+</app-dialog-shell>

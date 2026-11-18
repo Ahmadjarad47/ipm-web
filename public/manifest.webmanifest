@@ -1,0 +1,16 @@
+{
+  "name": "نظام إدارة المشاريع الداخلي",
+  "short_name": "إدارة المشاريع",
+  "description": "مشاريع، عناصر عمل، موافقات وتدقيق في مكان واحد.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#0b3d2e",
+  "background_color": "#f8f5ee",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

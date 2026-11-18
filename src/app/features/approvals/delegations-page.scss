@@ -1,0 +1,15 @@
+:host { display: block; }
+.layout { display: grid; grid-template-columns: minmax(280px, 1fr) 2fr; gap: var(--s-4); align-items: start; }
+@media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+.stack { display: grid; gap: var(--s-3); }
+.pad { padding: var(--s-4) var(--s-4) 0; }
+.error { color: var(--c-danger); font-size: var(--fs-xs); }
+.scroll { overflow-x: auto; }
+.dtable { width: 100%; border-collapse: collapse; font-size: var(--fs-md); }
+.dtable th { padding: var(--s-3) var(--s-4); text-align: start; font-size: var(--fs-xs); font-weight: 600; color: var(--c-muted); background: var(--c-surface-2); border-bottom: 1px solid var(--c-border); white-space: nowrap; }
+.dtable td { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-border); vertical-align: middle; }
+.dtable { min-inline-size: 520px; }
+
+@media (max-width: 768px) {
+  .pad { padding-inline: var(--s-3); }
+}

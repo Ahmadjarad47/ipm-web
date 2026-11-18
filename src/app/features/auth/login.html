@@ -1,0 +1,89 @@
+<div class="login">
+  <section class="hero on-dark" aria-hidden="true">
+    <span class="logo">م</span>
+    <h2>نظام إدارة المشاريع الداخلي</h2>
+    <p>مشاريع، عناصر عمل مرنة، موافقات هرمية وتدقيق كامل — في مكان واحد.</p>
+    <ul>
+      <li>أنواع عناصر عمل وحقول قابلة للتهيئة</li>
+      <li>سير عمل وحالات ديناميكية</li>
+      <li>موافقات متسلسلة متعددة المراحل</li>
+      <li>صلاحيات دقيقة على مستوى المشروع</li>
+    </ul>
+  </section>
+
+  <section class="panel">
+    <form class="card form" [formGroup]="form" (ngSubmit)="submit()" novalidate [attr.aria-busy]="submitting()">
+      <div class="head">
+        <h1>تسجيل الدخول</h1>
+        @if (isDemo) {
+          <span class="demo-badge">وضع تجريبي</span>
+        }
+      </div>
+      <p class="muted">استخدم حسابك الداخلي.</p>
+
+      @if (logoutReason(); as reason) {
+        <div class="notice" role="status">{{ reason.message }}</div>
+      }
+
+      @if (error()) {
+        <div id="login-error" class="alert" role="alert">{{ error() }}</div>
+      }
+
+      <div class="field">
+        <label for="username">اسم المستخدم</label>
+        <input #username id="username" class="input ltr" formControlName="username" autocomplete="username" dir="ltr"
+          [attr.aria-invalid]="error() ? 'true' : null" [attr.aria-describedby]="error() ? 'login-error' : null" />
+        @if (form.controls.username.touched && form.controls.username.invalid) {
+          <span class="error" role="alert">اسم المستخدم مطلوب</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password">كلمة المرور</label>
+        <div class="pw">
+          <input id="password" class="input" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
+            autocomplete="current-password" dir="ltr" (keydown)="onPasswordKey($event)" (keyup)="onPasswordKey($event)"
+            [attr.aria-invalid]="error() ? 'true' : null"
+            [attr.aria-describedby]="(error() ? 'login-error ' : '') + (capsLock() ? 'caps-warning' : '') || null" />
+          <button type="button" class="btn btn--ghost pw-toggle" (click)="showPassword.set(!showPassword())"
+            [attr.aria-pressed]="showPassword()" [attr.aria-label]="showPassword() ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'">
+            {{ showPassword() ? 'إخفاء' : 'إظهار' }}
+          </button>
+        </div>
+        @if (capsLock()) {
+          <span id="caps-warning" class="caps" role="status" aria-live="polite">تنبيه: مفتاح Caps Lock مفعّل</span>
+        }
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <span class="error" role="alert">كلمة المرور مطلوبة</span>
+        }
+      </div>
+
+      <div class="forgot">
+        <button type="button" class="link" [attr.aria-expanded]="forgotOpen()" aria-controls="forgot-help" (click)="forgotOpen.set(!forgotOpen())">
+          نسيت كلمة المرور؟
+        </button>
+        @if (forgotOpen()) {
+          <p id="forgot-help" class="muted" role="status">تواصل مع مدير النظام لإعادة التعيين.</p>
+        }
+      </div>
+
+      <button type="submit" class="btn btn--primary submit" [disabled]="submitting()">
+        @if (submitting()) {
+          <span class="spinner" aria-hidden="true"></span>
+        }
+        {{ submitting() ? 'جارٍ الدخول…' : 'دخول' }}
+      </button>
+
+      @if (isDemo) {
+        <div class="demo">
+          <p class="muted">وضع العرض التجريبي — ادخل بأحد الأدوار:</p>
+          <div class="demo-list">
+            @for (a of demoAccounts; track a.username) {
+              <button type="button" class="btn btn--outline demo-btn" [disabled]="submitting()" (click)="useDemo(a)">{{ a.label }}</button>
+            }
+          </div>
+        </div>
+      }
+    </form>
+  </section>
+</div>

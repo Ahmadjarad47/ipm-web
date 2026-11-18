@@ -1,0 +1,213 @@
+@if (item(); as it) {
+  <app-page-header [title]="it.title" [crumbs]="crumbs()">
+    @if (canEdit()) {
+      <button type="button" class="btn btn--outline" (click)="edit()"><app-icon name="edit" /> تعديل</button>
+    }
+    @if (canRequestApproval()) {
+      <button type="button" class="btn btn--outline" (click)="requestApproval()"><app-icon name="approval" /> طلب موافقة</button>
+    }
+    @if (canChangeType()) {
+      <button type="button" class="btn btn--outline" (click)="changeType()"><app-icon name="refresh" /> تغيير النوع</button>
+    }
+  </app-page-header>
+
+  <div class="row meta">
+    <app-type-chip [typeId]="it.typeId" />
+    <span class="ltr ref">{{ it.ref }}</span>
+    <button type="button" class="btn btn--ghost" (click)="copy(it.ref, 'المرجع')">نسخ المرجع</button>
+    <button type="button" class="btn btn--ghost" (click)="copyLink(it)"><app-icon name="link" [size]="14" /> نسخ الرابط</button>
+    @if (it.archived) {
+      <app-badge tone="neutral">مؤرشف</app-badge>
+    }
+  </div>
+
+  <div class="row actions" role="group" aria-label="إجراءات الحالة">
+    @if (transitions().length) {
+      <app-action-menu label="تغيير الحالة" triggerClass="btn btn--primary split" [entries]="statusMenu()" [disabled]="busy()" (picked)="pickTransition($event)">
+        <app-status-badge [statusId]="it.statusId" />
+        <app-icon name="chevronDown" [size]="14" />
+      </app-action-menu>
+    } @else {
+      <app-status-badge [statusId]="it.statusId" />
+    }
+    @if (canClose()) {
+      <button type="button" class="btn btn--outline" [disabled]="busy()" (click)="close()">
+        إغلاق
+        @if (closeNeedsApproval()) {
+          <span class="gate">يتطلب موافقة</span>
+        }
+      </button>
+    }
+    @if (canReopen()) {
+      <button type="button" class="btn btn--outline" [disabled]="busy()" (click)="reopen()">إعادة فتح</button>
+    }
+  </div>
+  @if (statusError(); as message) {
+    <div class="alert" role="alert">
+      <strong>تعذّر تغيير الحالة</strong>
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  <div class="layout">
+    <div class="main stack">
+      <section class="card">
+        <div class="card-body">
+          <h3 class="section-title">الوصف</h3>
+          <p class="desc">{{ it.description || 'لا يوجد وصف.' }}</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <app-tabs [tabs]="tabs()" [(active)]="tab" />
+        <div class="card-body">
+          @switch (tab()) {
+            @case ('hierarchy') {
+              <app-hierarchy-panel [item]="it" (changedParent)="refresh()" />
+            }
+            @case ('relations') {
+              <app-relations-panel [item]="it" (changed)="relationsChanged()" />
+            }
+            @case ('history') {
+              <app-status-history [itemId]="it.id" [version]="it.version" />
+            }
+            @case ('comments') {
+              <app-comments-panel subjectType="workItem" [subjectId]="it.id" [projectId]="it.projectId" />
+            }
+            @case ('attachments') {
+              <app-attachments-panel subjectType="workItem" [subjectId]="it.id" [projectId]="it.projectId" [readonly]="it.archived" />
+            }
+            @case ('graph') {
+              <app-item-graph-tab [item]="it" [refreshKey]="graphRefresh()" />
+            }
+            @case ('activity') {
+              <app-activity-log [subjectId]="it.id" />
+            }
+          }
+        </div>
+      </section>
+    </div>
+
+    <aside class="side stack">
+      <section class="card">
+        <div class="card-body">
+          <h3 class="section-title">التفاصيل</h3>
+          <dl class="kv">
+            <dt>المشروع</dt>
+            <dd><a [routerLink]="['/projects', it.projectId]">{{ project()?.name ?? '—' }}</a></dd>
+
+            <dt>الأولوية</dt>
+            <dd>
+              @if (editing() === 'priority') {
+                <select
+                  class="select inline"
+                  data-inline-focus
+                  aria-label="الأولوية"
+                  (blur)="onInlineBlur('priority', $event)"
+                  (keydown)="onInlineKey($event, 'priority')"
+                >
+                  @for (o of priorities; track o.value) {
+                    <option [value]="o.value" [selected]="o.value === it.priority">{{ o.label }}</option>
+                  }
+                </select>
+              } @else if (canEditFields()) {
+                <button type="button" class="inline-btn" aria-label="تعديل الأولوية" (click)="startEdit('priority')">
+                  <app-priority-badge [priority]="it.priority" /> <app-icon name="edit" [size]="12" />
+                </button>
+              } @else {
+                <app-priority-badge [priority]="it.priority" />
+              }
+            </dd>
+
+            <dt>المكلّفون</dt>
+            <dd>
+              @if (editing() === 'assignees') {
+                <div class="assignees" (focusout)="onAssigneesFocusOut($event)" (keydown)="onInlineKey($event, 'assignees')">
+                  <app-assignee-picker [userIds]="memberIds()" [(value)]="draftAssignees" />
+                  <button type="button" class="btn btn--primary" data-inline-focus (click)="saveAssignees()">حفظ</button>
+                </div>
+              } @else if (canAssign()) {
+                <button type="button" class="inline-btn" aria-label="تعديل المكلّفين" (click)="startEdit('assignees')">
+                  @if (it.assigneeIds.length) {
+                    <app-avatar-stack [names]="it.assigneeIds | userNames" />
+                  } @else {
+                    <span class="muted">غير مُكلَّف</span>
+                  }
+                  <app-icon name="edit" [size]="12" />
+                </button>
+              } @else {
+                <app-avatar-stack [names]="it.assigneeIds | userNames" />
+              }
+            </dd>
+
+            <dt>تاريخ البدء</dt>
+            <dd>{{ it.startDate | appDate }}</dd>
+
+            <dt>الاستحقاق</dt>
+            <dd>
+              @if (editing() === 'dueDate') {
+                <input
+                  type="date"
+                  class="input inline"
+                  data-inline-focus
+                  aria-label="تاريخ الاستحقاق"
+                  [value]="dateInputValue(it.dueDate)"
+                  (blur)="onInlineBlur('dueDate', $event)"
+                  (keydown)="onInlineKey($event, 'dueDate')"
+                />
+              } @else if (canEditFields()) {
+                <button type="button" class="inline-btn" aria-label="تعديل تاريخ الاستحقاق" [class.late]="overdue()" (click)="startEdit('dueDate')">
+                  {{ it.dueDate | appDate }} <app-icon name="edit" [size]="12" />
+                </button>
+              } @else {
+                <span [class.late]="overdue()">{{ it.dueDate | appDate }}</span>
+              }
+            </dd>
+
+            <dt>أنشأه</dt>
+            <dd>{{ it.createdBy | userName }}</dd>
+            <dt>تاريخ الإنشاء</dt>
+            <dd>{{ it.createdAt | appDate }}</dd>
+            @for (f of fieldRows(); track f.label) {
+              <dt>{{ f.label }}</dt>
+              <dd>{{ f.text }}</dd>
+            }
+          </dl>
+        </div>
+      </section>
+
+      @if (approvalRows().length) {
+        <section class="card">
+          <div class="card-body stack">
+            <h3 class="section-title"><app-icon name="approval" [size]="16" /> طلبات الموافقة</h3>
+            <ul class="apr">
+              @for (row of approvalRows(); track row.request.id) {
+                <li>
+                  <div class="apr-main">
+                    <a [routerLink]="['/approvals', row.request.id]">{{ row.request.title }}</a>
+                    @if (row.stageText) {
+                      <span class="muted">{{ row.stageText }} · {{ row.approverText }}</span>
+                    }
+                  </div>
+                  <app-approval-status [status]="row.request.status" />
+                </li>
+              }
+            </ul>
+          </div>
+        </section>
+      }
+
+      @if (canViewGit()) {
+        <app-dev-panel [item]="it" />
+      }
+    </aside>
+  </div>
+} @else if (notFound()) {
+  <app-empty-state icon="search" title="عنصر العمل غير موجود" text="قد يكون محذوفًا أو لا تملك صلاحية عرضه.">
+    <a class="btn btn--outline" routerLink="/work-items">العودة إلى عناصر العمل</a>
+  </app-empty-state>
+} @else if (failed()) {
+  <app-error-state text="تعذّر تحميل عنصر العمل." (retry)="resource.reload()" />
+} @else {
+  <app-skeleton variant="detail" />
+}

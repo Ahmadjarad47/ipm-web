@@ -1,0 +1,102 @@
+<div class="tb">
+  @if (tableId()) {
+    <div class="chooser">
+      <button type="button" class="btn btn--ghost btn--sm chooser-btn" aria-haspopup="true" [attr.aria-expanded]="chooserOpen()"
+        (click)="chooserOpen.set(!chooserOpen())">
+        <app-icon name="filter" [size]="14" /> الأعمدة
+      </button>
+      @if (chooserOpen()) {
+        <div class="chooser-panel card" role="group" aria-label="اختيار الأعمدة">
+          @for (c of chooserColumns(); track c.key) {
+            <label class="checkbox">
+              <input type="checkbox" [checked]="isVisible(c)" (change)="toggleColumn(c)" />
+              {{ c.header || c.srHeader || c.mobileLabel }}
+            </label>
+          }
+          <button type="button" class="btn btn--ghost btn--sm" (click)="resetColumns()">استعادة الافتراضي</button>
+        </div>
+      }
+    </div>
+    <div class="density" role="group" aria-label="كثافة الجدول">
+      <button type="button" class="btn btn--ghost btn--sm" [attr.aria-pressed]="prefs().density === 'comfortable'" (click)="setDensity('comfortable')">مريح</button>
+      <button type="button" class="btn btn--ghost btn--sm" [attr.aria-pressed]="prefs().density === 'compact'" (click)="setDensity('compact')">مضغوط</button>
+    </div>
+  }
+  <ng-content select="[toolbar]" />
+</div>
+
+<div class="table-wrap" [class.is-loading]="loading() && rows().length" [class.compact]="prefs().density === 'compact'">
+  <table role="table" [attr.aria-rowcount]="rowCount()" [attr.aria-busy]="loading()">
+    @if (caption()) {
+      <caption class="sr-only">{{ caption() }}</caption>
+    }
+    <thead role="rowgroup">
+      <tr role="row">
+        @for (col of visibleColumns(); track col.key) {
+          <th
+            scope="col"
+            role="columnheader"
+            [style.width]="col.width"
+            [class]="'align-' + (col.align ?? 'start')"
+            [class.hide-mobile]="col.hideOnMobile"
+            [attr.aria-sort]="ariaSort(col)"
+          >
+            @if (col.sortable) {
+              <button type="button" class="sort-btn" (click)="toggleSort(col)">
+                {{ col.header }}
+                <span class="sort-ind" aria-hidden="true" [class.active]="sort()?.field === col.key">
+                  @if (sort()?.field === col.key && sort()?.direction === 'desc') { ▼ } @else { ▲ }
+                </span>
+              </button>
+            } @else if (col.header) {
+              {{ col.header }}
+            } @else if (col.srHeader) {
+              <span class="sr-only">{{ col.srHeader }}</span>
+            }
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody role="rowgroup">
+      @if (loading() && !rows().length) {
+        @for (i of skeletonRows(); track i) {
+          <tr class="skeleton-row" role="row">
+            @for (col of visibleColumns(); track col.key) {
+              <td role="cell" [class.hide-mobile]="col.hideOnMobile"><span class="skeleton"></span></td>
+            }
+          </tr>
+        }
+      } @else {
+        @for (row of rows(); track row.id; let i = $index) {
+          <tr
+            role="row"
+            [attr.aria-rowindex]="i + 2"
+            [class.clickable]="clickable()"
+            [attr.tabindex]="clickable() ? 0 : null"
+            (click)="clickable() && rowClick.emit(row)"
+            (keydown)="clickable() && onRowKey($event, row)"
+          >
+            @for (col of visibleColumns(); track col.key) {
+              <td role="cell" [class]="'align-' + (col.align ?? 'start')" [class.hide-mobile]="col.hideOnMobile" [attr.data-label]="label(col)">
+                @if (col.template) {
+                  <ng-container *ngTemplateOutlet="col.template; context: context(row, col, i)" />
+                } @else {
+                  {{ text(row, col) }}
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+
+  @if (!loading() && !rows().length) {
+    <app-empty-state icon="search" [title]="emptyTitle()" [text]="emptyText()" />
+  }
+</div>
+
+@if (showPaginator()) {
+  <app-paginator [page]="page()" [pageSize]="pageSize()" [total]="total() ?? 0" (pageChange)="pageChange.emit($event)"
+    (pageSizeChange)="changePageSize($event)" />
+}

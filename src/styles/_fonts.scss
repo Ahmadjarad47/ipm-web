@@ -1,0 +1,57 @@
+// Self-hosted fonts. No third-party font CDN is used (privacy, offline, CSP).
+// Each face tries a locally installed copy first, then the optional WOFF2 you drop in public/fonts/
+// (see public/fonts/README.md and docs/DEPLOYMENT.md). If neither exists the system Arabic stack in --font is used.
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('IBM Plex Sans Arabic'),
+    local('IBMPlexSansArabic-Regular'),
+    url('/fonts/IBMPlexSansArabic-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('IBM Plex Sans Arabic Medium'),
+    local('IBMPlexSansArabic-Medium'),
+    url('/fonts/IBMPlexSansArabic-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local('IBM Plex Sans Arabic SemiBold'),
+    local('IBMPlexSansArabic-SemiBold'),
+    url('/fonts/IBMPlexSansArabic-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('IBM Plex Sans Arabic Bold'),
+    local('IBMPlexSansArabic-Bold'),
+    url('/fonts/IBMPlexSansArabic-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('IBM Plex Mono Medium'),
+    local('IBMPlexMono-Medium'),
+    url('/fonts/IBMPlexMono-Medium.woff2') format('woff2');
+}
