@@ -75,7 +75,7 @@ export abstract class BaseApiService<
     const { version, ...changes } = payload as { readonly version: number };
     return this.getById(id).pipe(
       switchMap((current) =>
-        this.http.put<T>(`${this.url}/${encodeURIComponent(id)}`, this.toUpdateBody({ ...current, ...changes } as T), { headers: ifMatch(version ?? current.version) }),
+        this.http.put<T>(`${this.url}/${encodeURIComponent(id)}`, this.toUpdateBody({ ...current, ...changes } as T), { headers: ifMatch(version || current.version) }),
       ),
     );
   }
@@ -106,7 +106,7 @@ export abstract class BaseApiService<
   /** Logical delete / archive (SRS never hard-deletes records with history). */
   remove(id: string, version?: number): Observable<void> {
     const call = (v: number) => this.http.delete<void>(`${this.url}/${encodeURIComponent(id)}`, { headers: ifMatch(v) });
-    return version === undefined ? this.getById(id).pipe(switchMap((current) => call(current.version))) : call(version);
+    return !version ? this.getById(id).pipe(switchMap((current) => call(current.version))) : call(version);
   }
 
   /** POST to a sub-action of one record, e.g. `work-items/42/transition`. A `version` in the body goes in `If-Match` instead. */
