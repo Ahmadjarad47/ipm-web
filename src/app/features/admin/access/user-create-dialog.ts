@@ -44,7 +44,7 @@ import { AdminNotice } from '../shared/admin-notice';
           <label for="uc-password">كلمة المرور الأولى <span class="req">*</span></label>
           <input id="uc-password" class="input ltr" type="password" formControlName="password" autocomplete="new-password" [attr.aria-invalid]="bad('password')" />
           <span class="hint">8 أحرف على الأقل وفيها رقم.</span>
-          @if (bad('password')) { <span class="error" role="alert">{{ serverErrors()['password'] ?? serverErrors()['newPassword'] ?? 'كلمة مرور لا تقل عن 8 أحرف.' }}</span> }
+          @if (bad('password')) { <span class="error" role="alert">{{ serverErrors()['password'] || serverErrors()['newPassword'] || 'كلمة مرور لا تقل عن 8 أحرف.' }}</span> }
         </div>
         <div class="field">
           <label for="uc-title">المسمى الوظيفي</label>

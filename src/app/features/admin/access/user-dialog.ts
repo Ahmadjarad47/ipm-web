@@ -20,7 +20,7 @@ const FIELD_KEYS: readonly string[] = ['name', 'email', 'title', 'managerId', 's
 /** Edit profile, manager, activation and system roles of a user; reset password (FR-AUTH-02). Own roles/activation are locked (§2.3). */
 @Component({
   selector: 'app-user-dialog',
-  imports: [ReactiveFormsModule, DialogShell, Avatar, ActiveToggle, AdminNotice, Icon, AppDatePipe],
+  imports: [ReactiveFormsModule, DialogShell, Avatar, ActiveToggle, AdminNotice, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-dialog-shell [title]="user.name" [subtitle]="'@' + user.username">
