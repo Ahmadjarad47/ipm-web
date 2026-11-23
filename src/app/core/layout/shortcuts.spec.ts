@@ -3,6 +3,8 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AuthSession } from '@core/auth/auth.models';
+import { AuthService } from '@core/auth/auth.service';
 import { DialogService } from '@shared/ui/dialog/dialog.service';
 import { Shortcuts } from './shortcuts';
 
@@ -19,22 +21,20 @@ describe('Shortcuts', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    sessionStorage.setItem(
-      'ipm.session',
-      JSON.stringify({
+    const session: AuthSession = {
         token: 't',
         expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
         user: { id: 'u', name: 'U', email: 'u@x', title: '' },
         systemPermissions: ['projects.view', 'tasks.view', 'tasks.create', 'dashboard.view', 'approvals.view'],
         projectPermissions: {},
         denied: [],
-      }),
-    );
+    };
     open = vi.fn();
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([]), { provide: DialogService, useValue: { open } }],
     });
     navigateByUrl = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true) as unknown as ReturnType<typeof vi.fn>;
+    TestBed.inject(AuthService).establish(session);
     shortcuts = TestBed.inject(Shortcuts);
   });
 

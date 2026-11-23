@@ -8,7 +8,18 @@ export const ROUTE_PERMISSIONS = 'permissions';
 
 export const authGuard: CanMatchFn = () => {
   const auth = inject(AuthService);
-  return auth.isAuthenticated() || inject(Router).createUrlTree(['/login']);
+  const router = inject(Router);
+  if (!auth.isAuthenticated()) return router.createUrlTree(['/login']);
+  // A first password chosen by an administrator must be replaced before anything else.
+  return auth.mustChangePassword() ? router.createUrlTree(['/change-password']) : true;
+};
+
+/** The change-password screen: only for a signed-in user who still has to choose their own password. */
+export const passwordChangeGuard: CanMatchFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (!auth.isAuthenticated()) return router.createUrlTree(['/login']);
+  return auth.mustChangePassword() || router.createUrlTree(['/']);
 };
 
 export const guestGuard: CanMatchFn = () => {

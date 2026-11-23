@@ -1,16 +1,35 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { catchError, finalize, firstValueFrom, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
 import { API_BASE_URL } from '@core/api/api.config';
-import { AuthSession, LoginRequest, LogoutReason } from './auth.models';
+import { AuthSession, LoginRequest, LogoutReason, SessionUser } from './auth.models';
 import { PermissionKey } from './permissions';
 
-const STORAGE_KEY = 'ipm.session';
+/** What `POST /auth/login` and `POST /auth/refresh` answer: the short-lived access token (the refresh token is an HttpOnly cookie). */
+interface TokenResponse {
+  readonly accessToken: string;
+  readonly expiresAt: string;
+  readonly mustChangePassword: boolean;
+}
+
+/** What `GET /auth/me` answers: who the caller is and the effective grants. */
+interface MeResponse {
+  readonly user: SessionUser;
+  readonly systemPermissions: readonly PermissionKey[];
+  readonly projectPermissions: Readonly<Record<string, readonly PermissionKey[]>>;
+  readonly denied: readonly PermissionKey[];
+}
+
+/** The access token is renewed this long before it expires. */
+const RENEW_AHEAD_MS = 60_000;
+const SILENT = { 'X-Silent-Error': '1' };
 
 /**
  * Holds the session and answers "can the user do X (in project P)?".
  *
+ * The access token lives in memory only. The refresh token is an HttpOnly cookie the server sets, so reloading the page
+ * brings the session back through `initialize()` without any secret in script-reachable storage.
  * UI checks are a convenience only — the server re-checks every request (FR-AUTH-03).
  */
 @Injectable({ providedIn: 'root' })
@@ -18,59 +37,84 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly baseUrl = inject(API_BASE_URL);
-
-  private readonly _session = signal<AuthSession | null>(this.restore());
-  private expiryTimer: ReturnType<typeof setTimeout> | null = null;
-
+  private readonly _session = signal<AuthSession | null>(null);
+  private renewTimer: ReturnType<typeof setTimeout> | null = null;
+  private inflight: Observable<string | null> | null = null;
   private readonly _lastLogoutReason = signal<LogoutReason | null>(null);
-  /** Set when the server (or the expiry timer) ended the session; cleared on the next successful login. */
-  readonly lastLogoutReason = this._lastLogoutReason.asReadonly();
 
+  /** Set when the server (or the renewal) ended the session; cleared on the next successful login. */
+  readonly lastLogoutReason = this._lastLogoutReason.asReadonly();
   readonly session = this._session.asReadonly();
   readonly user = computed(() => this._session()?.user ?? null);
-  /** Expired sessions are cleared by a timer (see `store`), so this stays accurate without polling the clock. */
-  readonly isAuthenticated = computed(() => {
-    const session = this._session();
-    return !!session && new Date(session.expiresAt).getTime() > Date.now();
-  });
+  /** A session exists; its token is renewed in the background, and a failed renewal ends it. */
+  readonly isAuthenticated = computed(() => !!this._session());
   readonly token = computed(() => this._session()?.token ?? null);
-
+  /** The first password was set by an administrator: the user must choose their own before anything else. */
+  readonly mustChangePassword = computed(() => this._session()?.mustChangePassword ?? false);
   private readonly systemGrants = computed(() => new Set(this._session()?.systemPermissions ?? []));
   private readonly denied = computed(() => new Set(this._session()?.denied ?? []));
 
-  constructor() {
-    this.scheduleExpiry(this._session());
+  /** Runs once at start-up: brings back the session of a returning user, quietly. */
+  initialize(): Promise<void> {
+    return firstValueFrom(this.refresh().pipe(map(() => undefined)));
   }
 
   login(request: LoginRequest): Observable<AuthSession> {
-    return this.http
-      .post<AuthSession>(`${this.baseUrl}/auth/login`, request)
-      .pipe(tap((session) => {
+    return this.http.post<TokenResponse>(`${this.baseUrl}/auth/login`, request).pipe(
+      switchMap((tokens) => this.buildSession(tokens)),
+      tap((session) => {
         this._lastLogoutReason.set(null);
-        this.store(session);
-      }));
+        this.establish(session);
+      }),
+    );
+  }
+
+  /**
+   * Gets a fresh access token with the refresh cookie (one call at a time, shared by everyone waiting).
+   * Emits the new token, or null when there is no valid refresh token — in which case the session is over.
+   */
+  refresh(): Observable<string | null> {
+    this.inflight ??= this.http.post<TokenResponse>(`${this.baseUrl}/auth/refresh`, {}, { headers: SILENT }).pipe(
+      switchMap((tokens) => this.buildSession(tokens)),
+      tap((session) => this.establish(session)),
+      map((session) => session.token),
+      catchError(() => {
+        this.establish(null);
+        return of(null);
+      }),
+      finalize(() => (this.inflight = null)),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    return this.inflight;
   }
 
   /**
    * Re-reads the caller's effective grants. Call after anything that changes them server-side
-   * (creating a project, membership or role changes) — grants are otherwise a login-time snapshot.
+   * (creating a project, membership or role changes) — grants are otherwise a snapshot of the last sign-in or renewal.
    */
   refreshSession(): Observable<AuthSession> {
-    return this.http.get<AuthSession>(`${this.baseUrl}/auth/me`).pipe(tap((session) => this.store(session)));
+    return this.http.get<MeResponse>(`${this.baseUrl}/auth/me`).pipe(
+      map((me) => ({ ...this.requireSession(), ...me })),
+      tap((session) => this.establish(session)),
+    );
+  }
+
+  /** After the user chose their own password: the flag is cleared locally (the server stopped enforcing it). */
+  passwordChanged(): void {
+    const session = this._session();
+    if (session) this.establish({ ...session, mustChangePassword: false });
   }
 
   /**
-   * Ends the session. A user-initiated logout tells the server (best effort, so the token is revoked);
-   * a forced one passes the `reason` the server gave and does not call back.
+   * Ends the session. A user-initiated logout tells the server (best effort, so the refresh token is revoked);
+   * a forced one passes the `reason` and does not call back.
    */
   logout(redirect = true, reason?: LogoutReason): void {
     const token = this.token();
     this._lastLogoutReason.set(reason ?? null);
-    this.store(null);
+    this.establish(null);
     if (token && !reason) {
-      this.http
-        .post(`${this.baseUrl}/auth/logout`, {}, { headers: { Authorization: `Bearer ${token}`, 'X-Silent-Error': '1' } })
-        .subscribe({ error: () => undefined });
+      this.http.post(`${this.baseUrl}/auth/logout`, {}, { headers: { Authorization: `Bearer ${token}`, ...SILENT } }).subscribe({ error: () => undefined });
     }
     if (redirect) void this.router.navigate(['/login']);
   }
@@ -97,32 +141,35 @@ export class AuthService {
     return !this.denied().has(permission) && Object.values(perProject).some((keys) => keys.includes(permission));
   }
 
-  private scheduleExpiry(session: AuthSession | null): void {
-    if (this.expiryTimer) clearTimeout(this.expiryTimer);
-    this.expiryTimer = null;
-    if (!session) return;
-    const ms = new Date(session.expiresAt).getTime() - Date.now();
-    // setTimeout overflows beyond ~24.8 days; sessions are hours long.
-    this.expiryTimer = setTimeout(() => this.logout(true, { code: 'session_expired', message: 'انتهت الجلسة، يرجى تسجيل الدخول مجددًا.' }), Math.max(0, Math.min(ms, 2_147_000_000)));
-  }
-
-  private store(session: AuthSession | null): void {
+  /** Makes `session` the current one (or none) and schedules its renewal. Also the way tests sign a user in. */
+  establish(session: AuthSession | null): void {
     this._session.set(session);
-    this.scheduleExpiry(session);
-    try {
-      if (session) sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-      else sessionStorage.removeItem(STORAGE_KEY);
-    } catch {
-      /* storage unavailable (private mode) — session stays in memory */
-    }
+    this.scheduleRenewal(session);
   }
 
-  private restore(): AuthSession | null {
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as AuthSession) : null;
-    } catch {
-      return null;
-    }
+  /** The tokens plus who the caller is: what the UI calls a session. The new token is sent explicitly (it is not stored yet). */
+  private buildSession(tokens: TokenResponse): Observable<AuthSession> {
+    return this.http
+      .get<MeResponse>(`${this.baseUrl}/auth/me`, { headers: { Authorization: `Bearer ${tokens.accessToken}`, ...SILENT } })
+      .pipe(map((me) => ({ token: tokens.accessToken, expiresAt: tokens.expiresAt, mustChangePassword: tokens.mustChangePassword, ...me })));
+  }
+
+  private requireSession(): AuthSession {
+    const session = this._session();
+    if (!session) throw new Error('No active session.');
+    return session;
+  }
+
+  private scheduleRenewal(session: AuthSession | null): void {
+    if (this.renewTimer) clearTimeout(this.renewTimer);
+    this.renewTimer = null;
+    if (!session) return;
+    // setTimeout overflows beyond ~24.8 days; access tokens last minutes.
+    const ms = Math.max(0, Math.min(new Date(session.expiresAt).getTime() - Date.now() - RENEW_AHEAD_MS, 2_000_000_000));
+    this.renewTimer = setTimeout(() => {
+      this.refresh().subscribe((token) => {
+        if (!token) this.logout(true, { code: 'session_expired', message: 'انتهت الجلسة، يرجى تسجيل الدخول مجددًا.' });
+      });
+    }, ms);
   }
 }
