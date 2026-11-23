@@ -33,6 +33,11 @@ export abstract class BaseApiService<
   /** Resource path segment, e.g. `projects` or `work-items`. */
   protected abstract readonly resource: string;
 
+  /** The resource path segment; the lookup cache uses it to know what a write made stale. */
+  get resourceName(): string {
+    return this.resource;
+  }
+
   protected get url(): string {
     return `${this.baseUrl}/${this.resource}`;
   }

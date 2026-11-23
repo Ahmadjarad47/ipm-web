@@ -74,6 +74,7 @@ export class StatusLookup extends LookupStore<Status> {
 @Injectable({ providedIn: 'root' })
 export class WorkflowLookup extends LookupStore<Workflow> {
   protected readonly api = inject(WorkflowsApi);
+  protected override readonly alsoDependsOn = ['statuses'];
 
   /** Transitions leaving `statusId` inside `workflowId`. */
   transitionsFrom(workflowId: string | undefined, statusId: string): readonly Transition[] {

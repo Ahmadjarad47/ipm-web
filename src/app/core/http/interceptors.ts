@@ -1,6 +1,8 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { catchError, switchMap, tap, throwError } from 'rxjs';
+import { API_BASE_URL } from '@core/api/api.config';
+import { LookupRegistry } from '@core/state/lookup-registry';
 import { AuthService } from '@core/auth/auth.service';
 import { ApiError, ApiErrorCode } from '@core/models/api-error.model';
 import { ToastService } from '@core/notifications/toast.service';
@@ -19,6 +21,22 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
   const token = inject(AuthService).token();
   // An explicit Authorization header (used while a session is being built) wins.
   return next(token && !req.headers.has('Authorization') ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req);
+};
+
+/**
+ * Any successful write tells the lookup cache which resource changed (`/projects/p1/members` → `projects`), so every screen that
+ * reads from a lookup shows the change without a reload. Sign-in calls and reads are not writes.
+ */
+export const invalidationInterceptor: HttpInterceptorFn = (req, next) => {
+  if (req.method === 'GET' || req.method === 'HEAD' || AUTH_PATH.test(req.url)) return next(req);
+  const registry = inject(LookupRegistry);
+  const base = inject(API_BASE_URL);
+  const resource = req.url.startsWith(base) ? req.url.slice(base.length).split('/').find((part) => part.length > 0) : undefined;
+  return next(req).pipe(
+    tap((event) => {
+      if (resource && event instanceof HttpResponse && event.ok) registry.invalidate(resource);
+    }),
+  );
 };
 
 /**

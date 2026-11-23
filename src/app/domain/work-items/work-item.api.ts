@@ -199,6 +199,7 @@ export class RelationsApi extends BaseApiService<WorkItemRelation> {
 @Injectable({ providedIn: 'root' })
 export class WorkItemTypeLookup extends LookupStore<WorkItemType> {
   protected readonly api = inject(WorkItemTypesApi);
+  protected override readonly alsoDependsOn = ['hierarchy-rules', 'workflows'];
 }
 
 @Injectable({ providedIn: 'root' })
