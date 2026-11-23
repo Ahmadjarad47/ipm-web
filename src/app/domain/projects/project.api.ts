@@ -108,4 +108,6 @@ export class ProjectsApi extends BaseApiService<ProjectSummary, ProjectCreate, U
 @Injectable({ providedIn: 'root' })
 export class ProjectLookup extends LookupStore<ProjectSummary> {
   protected readonly api = inject(ProjectsApi);
+  /** Progress, item counts and overdue counts come from work items; repositories from Git; the progress rule from settings. */
+  protected override readonly alsoDependsOn = ['work-items', 'relations', 'git', 'settings'];
 }

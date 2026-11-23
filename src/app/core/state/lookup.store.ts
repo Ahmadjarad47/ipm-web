@@ -3,6 +3,7 @@ import { rxResource } from '@core/state/safe-resource';
 import { BaseApiService } from '@core/api/base-api.service';
 import { AuthService } from '@core/auth/auth.service';
 import { Entity } from '@core/models/entity.model';
+import { Invalidatable, LookupRegistry } from './lookup-registry';
 
 /**
  * Generic cached lookup (statuses, types, users, roles...).
@@ -10,10 +11,17 @@ import { Entity } from '@core/models/entity.model';
  * Concrete lookups are `providedIn: 'root'` singletons.
  */
 @Directive()
-export abstract class LookupStore<T extends Entity> {
+export abstract class LookupStore<T extends Entity> implements Invalidatable {
   protected abstract readonly api: BaseApiService<T, unknown, unknown>;
 
   private readonly auth = inject(AuthService);
+
+  /** Other resources whose changes also make this lookup stale (e.g. project progress moves with work items). */
+  protected readonly alsoDependsOn: readonly string[] = [];
+
+  constructor() {
+    inject(LookupRegistry).register(this);
+  }
 
   /**
    * Keyed on the session: lookups are visibility-filtered per user, so they are dropped on logout
@@ -34,6 +42,11 @@ export abstract class LookupStore<T extends Entity> {
 
   get(id: string | null | undefined): T | undefined {
     return id ? this.byId().get(id) : undefined;
+  }
+
+  /** The resources this lookup is built from: its own, and those named in `alsoDependsOn`. */
+  dependsOn(): readonly string[] {
+    return [this.api.resourceName, ...this.alsoDependsOn];
   }
 
   reload(): void {
