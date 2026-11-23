@@ -153,46 +153,22 @@ export class AuditPage {
     return SUBJECT_TYPE_LABELS[type];
   }
 
-  /** FR-AUD-08: server-side export of every event matching the current filters (all pages); the server audits the export. */
+  /** FR-AUD-08: the server builds the CSV of every event matching the current filters and records the export in the audit log. */
   protected exportCsv(): void {
     if (this.exporting()) return;
     this.exporting.set(true);
-    const { sort, search, filters } = this.store.query();
-    this.auditApi.export({ page: 1, pageSize: 100000, sort, search, filters }).subscribe({
-      next: (events) => {
+    this.auditApi.exportCsv(this.store.query()).subscribe({
+      next: (file) => {
         this.exporting.set(false);
-        this.download(events);
+        const url = URL.createObjectURL(file);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `audit-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.toast.success('تم تصدير السجل');
       },
       error: () => this.exporting.set(false),
     });
   }
-
-  /** UTF-8 with BOM so Arabic opens correctly in Excel. */
-  private download(events: readonly AuditEvent[]): void {
-    const header = ['الوقت', 'المنفّذ', 'الإجراء', 'الموضوع', 'نوع الموضوع', 'المصدر', 'أمني', 'معرّف الارتباط'];
-    const rows = events.map((e) => [
-      e.at,
-      this.users.nameOf(e.actorId),
-      AUDIT_ACTION_LABELS[e.action] ?? e.action,
-      e.subjectLabel,
-      SUBJECT_TYPE_LABELS[e.subjectType],
-      e.source,
-      e.security ? 'نعم' : 'لا',
-      e.correlationId,
-    ]);
-    const csv = [header, ...rows].map((r) => r.map(escapeCsv).join(',')).join('\r\n');
-    const url = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `audit-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    this.toast.success('تم تصدير السجل');
-  }
-}
-
-function escapeCsv(value: string): string {
-  // Prefix formula-like cells so spreadsheets do not execute them; leading tab/CR/space also count.
-  const safe = /^[\s=+\-@]/.test(value) ? `'${value}` : value;
-  return `"${safe.replace(/"/g, '""')}"`;
 }

@@ -1,9 +1,9 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { API_BASE_URL } from '@core/api/api.config';
-import { Observable } from 'rxjs';
+import { Observable, switchMap } from 'rxjs';
 import { BaseApiService } from '@core/api/base-api.service';
-import { toHttpParams } from '@core/api/query-params';
+import { ifMatch, toHttpParams } from '@core/api/query-params';
 import { ListQuery, PagedResult } from '@core/models/entity.model';
 import { ApprovalAction, ApprovalBox, ApprovalRequest, ApprovalSubject, ApprovalTemplate, BulkDecideResult, DecideRequest, Delegation, DelegationCreate } from './approval.models';
 
@@ -24,32 +24,42 @@ export class ApprovalRequestsApi extends BaseApiService<ApprovalRequest, SubmitA
 
   /** inbox = waiting for my decision, sent = submitted by me, closed = finished requests I may see. */
   listBox(box: ApprovalBox, query: ListQuery<ApprovalRequest>): Observable<PagedResult<ApprovalRequest>> {
-    const params = toHttpParams(query).set('filter.box', box);
+    const params = toHttpParams(query).set('box', box);
     return this.http.get<PagedResult<ApprovalRequest>>(this.url, { params });
   }
 
   /** Server enforces stage order, self-approval ban and revision match (FR-APR-04/06, §4.3). */
+  /** The decision names the revision the approver reviewed; the record version for `If-Match` is read right before sending. */
   decide(id: string, request: DecideRequest): Observable<ApprovalRequest> {
-    return this.action(id, 'decide', request);
+    return this.withCurrentVersion(id, 'decide', request);
   }
 
   resubmit(id: string): Observable<ApprovalRequest> {
-    return this.action(id, 'resubmit', {});
+    return this.withCurrentVersion(id, 'resubmit', {});
   }
 
   /** FR-APR-07: notify the current approvers (one reminder per hour). */
   remind(id: string): Observable<ApprovalRequest> {
-    return this.action(id, 'remind', {});
+    return this.withCurrentVersion(id, 'remind', {});
   }
 
   /** Approve many pending requests at once; reject/return are never bulk (comment is mandatory). */
   bulkApprove(ids: readonly string[], comment?: string, revisions?: Readonly<Record<string, number>>): Observable<BulkDecideResult[]> {
-    return this.http.post<BulkDecideResult[]>(`${this.url}/bulk-decide`, { ids, decision: 'approve', comment, revisions });
+    return this.http.post<BulkDecideResult[]>(`${this.url}/bulk-decide`, { ids, comment, revisions });
   }
 
   /** FR-APR-11: substitute the active stage's approver (absence), with a mandatory reason; needs `approvals.configure`. */
+  /** Not offered by the API yet (the screen hides it behind `environment.features.approverReassign`). */
   reassign(id: string, approverId: string, reason: string): Observable<ApprovalRequest> {
     return this.action(id, 'reassign', { approverId, reason });
+  }
+
+  private withCurrentVersion<TBody>(id: string, name: string, body: TBody): Observable<ApprovalRequest> {
+    return this.getById(id).pipe(
+      switchMap((current) =>
+        this.http.post<ApprovalRequest>(`${this.url}/${encodeURIComponent(id)}/${name}`, body, { headers: ifMatch(current.version) }),
+      ),
+    );
   }
 }
 

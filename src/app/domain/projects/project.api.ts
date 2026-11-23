@@ -1,59 +1,107 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable, switchMap } from 'rxjs';
 import { BaseApiService } from '@core/api/base-api.service';
-import { UpdateDto } from '@core/models/entity.model';
+import { asPage, ifMatch } from '@core/api/query-params';
+import { ListQuery, PagedResult, UpdateDto } from '@core/models/entity.model';
 import { LookupStore } from '@core/state/lookup.store';
-import { Project, ProjectCreate, ProjectMember, ProjectMembersResult, ProjectSummary, ProjectTransitionRequest, RepositoryConnect, RotatedSecret } from './project.models';
+import {
+  MemberWarning,
+  Project,
+  ProjectCreate,
+  ProjectMember,
+  ProjectMembersResult,
+  ProjectSummary,
+  ProjectTransitionRequest,
+  Repository,
+  RepositoryConnect,
+  RotatedSecret,
+} from './project.models';
+
+/** A project as the list and the single read return it: the Git repositories are a resource of their own. */
+type ServerProject = Omit<ProjectSummary, 'repositories'> & { readonly repositories?: readonly Repository[] };
 
 @Injectable({ providedIn: 'root' })
 export class ProjectsApi extends BaseApiService<ProjectSummary, ProjectCreate, UpdateDto<Project>> {
   protected readonly resource = 'projects';
 
+  private static readonly noRepositories: readonly Repository[] = [];
+
+  override list(query: ListQuery<ProjectSummary>): Observable<PagedResult<ProjectSummary>> {
+    return this.http
+      .get<PagedResult<ServerProject> | readonly ServerProject[]>(this.url, { params: this.toParams(query) })
+      .pipe(map((r) => asPage(r)), map((page) => ({ ...page, items: page.items.map((p) => ({ ...p, repositories: p.repositories ?? ProjectsApi.noRepositories })) })));
+  }
+
+  /** The project with its Git repositories (the API includes them for those who hold git.view). */
+  override getById(id: string): Observable<ProjectSummary> {
+    return this.http.get<ServerProject>(`${this.url}/${encodeURIComponent(id)}`).pipe(map((p) => this.withoutRepositories(p)));
+  }
+
+  override create(payload: ProjectCreate): Observable<ProjectSummary> {
+    return this.http.post<ServerProject>(this.url, payload).pipe(map((p) => ({ ...p, repositories: ProjectsApi.noRepositories })));
+  }
+
+  protected override toUpdateBody(m: ProjectSummary): unknown {
+    return { name: m.name, description: m.description, startDate: m.startDate, endDate: m.endDate, ownerId: m.ownerId, code: m.code, statusId: m.statusId };
+  }
+
   /** Workflow-checked status change; may require an approved request first. */
   transition(id: string, request: ProjectTransitionRequest): Observable<ProjectSummary> {
-    return this.action(id, 'transition', request);
+    return this.action<ProjectTransitionRequest, ServerProject>(id, 'transition', request).pipe(switchMap(() => this.getById(id)));
   }
 
   setArchived(id: string, archived: boolean, version: number): Observable<ProjectSummary> {
-    return this.action(id, archived ? 'archive' : 'unarchive', { version });
+    return this.action<{ version: number }, ServerProject>(id, archived ? 'archive' : 'unarchive', { version }).pipe(switchMap(() => this.getById(id)));
   }
 
+  /** Replaces the whole member list; the answer carries warnings (e.g. a removed member who still holds assigned items). */
   setMembers(id: string, members: readonly ProjectMember[], version: number): Observable<ProjectMembersResult> {
-    return this.action(id, 'members', { members, version });
+    return this.http
+      .put<{ readonly project: ServerProject; readonly warnings?: readonly MemberWarning[] }>(`${this.url}/${encodeURIComponent(id)}/members`, { members }, { headers: ifMatch(version) })
+      .pipe(switchMap((r) => this.getById(id).pipe(map((project) => ({ ...project, warnings: r.warnings })))));
   }
 
-  /** FR-WF-10: needs `workflows.manage` and `project.workitemtypes.configure`; empty map clears all overrides. */
   setWorkflowOverrides(id: string, overrides: Readonly<Record<string, string>>, version: number): Observable<ProjectSummary> {
-    return this.action(id, 'workflow-overrides', { overrides, version });
+    return this.http
+      .put<ServerProject>(`${this.url}/${encodeURIComponent(id)}/workflow-overrides`, { overrides }, { headers: ifMatch(version) })
+      .pipe(switchMap(() => this.getById(id)));
+  }
+
+  configureTypes(id: string, allowedTypeIds: readonly string[], defaultTypeId: string, version: number): Observable<ProjectSummary> {
+    return this.http
+      .put<ServerProject>(`${this.url}/${encodeURIComponent(id)}/work-item-types`, { allowedTypeIds, defaultTypeId }, { headers: ifMatch(version) })
+      .pipe(switchMap(() => this.getById(id)));
+  }
+
+  /** The pattern that finds work item refs in commit messages; `null` goes back to the default. */
+  setRefPattern(id: string, refPattern: string | null, version?: number): Observable<ProjectSummary> {
+    const put = (v: number) =>
+      this.http.put<ServerProject>(`${this.url}/${encodeURIComponent(id)}/ref-pattern`, { refPattern }, { headers: ifMatch(v) });
+    return (version === undefined ? this.getById(id).pipe(switchMap((p) => put(p.version))) : put(version)).pipe(switchMap(() => this.getById(id)));
+  }
+
+  // ---- Git repositories: a resource of the project; each change answers with the project as the screens expect it ----
+
+  connectRepository(id: string, payload: RepositoryConnect): Observable<ProjectSummary> {
+    return this.http.post<Repository>(`${this.url}/${encodeURIComponent(id)}/repositories`, payload).pipe(switchMap(() => this.getById(id)));
+  }
+
+  disconnectRepository(id: string, repositoryId: string): Observable<ProjectSummary> {
+    return this.http
+      .post<Repository>(`${this.url}/${encodeURIComponent(id)}/repositories/${encodeURIComponent(repositoryId)}/disconnect`, {})
+      .pipe(switchMap(() => this.getById(id)));
   }
 
   syncRepository(id: string, repositoryId: string): Observable<ProjectSummary> {
-    return this.action(id, 'git-sync', { repositoryId });
+    return this.http.post<unknown>(`${this.url}/${encodeURIComponent(id)}/git-sync`, { repositoryId }).pipe(switchMap(() => this.getById(id)));
   }
 
-  /** FR-GIT-01: needs `git.manage`. */
-  connectRepository(id: string, payload: RepositoryConnect): Observable<ProjectSummary> {
-    return this.action(id, 'repositories', payload);
-  }
-
-  /** FR-GIT-09: disconnects but keeps past links and events. */
-  disconnectRepository(id: string, repositoryId: string): Observable<ProjectSummary> {
-    return this.action(id, `repositories/${encodeURIComponent(repositoryId)}/disconnect`, {});
-  }
-
-  /** FR-GIT-09/§7.2: returns the new webhook secret exactly once. */
   rotateSecret(id: string, repositoryId: string): Observable<RotatedSecret> {
     return this.http.post<RotatedSecret>(`${this.url}/${encodeURIComponent(id)}/repositories/${encodeURIComponent(repositoryId)}/rotate-secret`, {});
   }
 
-  /** FR-GIT-03: set (or clear with null) the project's custom ref pattern. */
-  setRefPattern(id: string, refPattern: string | null): Observable<ProjectSummary> {
-    return this.action(id, 'ref-pattern', { refPattern });
-  }
-
-  /** FR-TYP-04: types offered in this project and the default for new items. */
-  configureTypes(id: string, allowedTypeIds: readonly string[], defaultTypeId: string, version: number): Observable<ProjectSummary> {
-    return this.update(id, { allowedTypeIds, defaultTypeId, version });
+  private withoutRepositories(project: ServerProject): ProjectSummary {
+    return { ...project, repositories: project.repositories ?? ProjectsApi.noRepositories };
   }
 }
 

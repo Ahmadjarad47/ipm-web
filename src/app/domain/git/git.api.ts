@@ -14,7 +14,7 @@ export class GitIntegrationApi {
 
   /** FR-GIT-05/06: received deliveries with outcome, newest first. */
   deliveries(projectId: string, query: ListQuery<WebhookDelivery>): Observable<PagedResult<WebhookDelivery>> {
-    const params: HttpParams = toHttpParams(query).set('filter.projectId', projectId);
+    const params: HttpParams = toHttpParams(query).set('projectId', projectId);
     return this.http.get<PagedResult<WebhookDelivery>>(`${this.url}/deliveries`, { params });
   }
 

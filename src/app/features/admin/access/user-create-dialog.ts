@@ -20,7 +20,7 @@ import { AdminNotice } from '../shared/admin-notice';
   template: `
     <app-dialog-shell title="مستخدم جديد">
       <form id="uc-form" [formGroup]="form" (ngSubmit)="save()" class="stack">
-        <app-admin-notice>سيصل للمستخدم رابط تعيين كلمة المرور عبر مزوّد الهوية.</app-admin-notice>
+        <app-admin-notice>تحدّد أنت كلمة المرور الأولى، ويُطلب من المستخدم تغييرها عند أول دخول.</app-admin-notice>
         @if (formError(); as msg) {
           <p class="error" role="alert">{{ msg }}</p>
         }
@@ -39,6 +39,12 @@ import { AdminNotice } from '../shared/admin-notice';
           <label for="uc-email">البريد الإلكتروني <span class="req">*</span></label>
           <input id="uc-email" class="input ltr" type="email" formControlName="email" [attr.aria-invalid]="bad('email')" />
           @if (bad('email')) { <span class="error" role="alert">{{ serverErrors()['email'] ?? 'أدخل بريدًا إلكترونيًا صحيحًا.' }}</span> }
+        </div>
+        <div class="field">
+          <label for="uc-password">كلمة المرور الأولى <span class="req">*</span></label>
+          <input id="uc-password" class="input ltr" type="password" formControlName="password" autocomplete="new-password" [attr.aria-invalid]="bad('password')" />
+          <span class="hint">8 أحرف على الأقل وفيها رقم.</span>
+          @if (bad('password')) { <span class="error" role="alert">{{ serverErrors()['password'] ?? serverErrors()['newPassword'] ?? 'كلمة مرور لا تقل عن 8 أحرف.' }}</span> }
         </div>
         <div class="field">
           <label for="uc-title">المسمى الوظيفي</label>
@@ -85,9 +91,10 @@ export class UserCreateDialog {
     name: this.fb.control('', Validators.required),
     email: this.fb.control('', [Validators.required, Validators.email]),
     title: this.fb.control(''),
+    password: this.fb.control('', [Validators.required, Validators.minLength(8)]),
   });
 
-  protected bad(key: 'username' | 'name' | 'email'): boolean {
+  protected bad(key: 'username' | 'name' | 'email' | 'password'): boolean {
     const c = this.form.controls[key];
     return (c.invalid && c.touched) || !!this.serverErrors()[key];
   }
@@ -108,6 +115,7 @@ export class UserCreateDialog {
       email: v.email.trim(),
       title: v.title.trim(),
       systemRoleIds: this.roleIds(),
+      password: v.password,
     };
     this.saving.set(true);
     this.serverErrors.set({});

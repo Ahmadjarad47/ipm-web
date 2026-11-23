@@ -4,7 +4,7 @@ import { AuthService } from '@core/auth/auth.service';
 import { isApiError } from '@core/models/api-error.model';
 import { ToastService } from '@core/notifications/toast.service';
 import { ProjectLookup } from '@domain/projects/project.api';
-import { PasswordResetLink, RoleLookup, UserLookup, UsersApi } from '@domain/users/user.api';
+import { RoleLookup, UserLookup, UsersApi } from '@domain/users/user.api';
 import { User } from '@domain/users/user.models';
 import { AppDatePipe } from '@shared/pipes/pipes';
 import { Avatar } from '@shared/ui/avatar/avatar';
@@ -99,20 +99,16 @@ const FIELD_KEYS: readonly string[] = ['name', 'email', 'title', 'managerId', 's
         @if (canAssign()) {
           <section class="reset" aria-labelledby="ud-reset-title">
             <strong id="ud-reset-title">كلمة المرور</strong>
-            <p class="muted">لا تُعرض كلمة مرور ولا تُخزَّن هنا. يُنشئ الخادم رابطًا لمرة واحدة ليعيّن المستخدم كلمة مروره بنفسه، وتُنهى جلساته الحالية فورًا.</p>
-            @if (resetLink(); as r) {
+            <p class="muted">تحدّد كلمة مرور مؤقتة وتُنهى جلسات المستخدم الحالية فورًا، ويُطلب منه تغييرها عند أول دخول.</p>
+            @if (resetDone()) {
+              <app-admin-notice tone="warning">تم تعيين كلمة المرور وإنهاء جميع جلسات هذا المستخدم. أرسلها له عبر قناة آمنة.</app-admin-notice>
+            } @else {
               <div class="link-box">
-                <input class="input ltr" readonly [value]="r.link" aria-label="رابط إعادة التعيين" />
-                <button type="button" class="btn btn--outline" (click)="copy(r.link)">
-                  <app-icon name="link" [size]="16" /> {{ copied() ? 'تم النسخ' : 'نسخ الرابط' }}
+                <input class="input ltr" type="password" autocomplete="new-password" aria-label="كلمة المرور المؤقتة" placeholder="كلمة المرور المؤقتة" [value]="newPassword()" (input)="newPassword.set($any($event.target).value)" />
+                <button type="button" class="btn btn--outline" [disabled]="resetting() || newPassword().length < 8" (click)="reset()">
+                  <app-icon name="lock" [size]="16" /> {{ resetting() ? 'جارٍ التعيين…' : 'تعيين كلمة المرور' }}
                 </button>
               </div>
-              <p class="muted">صالح حتى {{ r.expiresAt | appDate: true }} ويعمل مرة واحدة. أرسله للمستخدم عبر قناة آمنة.</p>
-              <app-admin-notice tone="warning">تم إنهاء جميع جلسات هذا المستخدم الحالية.</app-admin-notice>
-            } @else {
-              <button type="button" class="btn btn--outline" [disabled]="resetting()" (click)="reset()">
-                <app-icon name="lock" [size]="16" /> {{ resetting() ? 'جارٍ الإنشاء…' : 'إعادة تعيين كلمة المرور' }}
-              </button>
             }
             @if (resetError(); as e) { <p class="error" role="alert">{{ e }}</p> }
           </section>
@@ -164,10 +160,10 @@ export class UserDialog {
     Object.entries(this.serverErrors()).filter(([key]) => !FIELD_KEYS.includes(key)).map(([key, message]) => ({ key, message })),
   );
 
-  protected readonly resetLink = signal<PasswordResetLink | null>(null);
+  protected readonly resetDone = signal(false);
+  protected readonly newPassword = signal('');
   protected readonly resetting = signal(false);
   protected readonly resetError = signal<string | null>(null);
-  protected readonly copied = signal(false);
 
   protected readonly form = this.fb.group({
     name: this.fb.control(this.user.name, Validators.required),
@@ -250,17 +246,18 @@ export class UserDialog {
     this.confirm
       .confirm({
         title: 'إعادة تعيين كلمة المرور',
-        message: `سيُنشأ رابط لمرة واحدة لـ «${this.user.name}» وتُنهى جلساته الحالية. هل تريد المتابعة؟`,
-        confirmText: 'إنشاء الرابط',
+        message: `ستُعيَّن كلمة مرور مؤقتة لـ «${this.user.name}» وتُنهى جلساته الحالية. هل تريد المتابعة؟`,
+        confirmText: 'تعيين كلمة المرور',
       })
       .subscribe((ok) => {
         if (!ok) return;
         this.resetting.set(true);
         this.resetError.set(null);
-        this.api.resetPassword(this.user.id).subscribe({
-          next: (link) => {
+        this.api.resetPassword(this.user.id, this.newPassword()).subscribe({
+          next: () => {
             this.resetting.set(false);
-            this.resetLink.set(link);
+            this.resetDone.set(true);
+            this.newPassword.set('');
           },
           error: (e: unknown) => {
             this.resetting.set(false);
@@ -270,13 +267,4 @@ export class UserDialog {
       });
   }
 
-  protected copy(text: string): void {
-    void navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        this.copied.set(true);
-        setTimeout(() => this.copied.set(false), 2000);
-      })
-      .catch(() => this.toast.error('تعذّر النسخ. حدّد الرابط وانسخه يدويًا.'));
-  }
 }

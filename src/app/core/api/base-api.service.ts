@@ -1,6 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { expand, map, Observable, reduce } from 'rxjs';
+import { concat, defer, expand, last, map, Observable, reduce, switchMap, tap } from 'rxjs';
 import { CreateDto, Entity, ListQuery, PagedResult, UpdateDto } from '@core/models/entity.model';
 import { API_BASE_URL } from './api.config';
 import { asPage, ifMatch, toHttpParams } from './query-params';
@@ -37,9 +37,12 @@ export abstract class BaseApiService<
     return `${this.baseUrl}/${this.resource}`;
   }
 
+  /** The query parameter that carries the search text; a few resources call it `search` instead of `q`. */
+  protected readonly searchParam: string = 'q';
+
   /** The query string of a list call; override where the resource names its filters differently. */
   protected toParams(query: ListQuery<T>): HttpParams {
-    return toHttpParams(query);
+    return toHttpParams(query, this.searchParam);
   }
 
   list(query: ListQuery<T>): Observable<PagedResult<T>> {
@@ -64,14 +67,46 @@ export abstract class BaseApiService<
     return this.http.post<T>(this.url, payload);
   }
 
+  /**
+   * The API replaces a record with PUT, while screens send only what changed. So the current record is read, the changes are laid
+   * over it, and the whole is sent with the caller's `version` as `If-Match` (a stale version is refused with 412, never overwritten).
+   */
   update(id: string, payload: TUpdate): Observable<T> {
-    const { version, ...body } = payload as { readonly version: number };
-    return this.http.put<T>(`${this.url}/${encodeURIComponent(id)}`, body, { headers: ifMatch(version) });
+    const { version, ...changes } = payload as { readonly version: number };
+    return this.getById(id).pipe(
+      switchMap((current) =>
+        this.http.put<T>(`${this.url}/${encodeURIComponent(id)}`, this.toUpdateBody({ ...current, ...changes } as T), { headers: ifMatch(version ?? current.version) }),
+      ),
+    );
+  }
+
+  /** The PUT body for a merged record; override where the API's names or shape differ from the entity's. */
+  protected toUpdateBody(merged: T): unknown {
+    return merged;
+  }
+
+  /**
+   * One screen edit that the API splits into several calls (a record's fields, its children, its activation…). Each call moves the
+   * record's version, so they run in order and each one carries the version the call before it produced (the `ETag` of its answer).
+   */
+  protected sequence(id: string, version: number, steps: readonly SequenceStep[]): Observable<T> {
+    let current = version;
+    return concat(
+      ...steps.map((step) =>
+        defer(() => {
+          const url = `${this.url}/${encodeURIComponent(id)}${step.path}`;
+          const options = { headers: ifMatch(current), observe: 'response' as const };
+          const call = step.method === 'PUT' ? this.http.put<unknown>(url, step.body, options) : this.http.post<unknown>(url, step.body, options);
+          return call.pipe(tap((r: HttpResponse<unknown>) => (current = Number(r.headers.get('ETag')?.replaceAll('"', '') ?? current))));
+        }),
+      ),
+    ).pipe(last(), switchMap(() => this.getById(id)));
   }
 
   /** Logical delete / archive (SRS never hard-deletes records with history). */
   remove(id: string, version?: number): Observable<void> {
-    return this.http.delete<void>(`${this.url}/${encodeURIComponent(id)}`, version === undefined ? {} : { headers: ifMatch(version) });
+    const call = (v: number) => this.http.delete<void>(`${this.url}/${encodeURIComponent(id)}`, { headers: ifMatch(v) });
+    return version === undefined ? this.getById(id).pipe(switchMap((current) => call(current.version))) : call(version);
   }
 
   /** POST to a sub-action of one record, e.g. `work-items/42/transition`. A `version` in the body goes in `If-Match` instead. */
@@ -83,4 +118,11 @@ export abstract class BaseApiService<
       version === undefined ? {} : { headers: ifMatch(version) },
     );
   }
+}
+
+/** One call of a multi-call edit (see `BaseApiService.sequence`); `path` is relative to the record, e.g. `/fields`. */
+export interface SequenceStep {
+  readonly method: 'PUT' | 'POST';
+  readonly path: string;
+  readonly body: unknown;
 }

@@ -1,7 +1,6 @@
 import { computed, Directive, inject } from '@angular/core';
 import { rxResource } from '@core/state/safe-resource';
 import { BaseApiService } from '@core/api/base-api.service';
-import { AuthSession } from '@core/auth/auth.models';
 import { AuthService } from '@core/auth/auth.service';
 import { Entity } from '@core/models/entity.model';
 
@@ -20,8 +19,9 @@ export abstract class LookupStore<T extends Entity> {
    * Keyed on the session: lookups are visibility-filtered per user, so they are dropped on logout
    * and re-fetched on login or when grants are refreshed — never shown to the next user.
    */
-  private readonly resource = rxResource<readonly T[], AuthSession | undefined>({
-    params: () => this.auth.session() ?? undefined,
+  private readonly resource = rxResource<readonly T[], string | undefined>({
+    // Keyed by who is signed in, not by the session object: a silent token renewal must not reload every lookup.
+    params: () => this.auth.user()?.id,
     stream: () => this.api.all(),
     defaultValue: [],
   });

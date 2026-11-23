@@ -1,3 +1,4 @@
+import { environment } from '@env/environment';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { rxResource } from '@core/state/safe-resource';
 import { FormsModule } from '@angular/forms';
@@ -117,6 +118,7 @@ export class ApprovalDetail {
   }
 
   protected readonly canReassign = computed(() => {
+    if (!environment.features.approverReassign) return false;
     const r = this.request();
     return !!r && r.status === 'pending-approval' && this.auth.can('approvals.configure', r.projectId);
   });

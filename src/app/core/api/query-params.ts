@@ -3,17 +3,17 @@ import { ListQuery, PagedResult } from '@core/models/entity.model';
 
 /**
  * Serialises a typed `ListQuery<T>` into the query string the API reads:
- * `page`, `pageSize`, `search`, `sort=<field>` with `descending=true`, and every filter as a plain parameter (`statusId=…`,
+ * `page`, `pageSize`, the search text (`q`, or the name a resource uses), `sort=<field>` with `desc=true`, and every filter as a plain parameter (`statusId=…`,
  * an array becomes a comma list).
  */
-export function toHttpParams<T>(query: ListQuery<T>): HttpParams {
+export function toHttpParams<T>(query: ListQuery<T>, searchParam = 'q'): HttpParams {
   let params = new HttpParams().set('page', query.page).set('pageSize', query.pageSize);
   if (query.search?.trim()) {
-    params = params.set('search', query.search.trim());
+    params = params.set(searchParam, query.search.trim());
   }
   if (query.sort) {
     params = params.set('sort', query.sort.field);
-    if (query.sort.direction === 'desc') params = params.set('descending', true);
+    if (query.sort.direction === 'desc') params = params.set('desc', true);
   }
   for (const [field, value] of Object.entries(query.filters ?? {})) {
     if (value === undefined || value === null || value === '') continue;
