@@ -23,7 +23,6 @@ import { RoleLookup, UserLookup } from '@domain/users/user.api';
 import { WorkItemTypeLookup } from '@domain/work-items/work-item.api';
 import { PRIORITY_LABELS, Priority } from '@domain/work-items/work-item.models';
 import { ApprovalStatusBadge } from '@shared/domain-ui/domain-ui';
-import { CommentsPanel } from '@shared/domain-ui/comments-panel';
 import { AppDatePipe, UserNamePipe } from '@shared/pipes/pipes';
 import { Avatar } from '@shared/ui/avatar/avatar';
 import { Badge } from '@shared/ui/badge/badge';
@@ -74,7 +73,7 @@ const STATE_LABELS: Record<StageState, string> = { done: 'تم', active: 'الح
 /** Approval request detail: stage stepper, frozen snapshot, proposed changes, decision panel (FR-APR-03..13). */
 @Component({
   selector: 'app-approval-detail',
-  imports: [FormsModule, RouterLink, PageHeader, ApprovalStatusBadge, EmptyState, ErrorState, Skeleton, Badge, Avatar, Icon, CommentsPanel, AppDatePipe, UserNamePipe],
+  imports: [FormsModule, RouterLink, PageHeader, ApprovalStatusBadge, EmptyState, ErrorState, Skeleton, Badge, Avatar, Icon, AppDatePipe, UserNamePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './approval-detail.html',
   styleUrl: './approval-detail.scss',
