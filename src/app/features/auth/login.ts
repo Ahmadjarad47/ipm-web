@@ -67,7 +67,7 @@ export class Login {
     this.submitting.set(true);
     this.error.set(null);
     this.auth.login(this.form.getRawValue()).subscribe({
-      next: () => void this.router.navigateByUrl(this.preferences.prefs().landingPage),
+      next: (session) => void this.router.navigateByUrl(session.mustChangePassword ? '/change-password' : this.preferences.prefs().landingPage),
       error: (e: ApiError) => {
         this.error.set(e.message);
         this.submitting.set(false);

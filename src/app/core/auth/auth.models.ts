@@ -11,6 +11,8 @@ export interface AuthSession {
   readonly projectPermissions: Readonly<Record<string, readonly PermissionKey[]>>;
   /** Explicit denies always win over grants. */
   readonly denied: readonly PermissionKey[];
+  /** The first password was set by an administrator (spec 01): the user must change it before anything else. */
+  readonly mustChangePassword?: boolean;
 }
 
 export interface SessionUser {

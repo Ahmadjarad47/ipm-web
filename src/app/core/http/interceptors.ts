@@ -1,11 +1,15 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
+import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '@core/auth/auth.service';
 import { ApiError, ApiErrorCode } from '@core/models/api-error.model';
 import { ToastService } from '@core/notifications/toast.service';
+import { readProblem } from './problem';
 
 export const CORRELATION_HEADER = 'X-Correlation-Id';
+
+/** Calls that must never trigger a silent refresh or a forced logout of their own. */
+const AUTH_PATH = /\/auth\/(login|logout|refresh)$/;
 
 /** Tags every request so client errors can be matched with server logs (NFR-11). */
 export const correlationIdInterceptor: HttpInterceptorFn = (req, next) =>
@@ -13,7 +17,26 @@ export const correlationIdInterceptor: HttpInterceptorFn = (req, next) =>
 
 export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
   const token = inject(AuthService).token();
-  return next(token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req);
+  // An explicit Authorization header (used while a session is being built) wins.
+  return next(token && !req.headers.has('Authorization') ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req);
+};
+
+/**
+ * One silent refresh and one retry when the access token expired (401). The refresh token travels as an HttpOnly cookie,
+ * so no secret is ever kept in script-reachable storage. Sits next to the server, below `errorInterceptor`, so a
+ * failed refresh is what that interceptor turns into a logout.
+ */
+export const refreshInterceptor: HttpInterceptorFn = (req, next) => {
+  const auth = inject(AuthService);
+  if (AUTH_PATH.test(req.url)) return next(req);
+  return next(req).pipe(
+    catchError((error: unknown) => {
+      if (!(error instanceof HttpErrorResponse) || error.status !== 401 || !auth.isAuthenticated()) return throwError(() => error);
+      return auth.refresh().pipe(
+        switchMap((token) => (token ? next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })) : throwError(() => error))),
+      );
+    }),
+  );
 };
 
 const CODE_BY_STATUS: Record<number, ApiErrorCode> = {
@@ -24,6 +47,7 @@ const CODE_BY_STATUS: Record<number, ApiErrorCode> = {
   403: 'forbidden',
   404: 'not_found',
   409: 'conflict',
+  412: 'conflict', // stale If-Match: someone else saved first
   422: 'rule_violation',
 };
 
@@ -49,35 +73,24 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const toast = inject(ToastService);
   const silent = req.headers.has('X-Silent-Error');
-
   const outgoing = silent ? req.clone({ headers: req.headers.delete('X-Silent-Error') }) : req;
-
   return next(outgoing).pipe(
     catchError((res: unknown) => {
       if (!(res instanceof HttpErrorResponse)) return throwError(() => res);
-
-      const body = (res.error ?? {}) as Partial<ApiError>;
-      const bodyCode = (res.error as { code?: string } | null)?.code;
-      // 401 bodies say why the session ended (FR-AUTH-06); everything else maps by status.
-      const code: ApiErrorCode =
-        res.status === 401 && (bodyCode === 'session_expired' || bodyCode === 'account_disabled')
-          ? bodyCode
-          : (CODE_BY_STATUS[res.status] ?? 'server');
+      const problem = readProblem(res.error);
+      const code: ApiErrorCode = CODE_BY_STATUS[res.status] ?? 'server';
       const error: ApiError = {
         status: res.status,
         code,
         // Server messages are shown only for business-rule errors; never raw server internals.
-        message: code === 'server' ? FALLBACK_MESSAGE.server : (body.message ?? FALLBACK_MESSAGE[code]),
+        message: code === 'server' ? FALLBACK_MESSAGE.server : (problem.message ?? FALLBACK_MESSAGE[code]),
         correlationId: req.headers.get(CORRELATION_HEADER) ?? undefined,
-        details: body.details,
+        details: problem.details,
       };
-
-      const forced = code === 'session_expired' || code === 'account_disabled';
-      const authCall = req.url.endsWith('/auth/login') || req.url.endsWith('/auth/logout');
-      if (forced && !authCall) auth.logout(true, { code, message: error.message });
-      else if (code === 'unauthorized' && !authCall) auth.logout();
-      // The login screen explains a forced logout, so no toast on top of it.
-      if (!silent && !(forced && !authCall)) toast.error(error.message);
+      const authCall = AUTH_PATH.test(req.url);
+      // A 401 that survived the silent refresh means the session is over.
+      if (code === 'unauthorized' && !authCall) auth.logout(true, { code: 'session_expired', message: FALLBACK_MESSAGE.session_expired });
+      if (!silent && !(code === 'unauthorized' && !authCall)) toast.error(error.message);
       return throwError(() => error);
     }),
   );

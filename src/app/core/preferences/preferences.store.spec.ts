@@ -3,25 +3,22 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { AuthService } from '@core/auth/auth.service';
 import { PreferencesStore } from './preferences.store';
 
 function setup(userId: string | null): PreferencesStore {
-  sessionStorage.clear();
-  if (userId) {
-    sessionStorage.setItem(
-      'ipm.session',
-      JSON.stringify({
-        token: 't',
-        expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
-        user: { id: userId, name: 'U', email: 'u@x', title: '' },
-        systemPermissions: [],
-        projectPermissions: {},
-        denied: [],
-      }),
-    );
-  }
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])] });
+  if (userId) {
+    TestBed.inject(AuthService).establish({
+      token: 't',
+      expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+      user: { id: userId, name: 'U', email: 'u@x', title: '' },
+      systemPermissions: [],
+      projectPermissions: {},
+      denied: [],
+    });
+  }
   return TestBed.inject(PreferencesStore);
 }
 

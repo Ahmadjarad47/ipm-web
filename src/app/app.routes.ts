@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard, permissionGuard, ROUTE_PERMISSIONS } from '@core/auth/auth.guards';
+import { authGuard, guestGuard, passwordChangeGuard, permissionGuard, ROUTE_PERMISSIONS } from '@core/auth/auth.guards';
 import { PermissionKey } from '@core/auth/permissions';
 import { ROUTE_CRUMBS } from '@core/layout/route-crumbs';
 import { Shell } from '@core/layout/shell';
@@ -21,6 +21,12 @@ const crumbs = (...trail: readonly (string | { label: string; link: string })[])
 
 /** Every feature is lazy-loaded and guarded; screens re-check project-scoped permissions themselves. */
 export const routes: Routes = [
+  {
+    path: 'change-password',
+    canMatch: [passwordChangeGuard],
+    title: 'كلمة المرور',
+    loadComponent: () => import('@features/auth/change-password').then((m) => m.ChangePassword),
+  },
   {
     path: 'login',
     canMatch: [guestGuard],
