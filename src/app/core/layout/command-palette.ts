@@ -24,8 +24,8 @@ interface PaletteItem {
   readonly run?: () => void;
 }
 
-const KIND_ICON: Record<SearchHit['kind'], string> = { project: 'folder', workItem: 'list', approval: 'approval', user: 'user' };
-const KIND_GROUP: Record<SearchHit['kind'], string> = { project: 'المشاريع', workItem: 'عناصر العمل', approval: 'الموافقات', user: 'المستخدمون' };
+const KIND_ICON: Record<SearchHit['kind'], string> = { project: 'folder', 'work-item': 'list', approval: 'approval', user: 'user' };
+const KIND_GROUP: Record<SearchHit['kind'], string> = { project: 'المشاريع', 'work-item': 'عناصر العمل', approval: 'الموافقات', user: 'المستخدمون' };
 
 /**
  * Global search & navigation (Ctrl/⌘+K). Searches everything the user may see; with an empty
@@ -115,7 +115,7 @@ export class CommandPalette {
 
   private readonly recentItems = computed<PaletteItem[]>(() =>
     this.recent.items().map((r) => ({
-      key: `recent-${r.kind}-${r.id}`, icon: KIND_ICON[r.kind === 'approval' ? 'approval' : r.kind], title: r.title, subtitle: '', code: r.code ?? null, link: r.link, typeId: r.typeId, group: 'الأخيرة',
+      key: `recent-${r.kind}-${r.id}`, icon: KIND_ICON[r.kind === 'workItem' ? 'work-item' : r.kind], title: r.title, subtitle: '', code: r.code ?? null, link: r.link, typeId: r.typeId, group: 'الأخيرة',
     })),
   );
 

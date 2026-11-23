@@ -84,7 +84,7 @@ export function filtersToQuery(f: ReportFilters): Record<string, string | null> 
 }
 
 export function isClosedCategory(category: StatusCategory | undefined): boolean {
-  return category === 'Done' || category === 'Cancelled';
+  return category === 'done' || category === 'cancelled';
 }
 
 /** Neutralises spreadsheet formulas (CSV injection) and quotes cells that need it. */

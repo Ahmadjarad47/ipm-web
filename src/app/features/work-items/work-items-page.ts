@@ -71,7 +71,7 @@ export class WorkItemsPage {
   protected readonly view = signal<ViewMode>(loadView());
 
   protected readonly workItemStatuses = computed(() =>
-    this.statusLookup.items().filter((s) => s.scope === 'workItem' && s.active).sort((a, b) => a.order - b.order),
+    this.statusLookup.items().filter((s) => s.scope === 'work-item' && s.active).sort((a, b) => a.order - b.order),
   );
   protected readonly activeUsers = computed(() => this.users.items().filter((u) => u.active));
 

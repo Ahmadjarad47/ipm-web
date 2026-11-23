@@ -20,7 +20,7 @@ export interface StatusFormData {
 
 const STATUS_CONTROLS: readonly string[] = ['key', 'name', 'color', 'category', 'scope'];
 
-export const SCOPE_LABELS: Record<StatusScope, string> = { project: 'حالات المشاريع', workItem: 'حالات عناصر العمل' };
+export const SCOPE_LABELS: Record<StatusScope, string> = { project: 'حالات المشاريع', 'work-item': 'حالات عناصر العمل' };
 
 @Component({
   selector: 'app-status-form-dialog',
@@ -62,7 +62,7 @@ export const SCOPE_LABELS: Record<StatusScope, string> = { project: 'حالات 
           <label for="s-scope">النطاق <app-help-tip [text]="scopeHelp" /></label>
           <select id="s-scope" class="select" formControlName="scope">
             <option value="project">{{ scopeLabels.project }}</option>
-            <option value="workItem">{{ scopeLabels.workItem }}</option>
+            <option value="work-item">{{ scopeLabels['work-item'] }}</option>
           </select>
           @if (editing) {
             <span class="hint">لا يتغير بعد الإنشاء.</span>
@@ -120,7 +120,7 @@ export class StatusFormDialog {
     name: this.fb.control(this.editing?.name ?? '', Validators.required),
     description: this.fb.control(this.editing?.description ?? ''),
     color: this.fb.control(this.editing?.color ?? '#2f6fb5'),
-    category: this.fb.control<StatusCategory>(this.editing?.category ?? 'Active'),
+    category: this.fb.control<StatusCategory>(this.editing?.category ?? 'active'),
     scope: this.fb.control<StatusScope>({ value: this.editing?.scope ?? this.data.scope, disabled: !!this.editing }),
     order: this.fb.control(this.editing?.order ?? this.lookup.items().length + 1),
   });

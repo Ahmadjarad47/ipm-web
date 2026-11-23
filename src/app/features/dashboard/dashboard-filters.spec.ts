@@ -14,12 +14,12 @@ describe('dashboard filters', () => {
   });
 
   it('builds the API filter and omits empty values', () => {
-    const f = toDashboardFilter({ ...DEFAULT_DASHBOARD_FILTERS, projectId: 'p1', category: 'Active' }, today);
-    expect(f).toEqual({ projectId: 'p1', statusCategory: 'Active', assigneeId: undefined });
+    const f = toDashboardFilter({ ...DEFAULT_DASHBOARD_FILTERS, projectId: 'p1', category: 'active' }, today);
+    expect(f).toEqual({ projectId: 'p1', statusCategory: 'active', assigneeId: undefined });
   });
 
   it('round-trips through the URL and ignores junk', () => {
-    const f = { projectId: 'p1', period: 'custom' as const, from: '2026-01-01', to: '2026-02-01', category: 'Done' as const, assigneeId: 'u2' };
+    const f = { projectId: 'p1', period: 'custom' as const, from: '2026-01-01', to: '2026-02-01', category: 'done' as const, assigneeId: 'u2' };
     const q = dashboardFiltersToQuery(f);
     expect(dashboardFiltersFromQuery((k) => q[k] ?? null)).toEqual(f);
     expect(dashboardFiltersToQuery(DEFAULT_DASHBOARD_FILTERS)).toEqual({ project: null, period: null, from: null, to: null, category: null, assignee: null });

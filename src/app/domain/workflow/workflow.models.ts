@@ -2,19 +2,19 @@ import { PermissionKey } from '@core/auth/permissions';
 import { Entity } from '@core/models/entity.model';
 
 /** Stable reporting categories; display names may change freely (FR-WF-03). */
-export type StatusCategory = 'NotStarted' | 'Active' | 'Blocked' | 'Done' | 'Cancelled';
+export type StatusCategory = 'not-started' | 'active' | 'blocked' | 'done' | 'cancelled';
 
-export const STATUS_CATEGORIES: readonly StatusCategory[] = ['NotStarted', 'Active', 'Blocked', 'Done', 'Cancelled'];
+export const STATUS_CATEGORIES: readonly StatusCategory[] = ['not-started', 'active', 'blocked', 'done', 'cancelled'];
 
 export const STATUS_CATEGORY_LABELS: Record<StatusCategory, string> = {
-  NotStarted: 'لم يبدأ',
-  Active: 'نشط',
-  Blocked: 'محجوب',
-  Done: 'منجز',
-  Cancelled: 'ملغى',
+  'not-started': 'لم يبدأ',
+  active: 'نشط',
+  blocked: 'محجوب',
+  done: 'منجز',
+  cancelled: 'ملغى',
 };
 
-export type StatusScope = 'project' | 'workItem';
+export type StatusScope = 'project' | 'work-item';
 
 export interface Status extends Entity {
   /** Immutable internal key — history and integrations reference this, never the name. */

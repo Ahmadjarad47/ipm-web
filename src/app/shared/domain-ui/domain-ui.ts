@@ -59,12 +59,11 @@ export class PriorityBadge {
 }
 
 const APPROVAL_TONES: Record<ApprovalStatus, BadgeTone> = {
-  Draft: 'neutral',
-  PendingApproval: 'gold',
-  Approved: 'success',
-  Rejected: 'danger',
-  Returned: 'warning',
-  Superseded: 'neutral',
+  'pending-approval': 'gold',
+  approved: 'success',
+  rejected: 'danger',
+  returned: 'warning',
+  superseded: 'neutral',
 };
 
 @Component({

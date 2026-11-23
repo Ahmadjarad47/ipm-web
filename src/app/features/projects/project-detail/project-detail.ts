@@ -1,3 +1,4 @@
+import { environment } from '@env/environment';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { rxResource } from '@core/state/safe-resource';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -112,7 +113,7 @@ export class ProjectDetail {
   /** Tab counts: attachments and pending approvals are fetched lazily and refreshed with the project. */
   private readonly attachments = rxResource<readonly Attachment[], string | null>({
     params: () => (this.auth.can('files.download', this.id()) ? this.id() : null),
-    stream: ({ params }) => (params ? this.attachmentsApi.forSubject('project', params) : of([])),
+    stream: ({ params }) => (params && environment.features.attachments ? this.attachmentsApi.forSubject('project', params) : of([])),
     defaultValue: [],
   });
   private readonly approvals = rxResource<readonly ApprovalRequest[], { id: string; key: number }>({
@@ -125,11 +126,11 @@ export class ProjectDetail {
     const p = this.project();
     const id = this.id();
     const attachmentCount = this.attachments.hasValue() ? this.attachments.value().length : null;
-    const pending = this.approvals.hasValue() ? this.approvals.value().filter((r) => r.status === 'PendingApproval').length : null;
+    const pending = this.approvals.hasValue() ? this.approvals.value().filter((r) => r.status === 'pending-approval').length : null;
     const tabs: TabItem<DetailTab>[] = [{ key: 'items', label: 'عناصر العمل', count: p?.workItemCount ?? null }];
     if (this.auth.can('workitem.relations.view', id)) tabs.push({ key: 'graph', label: 'المخطط' });
     tabs.push({ key: 'members', label: 'الأعضاء', count: p?.members.length ?? null });
-    if (this.auth.can('files.download', id)) tabs.push({ key: 'attachments', label: 'المرفقات', count: attachmentCount });
+    if (environment.features.attachments && this.auth.can('files.download', id)) tabs.push({ key: 'attachments', label: 'المرفقات', count: attachmentCount });
     if (this.auth.can('git.view', id)) tabs.push({ key: 'git', label: 'Git' });
     tabs.push(
       { key: 'approvals', label: 'الموافقات', count: pending },

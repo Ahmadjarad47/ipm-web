@@ -10,7 +10,6 @@ import { GitEventsApi } from '@domain/activity/activity.api';
 import { GitEvent } from '@domain/activity/activity.models';
 import { ProjectsApi } from '@domain/projects/project.api';
 import { ProjectSummary, Repository } from '@domain/projects/project.models';
-import { environment } from '@env/environment';
 import { AppDatePipe, RelativeTimePipe } from '@shared/pipes/pipes';
 import { Badge, BadgeTone } from '@shared/ui/badge/badge';
 import { EmptyState } from '@shared/ui/empty-state/empty-state';
@@ -199,7 +198,8 @@ export class ProjectGitTab {
   private readonly syncErrors = signal<Readonly<Record<string, string>>>({});
   protected readonly refreshKey = signal(0);
   /** Webhook simulator is a demo-only tool (mock backend). */
-  protected readonly simulatorEnabled = environment.useMockBackend;
+  /** The webhook simulator existed only in the in-app mock; real deliveries come from the Git server. */
+  protected readonly simulatorEnabled = false;
   protected readonly providerLabel = providerLabel;
 
   protected readonly events = rxResource<PagedResult<GitEvent>, string>({

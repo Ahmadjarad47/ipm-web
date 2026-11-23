@@ -41,9 +41,9 @@ export function joinAr(items: readonly string[], conjunction = 'و'): string {
 }
 
 function subjectNoun(ctx: RuleSummaryContext, rule: ApprovalRule): string {
-  if (ctx.event === 'project.approve' || ctx.event === 'project.close') return 'المشاريع';
+  if (ctx.event === 'project-approve' || ctx.event === 'project-close') return 'المشاريع';
   if (rule.workItemTypeIds?.length) return joinAr(rule.workItemTypeIds.map(ctx.typeName));
-  return ctx.event === 'sensitive.change' ? 'العناصر ذات الحقول المحمية' : 'عناصر العمل';
+  return ctx.event === 'sensitive-change' ? 'العناصر ذات الحقول المحمية' : 'عناصر العمل';
 }
 
 function conditionText(c: RuleCondition, ctx: RuleSummaryContext): string {
@@ -54,7 +54,7 @@ function conditionText(c: RuleCondition, ctx: RuleSummaryContext): string {
 export function summarizeRule(rule: ApprovalRule | undefined, ctx: RuleSummaryContext): string {
   const r = rule ?? {};
   const parts: string[] = [subjectNoun(ctx, r)];
-  const isWork = ctx.event === 'workItem.approve' || ctx.event === 'sensitive.change';
+  const isWork = ctx.event === 'work-item-approve' || ctx.event === 'sensitive-change';
   if (isWork && r.priorities?.length) {
     parts.push(r.priorities.length === 1 ? `${ctx.priorityLabel(r.priorities[0])} الأولوية` : `ذات الأولوية ${joinAr(r.priorities.map(ctx.priorityLabel), 'أو ')}`);
   }

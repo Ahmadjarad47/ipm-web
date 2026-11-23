@@ -44,7 +44,7 @@ export class ApprovalRequestsApi extends BaseApiService<ApprovalRequest, SubmitA
 
   /** Approve many pending requests at once; reject/return are never bulk (comment is mandatory). */
   bulkApprove(ids: readonly string[], comment?: string, revisions?: Readonly<Record<string, number>>): Observable<BulkDecideResult[]> {
-    return this.http.post<BulkDecideResult[]>(`${this.url}/bulk-decide`, { ids, decision: 'Approve', comment, revisions });
+    return this.http.post<BulkDecideResult[]>(`${this.url}/bulk-decide`, { ids, decision: 'approve', comment, revisions });
   }
 
   /** FR-APR-11: substitute the active stage's approver (absence), with a mandatory reason; needs `approvals.configure`. */

@@ -88,7 +88,7 @@ export class StatusesTab {
   protected readonly categoryLabels = STATUS_CATEGORY_LABELS;
 
   protected readonly groups = computed<readonly StatusGroup[]>(() =>
-    (['project', 'workItem'] as const).map((scope) => ({
+    (['project', 'work-item'] as const).map((scope) => ({
       scope,
       title: SCOPE_LABELS[scope],
       rows: this.lookup

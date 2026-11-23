@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '@core/auth/auth.service';
 import { ApiError } from '@core/models/api-error.model';
 import { PreferencesStore } from '@core/preferences/preferences.store';
-import { environment } from '@env/environment';
 
 interface DemoAccount {
   readonly username: string;
@@ -30,7 +29,7 @@ export class Login {
   });
   protected readonly submitting = signal(false);
   protected readonly error = signal<string | null>(null);
-  protected readonly isDemo = environment.useMockBackend;
+  protected readonly isDemo = false;
   protected readonly showPassword = signal(false);
   protected readonly capsLock = signal(false);
   protected readonly forgotOpen = signal(false);

@@ -21,7 +21,7 @@ function todayIso(): string {
 export function isItemOverdue(item: WorkItem, statuses: StatusLookup): boolean {
   if (!item.dueDate) return false;
   const category = statuses.get(item.statusId)?.category;
-  if (category === 'Done' || category === 'Cancelled') return false;
+  if (category === 'done' || category === 'cancelled') return false;
   return item.dueDate.slice(0, 10) < todayIso();
 }
 

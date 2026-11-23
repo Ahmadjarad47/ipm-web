@@ -30,7 +30,7 @@
     <div class="banner banner--warn" role="alert"><app-icon name="alert" /><span>{{ m }}</span></div>
   }
 
-  @if (r.status === 'Superseded') {
+  @if (r.status === 'superseded') {
     <div class="banner banner--warn" role="alert">
       <app-icon name="alert" />
       <span>
@@ -74,7 +74,7 @@
                 <button type="button" class="btn btn--outline btn--sm reassign" (click)="reassign(s.stage)">إعادة تعيين المعتمد</button>
               }
               @if (s.decision; as d) {
-                <div class="decision" [class.bad]="d.decision !== 'Approve'">
+                <div class="decision" [class.bad]="d.decision !== 'approve'">
                   <strong>{{ decisionLabel(d.decision) }}</strong> · {{ d.deciderId | userName }} · {{ d.at | appDate: true }}
                   @if (d.onBehalfOf) {
                     <app-badge tone="info">نيابةً عن {{ d.onBehalfOf | userName }}</app-badge>
@@ -166,18 +166,15 @@
           </div>
           <div class="row">
             <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="approve()">موافقة</button>
-            <button type="button" class="btn btn--danger" [disabled]="busy()" (click)="openDecision('Reject')">رفض…</button>
-            <button type="button" class="btn btn--outline" [disabled]="busy()" (click)="openDecision('Return')">إرجاع للتعديل…</button>
+            <button type="button" class="btn btn--danger" [disabled]="busy()" (click)="openDecision('reject')">رفض…</button>
+            <button type="button" class="btn btn--outline" [disabled]="busy()" (click)="openDecision('return')">إرجاع للتعديل…</button>
           </div>
         </section>
       }
     </div>
   </div>
 
-  <section class="card card-body" aria-labelledby="cmt-title">
-    <h2 class="section-title" id="cmt-title">التعليقات</h2>
-    <app-comments-panel subjectType="approval" [subjectId]="r.id" [projectId]="r.projectId" />
-  </section>
+  <!-- Comments on approval requests are not offered by the API (comments belong to projects and work items). -->
 } @else if (notFound()) {
   <app-empty-state icon="alert" title="الطلب غير موجود" text="قد يكون محذوفًا أو لا تملك صلاحية الاطلاع عليه.">
     <a class="btn btn--outline" routerLink="/approvals">العودة إلى مركز الموافقات</a>

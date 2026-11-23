@@ -29,11 +29,11 @@ import {
 
 /** Stable system categories map to semantic design tokens (status display colours stay admin-configured). */
 const CATEGORY_COLORS: Record<StatusCategory, string> = {
-  NotStarted: 'var(--c-neutral)',
-  Active: 'var(--c-success)',
-  Blocked: 'var(--c-warning)',
-  Done: 'var(--c-info)',
-  Cancelled: 'var(--c-danger)',
+  'not-started': 'var(--c-neutral)',
+  active: 'var(--c-success)',
+  blocked: 'var(--c-warning)',
+  done: 'var(--c-info)',
+  cancelled: 'var(--c-danger)',
 };
 
 const PERIOD_HELP =

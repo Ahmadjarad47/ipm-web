@@ -13,8 +13,6 @@ import { AppErrorHandler } from '@core/layout/app-error-handler';
 import { AppTitleStrategy } from '@core/layout/title-strategy';
 import { AuthService } from '@core/auth/auth.service';
 import { authTokenInterceptor, correlationIdInterceptor, errorInterceptor, refreshInterceptor } from '@core/http/interceptors';
-import { environment } from '@env/environment';
-import { mockBackendInterceptor } from '@mock/mock-backend.interceptor';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -41,8 +39,6 @@ export const appConfig: ApplicationConfig = {
         errorInterceptor,
         // Below the error interceptor: a 401 is renewed once here, and only a failed renewal reaches the logout above.
         refreshInterceptor,
-        // Must stay last: it answers requests instead of forwarding them.
-        ...(environment.useMockBackend ? [mockBackendInterceptor] : []),
       ]),
     ),
   ],

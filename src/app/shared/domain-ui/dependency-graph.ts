@@ -34,7 +34,7 @@ const NODE_H = 62;
 const COL_GAP = 84;
 const ROW_GAP = 20;
 const PAD = 24;
-const OPEN = (category: string | undefined) => category !== 'Done' && category !== 'Cancelled';
+const OPEN = (category: string | undefined) => category !== 'done' && category !== 'cancelled';
 
 /**
  * Visual dependency / hierarchy diagram for work items (FR-REL-09, FR-UI-10).

@@ -13,7 +13,7 @@ describe('report filters', () => {
   });
 
   it('round-trips URL params', () => {
-    const f = { projectId: 'p1', period: 'custom' as const, from: '2026-01-01', to: '2026-02-01', category: 'Active' as const, assigneeId: 'u1' };
+    const f = { projectId: 'p1', period: 'custom' as const, from: '2026-01-01', to: '2026-02-01', category: 'active' as const, assigneeId: 'u1' };
     const q = filtersToQuery(f);
     expect(filtersFromQuery((k) => q[k] ?? null)).toEqual(f);
     expect(filtersFromQuery(() => null)).toEqual(DEFAULT_FILTERS);

@@ -212,7 +212,7 @@ export class WorkItemEditDialog {
       proposedChanges[field] = Array.isArray(value) ? value.join(',') : (value as string | number | null | undefined) ?? null;
     }
     this.saving.set(true);
-    this.approvals.create({ templateId: need.templateId, subjectType: 'workItem', subjectId: this.item.id, proposedChanges }).subscribe({
+    this.approvals.create({ templateId: need.templateId, subjectType: 'work-item', subjectId: this.item.id, proposedChanges }).subscribe({
       next: () => {
         this.toast.success('تم إرسال طلب التعديل الحساس');
         this.ref.close(this.item);

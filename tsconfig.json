@@ -25,9 +25,6 @@
       "@features/*": [
         "./src/app/features/*"
       ],
-      "@mock/*": [
-        "./src/app/mock/*"
-      ],
       "@env/*": [
         "./src/environments/*"
       ]

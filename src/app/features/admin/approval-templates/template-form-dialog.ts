@@ -50,17 +50,17 @@ export const PROTECTABLE_FIELDS: readonly ProtectableField[] = [
   { key: 'startDate', label: 'تاريخ البداية', subject: 'project' },
   { key: 'endDate', label: 'تاريخ النهاية', subject: 'project' },
   { key: 'ownerId', label: 'المالك', subject: 'project' },
-  { key: 'title', label: 'العنوان', subject: 'workItem' },
-  { key: 'description', label: 'الوصف', subject: 'workItem' },
-  { key: 'dueDate', label: 'تاريخ الاستحقاق', subject: 'workItem' },
-  { key: 'startDate', label: 'تاريخ البداية', subject: 'workItem' },
-  { key: 'parentId', label: 'العنصر الأب', subject: 'workItem' },
-  { key: 'priority', label: 'الأولوية', subject: 'workItem' },
-  { key: 'typeId', label: 'النوع', subject: 'workItem' },
-  { key: 'assigneeIds', label: 'المكلَّفون', subject: 'workItem' },
+  { key: 'title', label: 'العنوان', subject: 'work-item' },
+  { key: 'description', label: 'الوصف', subject: 'work-item' },
+  { key: 'dueDate', label: 'تاريخ الاستحقاق', subject: 'work-item' },
+  { key: 'startDate', label: 'تاريخ البداية', subject: 'work-item' },
+  { key: 'parentId', label: 'العنصر الأب', subject: 'work-item' },
+  { key: 'priority', label: 'الأولوية', subject: 'work-item' },
+  { key: 'typeId', label: 'النوع', subject: 'work-item' },
+  { key: 'assigneeIds', label: 'المكلَّفون', subject: 'work-item' },
 ];
 
-const SUBJECT_TITLES: Record<ApprovalSubject, string> = { project: 'حقول المشروع', workItem: 'حقول عنصر العمل' };
+const SUBJECT_TITLES: Record<ApprovalSubject, string> = { project: 'حقول المشروع', 'work-item': 'حقول عنصر العمل' };
 
 type StageForm = FormGroup<{
   name: FormControl<string>;
@@ -130,7 +130,7 @@ const POSITION_SHORT: Record<ApproverPosition, string> = { project_owner: 'ما�
                 </div>
               </div>
             }
-            @if (eventValue() === 'sensitive.change') {
+            @if (eventValue() === 'sensitive-change') {
               <small class="muted">التعديل الحساس يتطلب حقولًا من نوع واحد فقط (مشروع أو عنصر عمل).</small>
             }
             @if (serverErrors()['protectedFields']; as e) {
@@ -250,7 +250,7 @@ export class TemplateFormDialog {
 
   protected readonly form = this.fb.group({
     name: this.fb.control(this.editing?.name ?? '', Validators.required),
-    event: this.fb.control<ApprovalEvent>(this.editing?.event ?? 'project.approve'),
+    event: this.fb.control<ApprovalEvent>(this.editing?.event ?? 'project-approve'),
     active: this.fb.control(this.editing?.active ?? true),
     allowSelfApproval: this.fb.control(this.editing?.allowSelfApproval ?? false),
     stages: this.fb.array<StageForm>(
@@ -268,16 +268,16 @@ export class TemplateFormDialog {
   /** Which kind of subject the template is for (decided by its event, or by the protected fields of a sensitive change). */
   protected readonly subject = computed<ApprovalSubject>(() => {
     const event = this.eventValue();
-    if (event === 'project.approve' || event === 'project.close') return 'project';
-    if (event === 'workItem.approve') return 'workItem';
+    if (event === 'project-approve' || event === 'project-close') return 'project';
+    if (event === 'work-item-approve') return 'work-item';
     const fields = this.protectedFields();
-    const projectOnly = fields.length > 0 && fields.every((f) => PROTECTABLE_FIELDS.some((p) => p.subject === 'project' && p.key === f)) && fields.some((f) => !PROTECTABLE_FIELDS.some((p) => p.subject === 'workItem' && p.key === f));
-    return projectOnly ? 'project' : 'workItem';
+    const projectOnly = fields.length > 0 && fields.every((f) => PROTECTABLE_FIELDS.some((p) => p.subject === 'project' && p.key === f)) && fields.some((f) => !PROTECTABLE_FIELDS.some((p) => p.subject === 'work-item' && p.key === f));
+    return projectOnly ? 'project' : 'work-item';
   });
 
   protected readonly fieldGroups = computed(() => {
     const event = this.eventValue();
-    const subjects: readonly ApprovalSubject[] = event === 'sensitive.change' ? ['workItem', 'project'] : [this.subject()];
+    const subjects: readonly ApprovalSubject[] = event === 'sensitive-change' ? ['work-item', 'project'] : [this.subject()];
     return subjects.map((subject) => ({ subject, title: SUBJECT_TITLES[subject], fields: PROTECTABLE_FIELDS.filter((f) => f.subject === subject) }));
   });
 
@@ -404,7 +404,7 @@ export class TemplateFormDialog {
   /** Drops empty parts so a rule with no restrictions is stored as `{}`. */
   private cleanRule(): ApprovalRule {
     const r = this.rule();
-    const isWork = this.eventValue() === 'workItem.approve' || this.eventValue() === 'sensitive.change';
+    const isWork = this.eventValue() === 'work-item-approve' || this.eventValue() === 'sensitive-change';
     const out: { -readonly [K in keyof ApprovalRule]: ApprovalRule[K] } = {};
     if (isWork && r.workItemTypeIds?.length) out.workItemTypeIds = r.workItemTypeIds;
     if (r.projectIds?.length) out.projectIds = r.projectIds;

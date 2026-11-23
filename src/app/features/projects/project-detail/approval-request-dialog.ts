@@ -44,7 +44,7 @@ export class ApprovalRequestDialog {
   protected readonly serverError = signal('');
   protected readonly proposed = signal<ProposedValues>({});
   protected readonly fieldErrors = signal<Readonly<Record<string, string>>>({});
-  protected readonly sensitive = computed(() => (this.selected()?.event === 'sensitive.change' ? this.selected() : null));
+  protected readonly sensitive = computed(() => (this.selected()?.event === 'sensitive-change' ? this.selected() : null));
   protected readonly canSubmit = computed(() => !!this.selected() && !this.saving() && (!this.sensitive() || Object.keys(this.proposed()).length > 0));
 
   protected submit(): void {

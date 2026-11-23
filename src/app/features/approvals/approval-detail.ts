@@ -118,7 +118,7 @@ export class ApprovalDetail {
 
   protected readonly canReassign = computed(() => {
     const r = this.request();
-    return !!r && r.status === 'PendingApproval' && this.auth.can('approvals.configure', r.projectId);
+    return !!r && r.status === 'pending-approval' && this.auth.can('approvals.configure', r.projectId);
   });
 
   protected readonly busy = signal(false);
@@ -127,15 +127,15 @@ export class ApprovalDetail {
   protected readonly stateLabels = STATE_LABELS;
 
   protected readonly isRequester = computed(() => this.request()?.requesterId === this.auth.user()?.id);
-  protected readonly isPending = computed(() => this.request()?.status === 'PendingApproval');
+  protected readonly isPending = computed(() => this.request()?.status === 'pending-approval');
   protected readonly showDecisionPanel = computed(() => !!this.request()?.canDecide && !this.isRequester());
   protected readonly canRemind = computed(() => {
     const r = this.request();
-    return !!r && r.status === 'PendingApproval' && (this.isRequester() || this.auth.can('approvals.configure', r.projectId));
+    return !!r && r.status === 'pending-approval' && (this.isRequester() || this.auth.can('approvals.configure', r.projectId));
   });
   protected readonly showResubmit = computed(() => {
     const status = this.request()?.status;
-    return this.isRequester() && (status === 'Returned' || status === 'Superseded');
+    return this.isRequester() && (status === 'returned' || status === 'superseded');
   });
 
   protected readonly subjectLink = computed(() => {
@@ -150,7 +150,7 @@ export class ApprovalDetail {
   });
   protected readonly sla = computed(() => {
     const r = this.request();
-    return r ? slaText(r.stageDueAt, r.status === 'PendingApproval') : '';
+    return r ? slaText(r.stageDueAt, r.status === 'pending-approval') : '';
   });
 
   protected readonly stages = computed<readonly StageView[]>(() => {
@@ -161,9 +161,9 @@ export class ApprovalDetail {
       .map((stage) => {
         const decision = [...r.decisions].reverse().find((d) => d.stageOrder === stage.order && d.revision === r.revision) ?? null;
         let state: StageState;
-        if (decision) state = decision.decision === 'Approve' ? 'done' : 'stopped';
-        else if (r.status === 'PendingApproval') state = stage.order === r.currentStage ? 'active' : 'pending';
-        else state = r.status === 'Draft' ? 'pending' : 'stopped';
+        if (decision) state = decision.decision === 'approve' ? 'done' : 'stopped';
+        else if (r.status === 'pending-approval') state = stage.order === r.currentStage ? 'active' : 'pending';
+        else state = 'stopped';
         return { stage, state, decision, ...this.approverView(r, stage) };
       });
   });
@@ -203,10 +203,10 @@ export class ApprovalDetail {
   }
 
   protected approve(): void {
-    this.submitDecision('Approve', this.comment().trim());
+    this.submitDecision('approve', this.comment().trim());
   }
 
-  protected openDecision(decision: 'Reject' | 'Return'): void {
+  protected openDecision(decision: 'reject' | 'return'): void {
     const r = this.request();
     if (!r || this.busy()) return;
     this.dialog
