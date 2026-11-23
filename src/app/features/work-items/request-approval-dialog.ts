@@ -23,9 +23,9 @@ export interface RequestApprovalData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-dialog-shell title="طلب موافقة" [subtitle]="ltr(data.ref)">
-      <app-approval-template-picker subjectType="workItem" [subjectId]="data.itemId" preferredAction="close" [(selected)]="selected" />
+      <app-approval-template-picker subjectType="work-item" [subjectId]="data.itemId" preferredAction="close" [(selected)]="selected" />
       @if (sensitive(); as t) {
-        <app-proposed-changes-editor [fields]="t.protectedFields" subjectType="workItem" [subjectId]="data.itemId" [errors]="fieldErrors()" [(value)]="proposed" />
+        <app-proposed-changes-editor [fields]="t.protectedFields" subjectType="work-item" [subjectId]="data.itemId" [errors]="fieldErrors()" [(value)]="proposed" />
       }
       @if (serverError(); as e) {
         <p class="err" role="alert">{{ e }}</p>
@@ -54,7 +54,7 @@ export class RequestApprovalDialog {
   protected readonly serverError = signal('');
   protected readonly fieldErrors = signal<Readonly<Record<string, string>>>({});
 
-  protected readonly sensitive = computed(() => (this.selected()?.event === 'sensitive.change' ? this.selected() : null));
+  protected readonly sensitive = computed(() => (this.selected()?.event === 'sensitive-change' ? this.selected() : null));
   protected readonly canSubmit = computed(() => !!this.selected() && !this.busy() && (!this.sensitive() || Object.keys(this.proposed()).length > 0));
 
   protected submit(): void {
@@ -64,7 +64,7 @@ export class RequestApprovalDialog {
     this.serverError.set('');
     this.fieldErrors.set({});
     const proposedChanges = this.sensitive() ? this.proposed() : undefined;
-    this.requests.create({ templateId: template.id, subjectType: 'workItem', subjectId: this.data.itemId, ...(proposedChanges ? { proposedChanges } : {}) }).subscribe({
+    this.requests.create({ templateId: template.id, subjectType: 'work-item', subjectId: this.data.itemId, ...(proposedChanges ? { proposedChanges } : {}) }).subscribe({
       next: (r) => this.ref.close(r),
       error: (e: unknown) => {
         this.busy.set(false);

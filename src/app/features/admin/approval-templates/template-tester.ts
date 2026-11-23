@@ -13,10 +13,10 @@ import { ACTION_LABELS, summarizeRule } from './rule-summary';
 const ACTIONS = Object.keys(ACTION_LABELS) as ApprovalAction[];
 
 const DEFAULT_ACTION: Record<ApprovalEvent, ApprovalAction> = {
-  'project.approve': 'activate',
-  'project.close': 'close',
-  'workItem.approve': 'close',
-  'sensitive.change': 'change',
+  'project-approve': 'activate',
+  'project-close': 'close',
+  'work-item-approve': 'close',
+  'sensitive-change': 'change',
 };
 
 /** «اختبر القالب»: asks the server which saved, active template would govern a real project / work item. */
@@ -43,7 +43,7 @@ const DEFAULT_ACTION: Record<ApprovalEvent, ApprovalAction> = {
           }
         </select>
       </div>
-      @if (subject() === 'workItem') {
+      @if (subject() === 'work-item') {
         <div class="field">
           <label for="tt-item">عنصر العمل</label>
           <select id="tt-item" class="select" [ngModel]="workItemId()" (ngModelChange)="workItemId.set($event); result.set(null)" [disabled]="!projectId()">
@@ -99,7 +99,7 @@ export class TemplateTester {
   protected readonly subjectId = computed(() => (this.subject() === 'project' ? this.projectId() : this.workItemId()));
 
   protected readonly items = rxResource<PagedResult<WorkItem>, string | undefined>({
-    params: () => (this.subject() === 'workItem' && this.projectId() ? this.projectId() : undefined),
+    params: () => (this.subject() === 'work-item' && this.projectId() ? this.projectId() : undefined),
     stream: ({ params }) => this.workItems.list({ page: 1, pageSize: 50, filters: { projectId: params as string } }),
     defaultValue: emptyPage<WorkItem>(50),
   });

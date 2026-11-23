@@ -217,7 +217,7 @@ export class FiltersPopover {
 
   protected readonly activeProjects = computed(() => this.projects.items().filter((p) => !p.archived));
   protected readonly activeTypes = computed(() => this.typeLookup.items().filter((t) => t.active));
-  protected readonly statuses = computed(() => this.statusLookup.items().filter((s) => s.scope === 'workItem' && s.active).sort((a, b) => a.order - b.order));
+  protected readonly statuses = computed(() => this.statusLookup.items().filter((s) => s.scope === 'work-item' && s.active).sort((a, b) => a.order - b.order));
   protected readonly activeUsers = computed(() => this.users.items().filter((u) => u.active));
   protected readonly activeCount = computed(() =>
     Object.values(this.filters()).filter((v) => v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && !v.length)).length,

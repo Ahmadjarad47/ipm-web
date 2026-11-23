@@ -72,7 +72,7 @@
               <app-status-history [itemId]="it.id" [version]="it.version" />
             }
             @case ('comments') {
-              <app-comments-panel subjectType="workItem" [subjectId]="it.id" [projectId]="it.projectId" />
+              <app-comments-panel subjectType="work-item" [subjectId]="it.id" [projectId]="it.projectId" />
             }
             @case ('attachments') {
               <app-attachments-panel subjectType="workItem" [subjectId]="it.id" [projectId]="it.projectId" [readonly]="it.archived" />

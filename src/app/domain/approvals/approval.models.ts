@@ -2,24 +2,23 @@ import { Entity } from '@core/models/entity.model';
 import { Priority } from '@domain/work-items/work-item.models';
 
 /** Approval state is separate from work status (FR-APR-13). */
-export type ApprovalStatus = 'Draft' | 'PendingApproval' | 'Approved' | 'Rejected' | 'Returned' | 'Superseded';
+export type ApprovalStatus = 'pending-approval' | 'approved' | 'rejected' | 'returned' | 'superseded';
 
 export const APPROVAL_STATUS_LABELS: Record<ApprovalStatus, string> = {
-  Draft: 'مسودة',
-  PendingApproval: 'بانتظار الموافقة',
-  Approved: 'معتمد',
-  Rejected: 'مرفوض',
-  Returned: 'مُعاد للتعديل',
-  Superseded: 'مُلغى بإصدار أحدث',
+  'pending-approval': 'بانتظار الموافقة',
+  approved: 'معتمد',
+  rejected: 'مرفوض',
+  returned: 'مُعاد للتعديل',
+  superseded: 'مُلغى بإصدار أحدث',
 };
 
-export type ApprovalEvent = 'project.approve' | 'project.close' | 'workItem.approve' | 'sensitive.change';
+export type ApprovalEvent = 'project-approve' | 'project-close' | 'work-item-approve' | 'sensitive-change';
 
 export const APPROVAL_EVENT_LABELS: Record<ApprovalEvent, string> = {
-  'project.approve': 'اعتماد مشروع',
-  'project.close': 'إغلاق مشروع',
-  'workItem.approve': 'موافقة على عنصر عمل',
-  'sensitive.change': 'تعديل حساس',
+  'project-approve': 'اعتماد مشروع',
+  'project-close': 'إغلاق مشروع',
+  'work-item-approve': 'موافقة على عنصر عمل',
+  'sensitive-change': 'تعديل حساس',
 };
 
 export type ApproverKind = 'user' | 'role' | 'position';
@@ -75,12 +74,12 @@ export interface ApprovalTemplate extends Entity {
   readonly allowSelfApproval?: boolean;
 }
 
-export type Decision = 'Approve' | 'Reject' | 'Return';
+export type Decision = 'approve' | 'reject' | 'return';
 
 export const DECISION_LABELS: Record<Decision, string> = {
-  Approve: 'موافقة',
-  Reject: 'رفض',
-  Return: 'إرجاع للتعديل',
+  approve: 'موافقة',
+  reject: 'رفض',
+  return: 'إرجاع للتعديل',
 };
 
 export interface ApprovalDecision {
@@ -98,7 +97,7 @@ export interface ApprovalDecision {
 /** An approved request can authorise its action for this many days only. */
 export const APPROVAL_TTL_DAYS = 14;
 
-export type ApprovalSubject = 'project' | 'workItem';
+export type ApprovalSubject = 'project' | 'work-item';
 
 export interface ApprovalRequest extends Entity {
   readonly templateId: string;

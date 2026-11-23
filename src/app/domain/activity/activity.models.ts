@@ -88,7 +88,7 @@ export const AUDIT_ACTION_LABELS: Readonly<Record<string, string>> = {
 };
 
 export interface Comment extends Entity {
-  readonly subjectType: 'project' | 'workItem' | 'approval';
+  readonly subjectType: 'project' | 'work-item';
   readonly subjectId: string;
   readonly authorId: string;
   readonly body: string;

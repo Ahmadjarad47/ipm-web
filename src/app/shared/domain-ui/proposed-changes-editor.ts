@@ -159,7 +159,7 @@ export class ProposedChangesEditor {
 
   private readonly subject = rxResource<WorkItem | null, { type: ApprovalSubject; id: string }>({
     params: () => ({ type: this.subjectType(), id: this.subjectId() }),
-    stream: ({ params }) => (params.type === 'workItem' ? this.workItems.getById(params.id) : of(null)),
+    stream: ({ params }) => (params.type === 'work-item' ? this.workItems.getById(params.id) : of(null)),
     defaultValue: null,
   });
 

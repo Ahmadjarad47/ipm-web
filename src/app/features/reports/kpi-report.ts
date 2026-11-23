@@ -27,11 +27,11 @@ import { dayNumber, downloadCsv, isClosedCategory, PERIOD_LABELS, ReportFilters,
 const PAGE_SIZE = 100;
 
 const CATEGORY_COLORS: Record<StatusCategory, string> = {
-  NotStarted: 'var(--c-neutral)',
-  Active: 'var(--c-success)',
-  Blocked: 'var(--c-warning)',
-  Done: 'var(--c-info)',
-  Cancelled: 'var(--c-danger)',
+  'not-started': 'var(--c-neutral)',
+  active: 'var(--c-success)',
+  blocked: 'var(--c-warning)',
+  done: 'var(--c-info)',
+  cancelled: 'var(--c-danger)',
 };
 
 const HELP_ALL_ITEMS = 'كل العناصر: تشمل العناصر الأب والطرفية معًا. تُستخدم في توزيع الفئات وعدّاد العناصر المفتوحة والمتأخرة.';

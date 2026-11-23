@@ -150,7 +150,7 @@ export class KanbanBoard {
   protected overdue(item: BoardCard): boolean {
     if (!item.dueDate) return false;
     const category = this.statuses.get(item.statusId)?.category;
-    return category !== 'Done' && category !== 'Cancelled' && item.dueDate.slice(0, 10) < todayIso();
+    return category !== 'done' && category !== 'cancelled' && item.dueDate.slice(0, 10) < todayIso();
   }
 
   protected onDragStart(event: DragEvent, item: BoardCard): void {

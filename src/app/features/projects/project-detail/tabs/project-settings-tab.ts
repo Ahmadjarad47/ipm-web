@@ -141,7 +141,7 @@ export class ProjectSettingsTab {
   protected readonly overrideError = signal<string | null>(null);
   protected readonly conflicts = signal<readonly ConflictRow[]>([]);
   protected readonly overrides = linkedSignal<Readonly<Record<string, string>>>(() => this.project().workflowOverrides ?? {});
-  protected readonly itemWorkflows = computed(() => this.workflows.items().filter((w) => w.scope === 'workItem'));
+  protected readonly itemWorkflows = computed(() => this.workflows.items().filter((w) => w.scope === 'work-item'));
   protected readonly allowedTypes = computed(() => this.types().filter((t) => this.project().allowedTypeIds.includes(t.id)));
   /** FR-WF-10: needs both `workflows.manage` and `project.workitemtypes.configure`. */
   protected readonly canOverride = computed(

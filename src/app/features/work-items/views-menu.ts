@@ -194,7 +194,7 @@ export class ViewsMenu {
       { id: 'b-mine', name: 'عناصر عملي', builtIn: true, state: { filters: { assigneeIds: [me] }, view: 'table' } },
       { id: 'b-overdue', name: 'المتأخرة', builtIn: true, state: { filters: { overdue: true }, view: 'table' } },
     ];
-    const review = this.statuses.items().find((s) => s.scope === 'workItem' && s.key === 'in_review');
+    const review = this.statuses.items().find((s) => s.scope === 'work-item' && s.key === 'in_review');
     if (review) builtIns.push({ id: 'b-review', name: 'قيد المراجعة', builtIn: true, state: { filters: { statusId: [review.id] }, view: 'table' } });
     return [...builtIns, ...this.stored().map((v) => ({ ...v, builtIn: false }))];
   });

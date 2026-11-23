@@ -159,7 +159,7 @@ export class TypeFormDialog {
   protected readonly canSeeHistory = computed(() => this.auth.can('audit.view'));
 
   private readonly workflowLookup = inject(WorkflowLookup);
-  protected readonly workflows = computed(() => this.workflowLookup.items().filter((w) => w.scope === 'workItem'));
+  protected readonly workflows = computed(() => this.workflowLookup.items().filter((w) => w.scope === 'work-item'));
   protected readonly otherTypes = computed(() => this.lookup.items());
   protected readonly childIds = signal<readonly string[]>(this.editing?.allowedChildTypeIds ?? []);
 

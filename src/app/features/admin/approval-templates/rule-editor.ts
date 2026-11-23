@@ -140,7 +140,7 @@ export class RuleEditor {
   protected readonly ops = OPS;
   protected readonly opLabels = OP_LABELS;
   protected readonly fields = CONDITION_FIELDS;
-  protected readonly isWork = computed(() => this.event() === 'workItem.approve' || this.event() === 'sensitive.change');
+  protected readonly isWork = computed(() => this.event() === 'work-item-approve' || this.event() === 'sensitive-change');
 
   /** Draft rows keep the raw text the admin typed (the rule stores the parsed value). */
   protected readonly rows = signal<readonly ConditionRow[]>([]);

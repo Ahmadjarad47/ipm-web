@@ -5,7 +5,7 @@ import { DialogShell } from '@shared/ui/dialog/dialog-shell';
 import { DIALOG_DATA, DialogRef } from '@shared/ui/dialog/dialog.service';
 
 export interface DecisionDialogData {
-  readonly decision: Exclude<Decision, 'Approve'>;
+  readonly decision: Exclude<Decision, 'approve'>;
   readonly requestTitle: string;
 }
 
@@ -29,7 +29,7 @@ let nextId = 0;
       </div>
       <ng-container dialog-actions>
         <button type="button" class="btn btn--outline" (click)="ref.close()">إلغاء</button>
-        <button type="button" class="btn" [class.btn--danger]="data.decision === 'Reject'" [class.btn--primary]="data.decision === 'Return'"
+        <button type="button" class="btn" [class.btn--danger]="data.decision === 'reject'" [class.btn--primary]="data.decision === 'return'"
           [disabled]="!valid()" (click)="ref.close(comment().trim())">{{ confirmText }}</button>
       </ng-container>
     </app-dialog-shell>
@@ -44,10 +44,10 @@ export class DecisionDialog {
   protected readonly touched = signal(false);
   protected readonly valid = computed(() => !!this.comment().trim());
 
-  protected readonly title = this.data.decision === 'Reject' ? 'رفض الطلب' : 'إرجاع الطلب للتعديل';
-  protected readonly confirmText = this.data.decision === 'Reject' ? 'تأكيد الرفض' : 'تأكيد الإرجاع';
+  protected readonly title = this.data.decision === 'reject' ? 'رفض الطلب' : 'إرجاع الطلب للتعديل';
+  protected readonly confirmText = this.data.decision === 'reject' ? 'تأكيد الرفض' : 'تأكيد الإرجاع';
   protected readonly intro =
-    this.data.decision === 'Reject'
+    this.data.decision === 'reject'
       ? 'الرفض نهائي لهذا الإصدار؛ اذكر السبب ليفهمه مقدّم الطلب.'
       : 'سيُعاد الطلب إلى مقدّمه للتعديل ثم إعادة التقديم؛ اذكر المطلوب تعديله.';
 }

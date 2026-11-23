@@ -134,7 +134,7 @@ export class ApprovalsPage {
   }
 
   protected isSelectable(row: ApprovalRequest): boolean {
-    return row.status === 'PendingApproval' && !!row.canDecide && row.requesterId !== this.me();
+    return row.status === 'pending-approval' && !!row.canDecide && row.requesterId !== this.me();
   }
 
   protected isSelected(row: ApprovalRequest): boolean {
@@ -198,7 +198,7 @@ export class ApprovalsPage {
   /** Dot states for the mini stepper: done / active / pending. */
   protected dots(row: ApprovalRequest): readonly ('done' | 'active' | 'pending')[] {
     return row.stages.map((s) =>
-      row.status === 'Approved' || (row.currentStage > 0 && s.order < row.currentStage)
+      row.status === 'approved' || (row.currentStage > 0 && s.order < row.currentStage)
         ? 'done'
         : s.order === row.currentStage
           ? 'active'
@@ -208,11 +208,11 @@ export class ApprovalsPage {
 
   protected stageText(row: ApprovalRequest): string {
     const total = row.stages.length;
-    return `${row.status === 'Approved' ? total : Math.max(row.currentStage, 0)} / ${total}`;
+    return `${row.status === 'approved' ? total : Math.max(row.currentStage, 0)} / ${total}`;
   }
 
   protected isPending(row: ApprovalRequest): boolean {
-    return row.status === 'PendingApproval';
+    return row.status === 'pending-approval';
   }
 
   protected sla(row: ApprovalRequest): string {

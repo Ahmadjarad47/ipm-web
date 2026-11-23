@@ -1,3 +1,4 @@
+import { environment } from '@env/environment';
 import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
 import { rxResource } from '@core/state/safe-resource';
 import { RouterLink } from '@angular/router';
@@ -184,7 +185,7 @@ export class WorkItemDetail {
       ...(this.canViewRelations() ? [{ key: 'relations' as const, label: 'العلاقات', count: this.relationCount.value()?.length ?? 0 }] : []),
       { key: 'history', label: 'سجل الحالة' },
       { key: 'comments', label: 'التعليقات' },
-      { key: 'attachments', label: 'المرفقات' },
+      ...(environment.features.attachments ? [{ key: 'attachments' as const, label: 'المرفقات' }] : []),
       ...(this.canViewRelations() ? [{ key: 'graph' as const, label: 'المخطط' }] : []),
       { key: 'activity', label: 'النشاط' },
     ];
@@ -193,7 +194,7 @@ export class WorkItemDetail {
 
   // ---------- workflow ----------
   private readonly category = computed(() => this.statuses.get(this.item()?.statusId)?.category);
-  protected readonly isClosed = computed(() => this.category() === 'Done' || this.category() === 'Cancelled');
+  protected readonly isClosed = computed(() => this.category() === 'done' || this.category() === 'cancelled');
 
   /** Transitions leaving the current status in this item's workflow (FR-WF-04), if the user may transition. */
   protected readonly transitions = computed<readonly (Transition & { readonly name: string })[]>(() => {
@@ -210,11 +211,11 @@ export class WorkItemDetail {
   protected readonly statusMenu = computed<readonly MenuEntry[]>(() =>
     this.transitions().map((t) => ({ key: t.toStatusId, label: t.name, ...(t.requiresApproval ? { hint: 'يتطلب موافقة' } : {}) })),
   );
-  private readonly closeTargets = computed(() => this.transitions().filter((t) => this.statuses.get(t.toStatusId)?.category === 'Done'));
+  private readonly closeTargets = computed(() => this.transitions().filter((t) => this.statuses.get(t.toStatusId)?.category === 'done'));
   private readonly reopenTargets = computed(() =>
     this.transitions().filter((t) => {
       const c = this.statuses.get(t.toStatusId)?.category;
-      return c !== 'Done' && c !== 'Cancelled';
+      return c !== 'done' && c !== 'cancelled';
     }),
   );
   protected readonly canClose = computed(() => !this.isClosed() && this.closeTargets().length > 0);
@@ -245,7 +246,7 @@ export class WorkItemDetail {
   protected readonly approvalRows = computed<readonly ApprovalRow[]>(() =>
     this.itemApprovals().map((request) => {
       const stage = request.stages?.find((s) => s.order === request.currentStage);
-      const pending = request.status === 'PendingApproval' && !!stage;
+      const pending = request.status === 'pending-approval' && !!stage;
       return {
         request,
         stageText: pending ? `المرحلة ${request.currentStage} من ${request.stages.length}` : '',
@@ -253,7 +254,7 @@ export class WorkItemDetail {
       };
     }),
   );
-  protected readonly hasApproved = computed(() => this.itemApprovals().some((r) => r.status === 'Approved'));
+  protected readonly hasApproved = computed(() => this.itemApprovals().some((r) => r.status === 'approved'));
   protected readonly canRequestApproval = computed(() => {
     const item = this.item();
     return !!item && this.auth.can('approvals.request', item.projectId);

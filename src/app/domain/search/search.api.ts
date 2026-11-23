@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '@core/api/api.config';
 
-export type SearchHitKind = 'project' | 'workItem' | 'approval' | 'user';
+export type SearchHitKind = 'project' | 'work-item' | 'approval' | 'user';
 
 export interface SearchHit {
   readonly kind: SearchHitKind;
