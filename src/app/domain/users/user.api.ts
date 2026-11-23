@@ -73,7 +73,7 @@ export class UsersApi extends BaseApiService<User, UserCreate> {
         if (active !== undefined && active !== current.active) steps.push((v) => this.step('POST', id, active ? '/activate' : '/deactivate', {}, v));
         if (!steps.length) return of(current);
         return from(steps).pipe(
-          concatMap((run, i) => (i === 0 ? run(version ?? current.version) : of(0).pipe(switchMap(() => this.getById(id)), switchMap((fresh) => run(fresh.version))))),
+          concatMap((run, i) => (i === 0 ? run(version || current.version) : of(0).pipe(switchMap(() => this.getById(id)), switchMap((fresh) => run(fresh.version))))),
           last(),
           switchMap(() => this.getById(id)),
         );

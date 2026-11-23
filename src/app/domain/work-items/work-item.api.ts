@@ -137,7 +137,7 @@ export class WorkItemTypesApi extends BaseApiService<WorkItemType> {
         if (!same([...current.allowedChildTypeIds].sort(), [...next.allowedChildTypeIds].sort())) {
           steps.push({ method: 'PUT', path: '/children', body: { childTypeIds: next.allowedChildTypeIds } });
         }
-        return steps.length ? this.sequence(id, version ?? current.version, steps) : of(current);
+        return steps.length ? this.sequence(id, version || current.version, steps) : of(current);
       }),
     );
   }
