@@ -4,5 +4,5 @@ export const environment = {
   apiBaseUrl: '/api/v1',
   timeZone: 'Asia/Riyadh',
   /** Screens whose API does not exist yet are hidden, not broken (attachments are not part of the first release). */
-  features: { attachments: false },
+  features: { attachments: false, approverReassign: false },
 };

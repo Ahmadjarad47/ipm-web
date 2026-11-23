@@ -221,7 +221,7 @@ export class CommentsPanel {
   protected remove(c: Comment): void {
     this.confirm
       .confirm({ title: 'حذف التعليق', message: 'سيُخفى نص التعليق ويبقى أثره في السجل. هل تريد المتابعة؟', confirmText: 'حذف', danger: true })
-      .pipe(filter(Boolean), switchMap(() => this.api.remove(c.id)))
+      .pipe(filter(Boolean), switchMap(() => this.api.remove(c.id, c.version)))
       .subscribe({ next: () => this.comments.reload(), error: () => this.comments.reload() });
   }
 }

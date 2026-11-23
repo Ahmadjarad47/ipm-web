@@ -161,8 +161,8 @@ export class DevPanel {
 
   protected readonly ltr = ltr;
   protected readonly events = rxResource({
-    params: () => ({ ref: this.item().ref }),
-    stream: ({ params }) => this.api.forWorkItem(params.ref),
+    params: () => ({ ref: this.item().ref, projectId: this.item().projectId }),
+    stream: ({ params }) => this.api.forWorkItem(params.projectId, params.ref),
   });
   protected readonly summary = computed(() => summarizeDev(this.events.value() ?? []));
   protected readonly branch = computed(() => suggestedBranch(this.item().ref, this.types.get(this.item().typeId)?.key));

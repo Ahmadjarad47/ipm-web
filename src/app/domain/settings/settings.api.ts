@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable } from '@angular/core';
 import { rxResource } from '@core/state/safe-resource';
-import { Observable, tap } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
+import { ifMatch } from '@core/api/query-params';
 import { API_BASE_URL } from '@core/api/api.config';
 import { AuthService } from '@core/auth/auth.service';
 import { DEFAULT_SETTINGS, SettingsUpdate, SystemSettings } from './settings.models';
@@ -14,8 +15,8 @@ export class SettingsStore {
   private readonly url = `${inject(API_BASE_URL)}/settings`;
 
   private readonly resource = rxResource({
-    params: () => this.auth.session() ?? undefined,
-    stream: () => this.http.get<SystemSettings>(this.url),
+    params: () => this.auth.user()?.id,
+    stream: () => this.http.get<SystemSettings>(this.url).pipe(map((saved) => ({ ...saved, id: 'settings', createdAt: '', updatedAt: '' }) as SystemSettings)),
   });
 
   readonly loading = this.resource.isLoading;
@@ -24,7 +25,11 @@ export class SettingsStore {
   readonly value = computed(() => this.current() ?? { ...DEFAULT_SETTINGS, id: '', version: 0, createdAt: '', updatedAt: '' });
 
   update(changes: SettingsUpdate): Observable<SystemSettings> {
-    return this.http.patch<SystemSettings>(this.url, changes).pipe(tap((s) => this.resource.set(s)));
+    const { version, ...body } = changes;
+    return this.http.patch<SystemSettings>(this.url, body, { headers: ifMatch(version) }).pipe(
+      map((saved) => ({ ...saved, id: 'settings', createdAt: '', updatedAt: '' }) as SystemSettings),
+      tap((s) => this.resource.set(s)),
+    );
   }
 
   reload(): void {

@@ -1,8 +1,9 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { inject, Injectable, Injector } from '@angular/core';
+import { map, Observable } from 'rxjs';
 import { API_BASE_URL } from '@core/api/api.config';
 import { BaseApiService } from '@core/api/base-api.service';
+import { PagedResult } from '@core/models/entity.model';
 import { LookupStore } from '@core/state/lookup.store';
 import { ImpactInfo } from '@domain/work-items/work-item.models';
 import { Status, Transition, TransitionRecord, Workflow } from './workflow.models';
@@ -17,15 +18,46 @@ export class StatusesApi extends BaseApiService<Status> {
   }
 }
 
+/** One status change as the API returns it (the screen also shows the names, which the lookup knows). */
+interface ServerTransition {
+  readonly at: string;
+  readonly fromStatusId: string;
+  readonly toStatusId: string;
+  readonly actorId: string;
+  readonly comment: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TransitionsApi {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
+  private readonly injector = inject(Injector);
 
   /** Status history of one work item or project, oldest first. */
   bySubject(subjectType: TransitionRecord['subjectType'], subjectId: string): Observable<readonly TransitionRecord[]> {
-    const params = new HttpParams().set('subjectType', subjectType).set('subjectId', subjectId);
-    return this.http.get<readonly TransitionRecord[]>(`${this.baseUrl}/transitions/by-subject`, { params });
+    const path = subjectType === 'project' ? 'projects' : 'work-items';
+    const params = new HttpParams().set('page', 1).set('pageSize', 200);
+    return this.http.get<PagedResult<ServerTransition>>(`${this.baseUrl}/${path}/${encodeURIComponent(subjectId)}/status-history`, { params }).pipe(
+      map((page) => {
+        const statuses = this.injector.get(StatusLookup);
+        return [...page.items].reverse().map((t, i) => ({
+          id: `${subjectId}:${i}`,
+          version: 0,
+          createdAt: t.at,
+          updatedAt: t.at,
+          subjectType,
+          itemId: subjectId,
+          projectId: '',
+          fromStatusId: t.fromStatusId,
+          toStatusId: t.toStatusId,
+          fromName: statuses.get(t.fromStatusId)?.name ?? '—',
+          toName: statuses.get(t.toStatusId)?.name ?? '—',
+          actorId: t.actorId,
+          comment: t.comment,
+          at: t.at,
+        }));
+      }),
+    );
   }
 }
 
