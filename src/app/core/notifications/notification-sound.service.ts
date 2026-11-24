@@ -4,16 +4,17 @@ import { PreferencesStore } from '@core/preferences/preferences.store';
 
 /** A burst of several pushes within this window plays one chime, not one per notification. */
 const THROTTLE_MS = 1_500;
+const SOUND_SRC = '/sounds/notification.mp3';
 
 /**
- * A short two-tone chime, generated on the fly (Web Audio — no audio file). One `AudioContext` is created lazily
- * and reused for the service's lifetime; each chime's oscillator/gain nodes are disconnected once it ends so the
- * audio graph never accumulates over a long session.
+ * Plays the notification sound. One `HTMLAudioElement` is created lazily and reused for the service's
+ * lifetime (never one per chime), so a long session never accumulates audio resources; each play just
+ * rewinds it and calls `play()` again.
  */
 @Injectable({ providedIn: 'root' })
 export class NotificationSoundService {
   private readonly preferences = inject(PreferencesStore);
-  private context: AudioContext | null = null;
+  private audio: HTMLAudioElement | null = null;
   private readonly trigger = new Subject<void>();
 
   constructor() {
@@ -28,39 +29,18 @@ export class NotificationSoundService {
   }
 
   private play(): void {
-    const ctx = this.ensureContext();
-    if (!ctx) return;
+    const audio = this.ensureAudio();
+    if (!audio) return;
 
-    const now = ctx.currentTime;
-    for (const [frequency, start] of [
-      [880, 0],
-      [1_320, 0.09],
-    ] as const) {
-      const oscillator = ctx.createOscillator();
-      const gain = ctx.createGain();
-      oscillator.type = 'sine';
-      oscillator.frequency.value = frequency;
-      oscillator.connect(gain);
-      gain.connect(ctx.destination);
-
-      const at = now + start;
-      gain.gain.setValueAtTime(0.0001, at);
-      gain.gain.exponentialRampToValueAtTime(0.18, at + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.16);
-
-      oscillator.start(at);
-      oscillator.stop(at + 0.18);
-      oscillator.onended = () => {
-        oscillator.disconnect();
-        gain.disconnect();
-      };
-    }
+    audio.currentTime = 0;
+    // Browsers can refuse playback before any user gesture on the page; that is a normal, silent no-op here
+    // (the badge count already reflects the push regardless of whether the chime played).
+    void audio.play().catch(() => undefined);
   }
 
-  private ensureContext(): AudioContext | null {
-    if (typeof window === 'undefined' || !('AudioContext' in window)) return null;
-    this.context ??= new AudioContext();
-    if (this.context.state === 'suspended') void this.context.resume();
-    return this.context;
+  private ensureAudio(): HTMLAudioElement | null {
+    if (typeof Audio === 'undefined') return null;
+    this.audio ??= new Audio(SOUND_SRC);
+    return this.audio;
   }
 }

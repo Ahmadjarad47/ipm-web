@@ -6,39 +6,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PreferencesStore } from '@core/preferences/preferences.store';
 import { NotificationSoundService } from './notification-sound.service';
 
-/** A minimal stand-in for Web Audio: just enough to assert a chime was (or wasn't) built. */
-class FakeAudioContext {
-  static instances: FakeAudioContext[] = [];
-  readonly state = 'running';
+/** A minimal stand-in for `HTMLAudioElement`: just enough to assert play/rewind behaviour. */
+class FakeAudio {
+  static instances: FakeAudio[] = [];
   currentTime = 0;
-  oscillatorsCreated = 0;
+  playCount = 0;
 
-  constructor() {
-    FakeAudioContext.instances.push(this);
+  constructor(readonly src: string) {
+    FakeAudio.instances.push(this);
   }
 
-  createOscillator() {
-    this.oscillatorsCreated++;
-    return {
-      type: '',
-      frequency: { value: 0 },
-      connect: vi.fn(),
-      disconnect: vi.fn(),
-      start: vi.fn(),
-      stop: vi.fn(),
-      onended: null as (() => void) | null,
-    };
-  }
-
-  createGain() {
-    return {
-      gain: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
-      connect: vi.fn(),
-      disconnect: vi.fn(),
-    };
-  }
-
-  resume() {
+  play(): Promise<void> {
+    this.playCount++;
     return Promise.resolve();
   }
 }
@@ -52,8 +31,8 @@ function setup(): NotificationSoundService {
 describe('NotificationSoundService', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    FakeAudioContext.instances = [];
-    (window as unknown as { AudioContext: unknown }).AudioContext = FakeAudioContext;
+    FakeAudio.instances = [];
+    (globalThis as unknown as { Audio: unknown }).Audio = FakeAudio;
     localStorage.clear();
     Object.defineProperty(document, 'hidden', { configurable: true, value: false });
   });
@@ -62,28 +41,29 @@ describe('NotificationSoundService', () => {
     vi.useRealTimers();
   });
 
-  it('plays one chime for a burst of several notifications within the throttle window', () => {
+  it('plays one chime, from the one reused audio element, for a burst of several notifications', () => {
     const sound = setup();
     sound.notify();
     sound.notify();
     sound.notify();
     vi.advanceTimersByTime(0);
 
-    expect(FakeAudioContext.instances).toHaveLength(1);
-    expect(FakeAudioContext.instances[0].oscillatorsCreated).toBeGreaterThan(0);
+    expect(FakeAudio.instances).toHaveLength(1); // one element created, reused — not one per chime
+    expect(FakeAudio.instances[0].src).toContain('/sounds/notification.mp3');
+    expect(FakeAudio.instances[0].playCount).toBe(1);
   });
 
-  it('plays again after the throttle window has passed', () => {
+  it('rewinds and plays again after the throttle window has passed', () => {
     const sound = setup();
     sound.notify();
     vi.advanceTimersByTime(0);
-    const firstCount = FakeAudioContext.instances[0].oscillatorsCreated;
 
     vi.advanceTimersByTime(2_000);
     sound.notify();
     vi.advanceTimersByTime(0);
 
-    expect(FakeAudioContext.instances[0].oscillatorsCreated).toBeGreaterThan(firstCount);
+    expect(FakeAudio.instances).toHaveLength(1);
+    expect(FakeAudio.instances[0].playCount).toBe(2);
   });
 
   it('does not play while the tab is hidden', () => {
@@ -92,7 +72,7 @@ describe('NotificationSoundService', () => {
     sound.notify();
     vi.advanceTimersByTime(2_000);
 
-    expect(FakeAudioContext.instances).toHaveLength(0);
+    expect(FakeAudio.instances).toHaveLength(0);
   });
 
   it('does not play when muted in preferences', () => {
@@ -101,6 +81,6 @@ describe('NotificationSoundService', () => {
     sound.notify();
     vi.advanceTimersByTime(2_000);
 
-    expect(FakeAudioContext.instances).toHaveLength(0);
+    expect(FakeAudio.instances).toHaveLength(0);
   });
 });
