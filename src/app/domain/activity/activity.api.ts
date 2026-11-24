@@ -71,10 +71,10 @@ export class CommentsApi extends BaseApiService<Comment, Pick<Comment, 'subjectT
   }
 }
 
-/** A notification as the API returns it (the list is always the caller's own, so it carries no owner). */
-type ServerNotification = Omit<Notification, 'userId' | 'version' | 'updatedAt'>;
+/** A notification as the API returns it (the list is always the caller's own, so it carries no owner) — also exactly the shape SignalR pushes, see `NotificationHubService`. */
+export type ServerNotification = Omit<Notification, 'userId' | 'version' | 'updatedAt'>;
 
-const toNotification = (n: ServerNotification): Notification => ({ ...n, userId: '', version: 0, updatedAt: n.createdAt });
+export const toNotification = (n: ServerNotification): Notification => ({ ...n, userId: '', version: 0, updatedAt: n.createdAt });
 
 @Injectable({ providedIn: 'root' })
 export class NotificationsApi extends BaseApiService<Notification> {
@@ -94,6 +94,11 @@ export class NotificationsApi extends BaseApiService<Notification> {
 
   markAllRead(): Observable<void> {
     return this.http.post<void>(`${this.url}/read-all`, {});
+  }
+
+  /** One call for several ids (the "seen in view" batch), instead of one request per notification. */
+  markReadBatch(ids: readonly string[]): Observable<void> {
+    return this.http.post<void>(`${this.url}/read-batch`, { ids });
   }
 }
 

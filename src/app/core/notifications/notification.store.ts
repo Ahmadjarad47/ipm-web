@@ -2,20 +2,33 @@ import { computed, DestroyRef, effect, inject, Injectable, signal } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { fromEvent, interval, merge, switchMap, filter } from 'rxjs';
 import { AuthService } from '@core/auth/auth.service';
-import { NotificationsApi } from '@domain/activity/activity.api';
+import { NotificationsApi, toNotification } from '@domain/activity/activity.api';
 import { Notification, NotificationPage } from '@domain/activity/activity.models';
+import { NotificationHubService } from './notification-hub.service';
+import { NotificationReadBatcherService } from './notification-read-batcher.service';
+import { NotificationSoundService } from './notification-sound.service';
 
-const POLL_MS = 30_000;
 const PAGE_SIZE = 30;
+/**
+ * Real-time pushes (see `NotificationHubService`) are the primary path; this is only a safety net for whatever a
+ * push could miss (a connection that never came up, a gap it does not know about) and only runs while the hub
+ * itself reports it is not connected — so a healthy connection means this never fires at all.
+ */
+const FALLBACK_POLL_MS = 180_000;
 
 /**
- * In-app notifications (FR-UI-06). Polls while signed in and refetches when the browser comes back online.
- * Swap the poll for a SignalR stream later without touching consumers.
+ * In-app notifications (FR-UI-06). Real-time via SignalR (`NotificationHubService`): a push both updates the
+ * list live and is the cue a sound plays. `refresh()` on reconnect and an interval while disconnected are the
+ * only fallbacks — SignalR does not replay what was missed during a drop, so they exist to catch that, not to
+ * carry the normal case.
  */
 @Injectable({ providedIn: 'root' })
 export class NotificationStore {
   private readonly api = inject(NotificationsApi);
   private readonly auth = inject(AuthService);
+  private readonly hub = inject(NotificationHubService);
+  private readonly sound = inject(NotificationSoundService);
+  private readonly batcher = inject(NotificationReadBatcherService);
 
   private readonly _items = signal<readonly Notification[]>([]);
   readonly items = this._items.asReadonly();
@@ -40,9 +53,14 @@ export class NotificationStore {
       if (this.auth.isAuthenticated()) this.refresh();
       else this.reset();
     });
-    merge(interval(POLL_MS), fromEvent(window, 'online'))
+
+    this.hub.received$.pipe(takeUntilDestroyed(destroyRef)).subscribe((n) => this.applyPush(toNotification(n)));
+    this.hub.reconnected$.pipe(takeUntilDestroyed(destroyRef)).subscribe(() => this.refresh());
+    this.batcher.flushed.pipe(takeUntilDestroyed(destroyRef)).subscribe((ids) => this.applyLocalRead(ids));
+
+    merge(interval(FALLBACK_POLL_MS), fromEvent(window, 'online'))
       .pipe(
-        filter(() => this.auth.isAuthenticated()),
+        filter(() => this.auth.isAuthenticated() && !this.hub.connected()),
         switchMap(() => this.api.page(1, PAGE_SIZE)),
         takeUntilDestroyed(destroyRef),
       )
@@ -92,13 +110,39 @@ export class NotificationStore {
     if (n.read) return;
     this._items.update((list) => list.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
     this._unread.update((u) => Math.max(0, u - 1));
-    this.api.update(n.id, { read: true, version: n.version }).subscribe({ error: () => this.refresh() });
+    this.api.markRead(n.id).subscribe({ error: () => this.refresh() });
   }
 
   markAllRead(): void {
     this._items.update((list) => list.map((x) => ({ ...x, read: true })));
     this._unread.set(0);
     this.api.markAllRead().subscribe({ error: () => this.refresh() });
+  }
+
+  /** A notification arrived live: prepend it (deduped) and count it, unless it is already known (reconnect races). */
+  private applyPush(n: Notification): void {
+    if (this._items().some((x) => x.id === n.id)) return;
+    this._items.update((list) => [n, ...list]);
+    this._total.update((t) => t + 1);
+    if (!n.read) this._unread.update((u) => u + 1);
+    this.sound.notify();
+  }
+
+  /**
+   * The "seen in view" batcher already sent the API call; this only mirrors `markRead`'s optimistic local update
+   * for each id in the batch, without a second network round trip.
+   */
+  private applyLocalRead(ids: readonly string[]): void {
+    const set = new Set(ids);
+    let newlyRead = 0;
+    this._items.update((list) =>
+      list.map((x) => {
+        if (!set.has(x.id) || x.read) return x;
+        newlyRead++;
+        return { ...x, read: true };
+      }),
+    );
+    if (newlyRead) this._unread.update((u) => Math.max(0, u - newlyRead));
   }
 
   private applyFirstPage(page: NotificationPage): void {

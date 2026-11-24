@@ -105,6 +105,10 @@ const THEMES: readonly { readonly value: ThemePreference; readonly label: string
             {{ n.label }}
           </label>
         }
+        <label class="checkbox">
+          <input type="checkbox" [checked]="prefs().notifySound" (change)="toggleNotifySound($event)" />
+          صوت عند وصول إشعار
+        </label>
       </fieldset>
 
       <div class="actions">
@@ -165,5 +169,9 @@ export class ProfilePage {
 
   protected toggleNotify(key: NotifyEvent, e: Event): void {
     this.prefsStore.setNotify(key, (e.target as HTMLInputElement).checked);
+  }
+
+  protected toggleNotifySound(e: Event): void {
+    this.prefsStore.setNotifySound((e.target as HTMLInputElement).checked);
   }
 }

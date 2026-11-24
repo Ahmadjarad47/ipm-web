@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { NotificationSeenDirective } from '@core/notifications/notification-seen.directive';
 import { NotificationStore } from '@core/notifications/notification.store';
 import { Notification } from '@domain/activity/activity.models';
 import { SettingsStore } from '@domain/settings/settings.api';
@@ -18,7 +19,7 @@ type NotificationTab = 'all' | 'unread';
 /** Notification centre (UX system #2): tabs, kind chips, day groups, bulk read, paging. Backed by the shared NotificationStore. */
 @Component({
   selector: 'app-notifications-page',
-  imports: [RouterLink, PageHeader, Tabs, EmptyState, Badge, Icon, RelativeTimePipe, Skeleton, ErrorState],
+  imports: [RouterLink, PageHeader, Tabs, EmptyState, Badge, Icon, RelativeTimePipe, Skeleton, ErrorState, NotificationSeenDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-page-header title="الإشعارات" subtitle="كل إشعاراتك في مكان واحد.">
@@ -48,7 +49,7 @@ type NotificationTab = 'all' | 'unread';
             <h2 class="day" [id]="'day-' + g.date">{{ g.label }}</h2>
             <ul class="list">
               @for (n of g.items; track n.id) {
-                <li class="item" [class.unread]="!n.read">
+                <li class="item" [class.unread]="!n.read" [appNotificationSeen]="n">
                   <input type="checkbox" class="sel" [checked]="selected().has(n.id)" (change)="toggle(n.id)" [attr.aria-label]="'تحديد: ' + n.title" />
                   <button type="button" class="main" (click)="open(n)">
                     <span class="dot" [class.dot--on]="!n.read" aria-hidden="true"></span>

@@ -75,7 +75,7 @@
             <app-tabs [tabs]="notifTabs()" [(active)]="notifTab" idPrefix="notif-tab-" />
             <ul aria-live="polite">
               @for (n of visibleNotifications(); track n.id) {
-                <li>
+                <li [appNotificationSeen]="n">
                   <button type="button" [class.unread]="!n.read" (click)="openNotification(n)">
                     <strong>{{ n.title }}</strong>
                     <span>{{ n.body }}</span>

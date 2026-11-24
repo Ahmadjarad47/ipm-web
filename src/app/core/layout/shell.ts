@@ -3,6 +3,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { AuthService } from '@core/auth/auth.service';
+import { NotificationSeenDirective } from '@core/notifications/notification-seen.directive';
 import { NotificationStore } from '@core/notifications/notification.store';
 import { Notification } from '@domain/activity/activity.models';
 import { Avatar } from '@shared/ui/avatar/avatar';
@@ -20,7 +21,7 @@ type NotifTab = 'all' | 'unread';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, Avatar, RelativeTimePipe, OfflineBanner, Tabs],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, Avatar, RelativeTimePipe, OfflineBanner, Tabs, NotificationSeenDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shell.html',
   styleUrl: './shell.scss',

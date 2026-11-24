@@ -12,6 +12,8 @@ export interface Preferences {
   readonly dateFormat: DateFormatPreference;
   /** Client-side only: server-side notification preferences are not implemented yet. */
   readonly notify: Readonly<Record<NotifyEvent, boolean>>;
+  /** Plays a short chime when a real-time notification arrives (muted while the tab is hidden regardless). */
+  readonly notifySound: boolean;
   readonly theme: ThemePreference;
 }
 
@@ -27,6 +29,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   tableDensity: 'comfortable',
   dateFormat: 'relative',
   notify: { assignment: true, mention: true, approvalRequest: true, decision: true, comment: true },
+  notifySound: true,
   theme: 'auto',
 };
 
@@ -50,6 +53,7 @@ export function normalizePreferences(stored: Partial<Preferences>, fallbackTheme
     tableDensity: stored.tableDensity === 'compact' || stored.tableDensity === 'comfortable' ? stored.tableDensity : d.tableDensity,
     dateFormat: stored.dateFormat === 'absolute' || stored.dateFormat === 'relative' ? stored.dateFormat : d.dateFormat,
     notify: { ...d.notify, ...(stored.notify && typeof stored.notify === 'object' ? stored.notify : {}) },
+    notifySound: typeof stored.notifySound === 'boolean' ? stored.notifySound : d.notifySound,
     theme: themes.includes(stored.theme ?? '') ? (stored.theme as ThemePreference) : (fallbackTheme ?? d.theme),
   };
 }
@@ -92,6 +96,10 @@ export class PreferencesStore {
 
   setNotify(event: NotifyEvent, value: boolean): void {
     this.update({ notify: { ...this.state().notify, [event]: value } });
+  }
+
+  setNotifySound(value: boolean): void {
+    this.update({ notifySound: value });
   }
 
   reset(): void {
