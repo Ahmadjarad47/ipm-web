@@ -78,7 +78,7 @@ const PR_LABEL: Readonly<Record<PrState, string>> = { open: 'مفتوح', merged
                       <app-badge [tone]="prTone(e)">{{ prLabel(e) }}</app-badge>
                     </div>
                     <div class="muted meta">
-                      {{ e.author }} · {{ e.createdAt | relativeTime }}
+                      {{ e.author }} · {{ (e.occurredAt ?? e.createdAt) | relativeTime }}
                       <ng-container *ngTemplateOutlet="manual; context: { $implicit: e }" />
                     </div>
                   </li>
@@ -97,7 +97,7 @@ const PR_LABEL: Readonly<Record<PrState, string>> = { open: 'مفتوح', merged
                       <span class="grow">{{ e.title }}</span>
                     </div>
                     <div class="muted meta">
-                      {{ e.author }} · {{ e.createdAt | relativeTime }}
+                      {{ e.author }} · {{ (e.occurredAt ?? e.createdAt) | relativeTime }}
                       <ng-container *ngTemplateOutlet="manual; context: { $implicit: e }" />
                     </div>
                   </li>

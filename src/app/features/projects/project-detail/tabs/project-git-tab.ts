@@ -139,7 +139,7 @@ const KIND_TONES: Record<GitEvent['kind'], BadgeTone> = { push: 'info', pull_req
               </div>
             </div>
             <span class="spacer"></span>
-            <span class="muted">{{ e.createdAt | relativeTime }}</span>
+            <span class="muted">{{ (e.occurredAt ?? e.createdAt) | relativeTime }}</span>
             <a class="btn btn--ghost btn--icon btn--sm" [href]="e.url" target="_blank" rel="noopener noreferrer" aria-label="فتح في المستودع">
               <app-icon name="link" [size]="16" />
             </a>
@@ -222,7 +222,11 @@ export class ProjectGitTab {
   }
 
   /** The error of the attempt just made, else the one the server stored on the repository. */
+  /** A disconnected repository is never synced, so an error left from before it was disconnected is not shown. */
   protected syncError(r: Repository): string | null {
+    if (!r.connected) {
+      return null;
+    }
     return this.syncErrors()[r.id] ?? r.lastSyncError;
   }
 

@@ -129,6 +129,8 @@ export interface GitEvent extends Entity {
   readonly prState?: 'open' | 'merged' | 'closed';
   /** Provider delivery that produced this event (idempotency, FR-GIT-05). */
   readonly deliveryId?: string;
+  /** When it happened on the Git server (commit / pull request time); `createdAt` is only when it was received or synced. */
+  readonly occurredAt?: string;
 }
 
 /** Open/blocked dependency picture of the filtered items (§6.3). */
