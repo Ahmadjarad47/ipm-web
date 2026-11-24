@@ -33,7 +33,7 @@ export interface GitLinkDialogData {
               <button type="button" class="pick" (click)="ref.close(e)">
                 <span class="ltr sha">{{ e.sha.slice(0, 7) || e.branch }}</span>
                 <span class="t">{{ e.title }}</span>
-                <span class="muted m">{{ e.author }} · {{ e.createdAt | relativeTime }}</span>
+                <span class="muted m">{{ e.author }} · {{ (e.occurredAt ?? e.createdAt) | relativeTime }}</span>
               </button>
             </li>
           } @empty {
