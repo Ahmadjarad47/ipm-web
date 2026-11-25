@@ -76,6 +76,12 @@ export class WorkflowLookup extends LookupStore<Workflow> {
   protected readonly api = inject(WorkflowsApi);
   protected override readonly alsoDependsOn = ['statuses'];
 
+  /** The workflow that governs projects (the server ids workflows by GUID, so it is found by scope). */
+  projectWorkflow(): Workflow | undefined {
+    const all = this.items().filter((w) => w.scope === 'project');
+    return all.find((w) => w.key === 'project_default') ?? all[0];
+  }
+
   /** Transitions leaving `statusId` inside `workflowId`. */
   transitionsFrom(workflowId: string | undefined, statusId: string): readonly Transition[] {
     return this.get(workflowId)?.transitions.filter((t) => t.fromStatusId === statusId) ?? [];

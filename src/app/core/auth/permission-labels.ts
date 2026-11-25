@@ -25,6 +25,7 @@ export const PERMISSION_LABELS: Record<PermissionKey, string> = {
   'approvals.view': 'عرض طلبات الموافقة ومسارها',
   'approvals.decide': 'اتخاذ قرار الموافقة أو الرفض أو الإعادة',
   'approvals.configure': 'إعداد قوالب الموافقات ومراحلها',
+  'approvals.override': 'قرار نهائي يتخطى مراحل الموافقة (حتى على طلبك)',
 
   'comments.create': 'إضافة تعليقات',
   'comments.edit_own': 'تعديل تعليقاتك خلال المهلة المحددة',

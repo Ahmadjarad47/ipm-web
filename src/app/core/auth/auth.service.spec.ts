@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthSession } from './auth.models';
 import { AuthService } from './auth.service';
 
@@ -98,5 +98,46 @@ describe('AuthService session (refresh cookie)', () => {
     auth.refresh().subscribe();
 
     expect(http.match((r) => r.url.endsWith('/auth/refresh'))).toHaveLength(1);
+  });
+});
+
+describe('AuthService re-reads the grants when the tab comes back', () => {
+  let auth: AuthService;
+  let http: HttpTestingController;
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])] });
+    auth = TestBed.inject(AuthService);
+    http = TestBed.inject(HttpTestingController);
+    auth.establish(session({ systemPermissions: ['dashboard.view'] }));
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  const show = () => document.dispatchEvent(new Event('visibilitychange'));
+
+  it('reads /auth/me quietly after the tab was away long enough, so a revoked permission disappears', () => {
+    vi.setSystemTime(Date.now() + 31_000);
+    show();
+
+    const call = http.expectOne((r) => r.url.endsWith('/auth/me'));
+    expect(call.request.headers.get('X-Silent-Error')).toBe('1');
+    call.flush({ user: { id: 'u', name: 'U', email: 'u@x', title: '' }, systemPermissions: [], projectPermissions: {}, denied: [] });
+    expect(auth.can('dashboard.view')).toBe(false);
+  });
+
+  it('does not ask again within 30 seconds', () => {
+    show();
+
+    http.expectNone((r) => r.url.endsWith('/auth/me'));
+  });
+
+  it('does nothing when signed out', () => {
+    auth.establish(null);
+    vi.setSystemTime(Date.now() + 31_000);
+    show();
+
+    http.expectNone((r) => r.url.endsWith('/auth/me'));
   });
 });

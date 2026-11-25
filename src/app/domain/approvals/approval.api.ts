@@ -5,7 +5,7 @@ import { Observable, switchMap } from 'rxjs';
 import { BaseApiService } from '@core/api/base-api.service';
 import { ifMatch, toHttpParams } from '@core/api/query-params';
 import { ListQuery, PagedResult } from '@core/models/entity.model';
-import { ApprovalAction, ApprovalBox, ApprovalRequest, ApprovalSubject, ApprovalTemplate, BulkDecideResult, DecideRequest, Delegation, DelegationCreate } from './approval.models';
+import { ApprovalAction, ApprovalBox, ApprovalRequest, ApprovalSubject, ApprovalTemplate, BulkDecideResult, DecideRequest, Delegation, DelegationCreate, OverrideRequest } from './approval.models';
 
 export interface SubmitApprovalRequest {
   readonly templateId: string;
@@ -32,6 +32,11 @@ export class ApprovalRequestsApi extends BaseApiService<ApprovalRequest, SubmitA
   /** The decision names the revision the approver reviewed; the record version for `If-Match` is read right before sending. */
   decide(id: string, request: DecideRequest): Observable<ApprovalRequest> {
     return this.withCurrentVersion(id, 'decide', request);
+  }
+
+  /** System-admin override: a final decision that skips every remaining stage; needs `approvals.override`, always audited. */
+  override(id: string, request: OverrideRequest): Observable<ApprovalRequest> {
+    return this.withCurrentVersion(id, 'override', request);
   }
 
   resubmit(id: string): Observable<ApprovalRequest> {

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ApprovalRequestsApi } from './approvals/approval.api';
 import { NotificationsApi } from './activity/activity.api';
 import { ProjectsApi } from './projects/project.api';
+import { WorkReportApi } from './reports/report.api';
 import { UsersApi } from './users/user.api';
 import { WorkItemsApi } from './work-items/work-item.api';
 
@@ -128,5 +129,26 @@ describe('API contract of the domain services', () => {
     const profile = http.expectOne((r) => r.method === 'PUT' && r.url.endsWith('/users/u1'));
     expect(profile.request.headers.get('If-Match')).toBe('"3"');
     expect(profile.request.body).toEqual({ name: 'N', email: 'e', title: '', managerId: null });
+  });
+
+  it('asks for the work report as a file with the period, the projects as a list, and the person', () => {
+    TestBed.inject(WorkReportApi).download({ from: '2026-10-01', to: '2026-10-31', projectIds: ['p1', 'p2'], assigneeId: 'u1' }).subscribe();
+
+    const req = http.expectOne((r) => r.method === 'GET' && r.url.endsWith('/reports/work'));
+    expect(req.request.responseType).toBe('blob');
+    expect(req.request.params.get('from')).toBe('2026-10-01');
+    expect(req.request.params.get('to')).toBe('2026-10-31');
+    expect(req.request.params.get('projectIds')).toBe('p1,p2');
+    expect(req.request.params.get('assigneeId')).toBe('u1');
+    req.flush(new Blob());
+  });
+
+  it('leaves the project list and the person out when they are not chosen', () => {
+    TestBed.inject(WorkReportApi).download({ from: '2026-10-01', to: '2026-10-31', projectIds: [], assigneeId: '' }).subscribe();
+
+    const req = http.expectOne((r) => r.url.endsWith('/reports/work'));
+    expect(req.request.params.has('projectIds')).toBe(false);
+    expect(req.request.params.has('assigneeId')).toBe(false);
+    req.flush(new Blob());
   });
 });

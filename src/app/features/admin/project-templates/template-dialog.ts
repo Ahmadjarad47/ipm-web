@@ -217,7 +217,7 @@ export class TemplateDialog {
   protected readonly allowedTypes = computed(() => this.typeLookup.items().filter((t) => this.allowed().includes(t.id)));
   protected readonly projectRoles = computed(() => this.roleLookup.items().filter((r) => r.scope === 'project'));
   protected readonly projectStatuses = computed(() => {
-    const ids = this.workflows.get('wf-project')?.statusIds ?? [];
+    const ids = this.workflows.projectWorkflow()?.statusIds ?? [];
     return this.statusLookup.items().filter((s) => s.scope === 'project' && ids.includes(s.id));
   });
 
