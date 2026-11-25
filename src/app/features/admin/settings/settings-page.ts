@@ -111,7 +111,7 @@ type BoolKey = 'allowCrossProjectRelations' | 'allowSelfApproval' | 'projectsPri
             <div><h2 id="g-pol">السياسات</h2><p class="muted">قواعد الوصول والعلاقات والموافقات.</p></div>
             <label class="opt">
               <input type="checkbox" formControlName="allowCrossProjectRelations" />
-              <span><strong>السماح بعلاقات بين المشاريع</strong><span class="hint">يتيح ربط عناصر من مشاريع مختلفة (FR-REL-07). الافتراضي: معطّل.</span></span>
+              <span><strong>السماح بعلاقات بين المشاريع</strong><span class="hint">يتيح ربط أعمال من مشاريع مختلفة (FR-REL-07). الافتراضي: معطّل.</span></span>
             </label>
             <label class="opt">
               <input type="checkbox" formControlName="projectsPrivateByDefault" />
@@ -129,7 +129,7 @@ type BoolKey = 'allowCrossProjectRelations' | 'allowSelfApproval' | 'projectsPri
 
         <section class="card" aria-labelledby="g-prog">
           <div class="card-body stack">
-            <div><h2 id="g-prog">احتساب التقدم</h2><p class="muted">أنواع عناصر العمل التي يُحتسب منها تقدم المشروع (§4.4).</p></div>
+            <div><h2 id="g-prog">احتساب التقدم</h2><p class="muted">أنواع الأعمال التي يُحتسب منها تقدم المشروع (§4.4).</p></div>
             <fieldset class="types">
               <legend>الأنواع المحتسبة <app-help-tip [text]="progressHelp" /></legend>
               <div class="chk-list">

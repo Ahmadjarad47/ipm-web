@@ -34,7 +34,7 @@ export interface TransitionRuleData {
           </select>
           <span class="hint">تُطلب فوق صلاحية <span class="ltr">workflow.transition</span>.</span>
         </div>
-        <div class="opt"><label class="checkbox"><input type="checkbox" formControlName="requiresAssignee" /> يتطلب وجود مكلَّف بالعنصر</label><app-help-tip [text]="help.requiresAssignee" /></div>
+        <div class="opt"><label class="checkbox"><input type="checkbox" formControlName="requiresAssignee" /> يتطلب وجود مكلَّف بالعمل</label><app-help-tip [text]="help.requiresAssignee" /></div>
         <div class="opt"><label class="checkbox"><input type="checkbox" formControlName="requiresApproval" /> يتطلب موافقة معتمدة</label><app-help-tip [text]="help.requiresApproval" /></div>
         <div class="opt"><label class="checkbox"><input type="checkbox" formControlName="blockedByOpenDependencies" /> يُرفض عند وجود اعتماديات «تحجب» مفتوحة</label><app-help-tip [text]="blockedHelp" /></div>
       </form>

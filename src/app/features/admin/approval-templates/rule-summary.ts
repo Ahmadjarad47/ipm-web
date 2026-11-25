@@ -43,7 +43,7 @@ export function joinAr(items: readonly string[], conjunction = 'و'): string {
 function subjectNoun(ctx: RuleSummaryContext, rule: ApprovalRule): string {
   if (ctx.event === 'project-approve' || ctx.event === 'project-close') return 'المشاريع';
   if (rule.workItemTypeIds?.length) return joinAr(rule.workItemTypeIds.map(ctx.typeName));
-  return ctx.event === 'sensitive-change' ? 'العناصر ذات الحقول المحمية' : 'عناصر العمل';
+  return ctx.event === 'sensitive-change' ? 'الأعمال ذات الحقول المحمية' : 'الأعمال';
 }
 
 function conditionText(c: RuleCondition, ctx: RuleSummaryContext): string {

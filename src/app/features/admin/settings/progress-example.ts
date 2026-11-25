@@ -13,11 +13,11 @@ export function progressExample(includedTypeNames: readonly string[]): ProgressE
   const all = includedTypeNames.length === 0;
   const { counted, done } = SAMPLE;
   const percent = Math.round((done / counted) * 100);
-  const scope = all ? 'كل أنواع عناصر العمل' : `الأنواع المحددة فقط: ${includedTypeNames.join('، ')}`;
-  const subject = all ? 'عنصرًا ورقيًا' : `عنصرًا ورقيًا من الأنواع المحددة`;
+  const scope = all ? 'كل أنواع الأعمال' : `الأنواع المحددة فقط: ${includedTypeNames.join('، ')}`;
+  const subject = all ? 'عملًا ورقيًا' : `عملًا ورقيًا من الأنواع المحددة`;
   return {
     scope,
-    formula: 'التقدم = العناصر الورقية المنجزة ÷ العناصر الورقية المحتسبة. الأب لا يُحتسب مع أبنائه، وتُستثنى الملغاة والمؤرشفة، والموافقة لا تعني الإنجاز.',
+    formula: 'التقدم = الأعمال الورقية المنجزة ÷ الأعمال الورقية المحتسبة. الأب لا يُحتسب مع أبنائه، وتُستثنى الملغاة والمؤرشفة، والموافقة لا تعني الإنجاز.',
     example: `مثال توضيحي: مشروع فيه ${counted} ${subject}، أُنجز منها ${done}، فيكون التقدم ${done} ÷ ${counted} = ${percent}%.`,
   };
 }

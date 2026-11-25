@@ -20,7 +20,7 @@ export interface Preferences {
 export const LANDING_PAGES: readonly { readonly link: string; readonly label: string }[] = [
   { link: '/dashboard', label: 'لوحة القيادة' },
   { link: '/projects', label: 'المشاريع' },
-  { link: '/work-items', label: 'عناصر العمل' },
+  { link: '/work-items', label: 'الأعمال' },
   { link: '/approvals', label: 'مركز الموافقات' },
 ];
 

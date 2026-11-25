@@ -106,12 +106,12 @@ export function validateRefPattern(pattern: string, sampleRefs: readonly string[
     return 'النمط ليس تعبيرًا نمطيًا صالحًا.';
   }
   if (isCatastrophic(pattern)) return 'النمط قد يسبب بطئًا شديدًا (تكرار متداخل أو مراجع خلفية أو تطلّع أمامي/خلفي أو تكرارات كثيرة) ومرفوض.';
-  if (captureGroups(pattern) !== 1) return 'يجب أن يحتوي النمط على مجموعة التقاط واحدة بالضبط تلتقط رمز العنصر.';
+  if (captureGroups(pattern) !== 1) return 'يجب أن يحتوي النمط على مجموعة التقاط واحدة بالضبط تلتقط رمز العمل.';
   for (const ref of sampleRefs) {
     // The ref must be recognised in at least one of the usual places it appears (bare, bracketed, branch, message).
     const forms = [ref, `[${ref}]`, `(${ref})`, `#${ref}`, `feature/${ref}`, `${ref}: وصف`];
     const recognised = forms.some((text) => [...text.matchAll(regex)].some((m) => m[1] === ref));
-    if (!recognised) return `النمط لا يلتقط رمز عنصر المشروع «${ref}».`;
+    if (!recognised) return `النمط لا يلتقط رمز عمل المشروع «${ref}».`;
   }
   return null;
 }

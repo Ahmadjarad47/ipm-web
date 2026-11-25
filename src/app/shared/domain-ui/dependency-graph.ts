@@ -69,7 +69,7 @@ const OPEN = (category: string | undefined) => category !== 'done' && category !
           }
         </div>
       }
-      <label class="checkbox"><input type="checkbox" [checked]="showUnlinked()" (change)="showUnlinked.set(!showUnlinked())" /> العناصر غير المرتبطة</label>
+      <label class="checkbox"><input type="checkbox" [checked]="showUnlinked()" (change)="showUnlinked.set(!showUnlinked())" /> الأعمال غير المرتبطة</label>
     </div>
 
     @if (graph().nodes.length) {
@@ -113,17 +113,17 @@ const OPEN = (category: string | undefined) => category !== 'done' && category !
 
       <ul class="legend" aria-label="مفتاح المخطط">
         @if (mode() === 'dependencies') {
-          <li><span class="ln ln--blocks"></span> يحجب (السهم نحو العنصر المحجوب)</li>
+          <li><span class="ln ln--blocks"></span> يحجب (السهم نحو العمل المحجوب)</li>
           <li><span class="ln ln--duplicates"></span> يكرر</li>
           <li><span class="ln ln--relates"></span> مرتبط بـ</li>
-          <li><span class="sw sw--blocked"></span> عنصر محجوب باعتمادية مفتوحة</li>
+          <li><span class="sw sw--blocked"></span> عمل محجوب باعتمادية مفتوحة</li>
         } @else {
           <li><span class="ln ln--parent"></span> أب ← ابن</li>
         }
       </ul>
     } @else {
       <app-empty-state icon="link" [title]="mode() === 'dependencies' ? 'لا توجد اعتماديات لعرضها' : 'لا يوجد تسلسل هرمي لعرضه'"
-        text="غيّر الفلاتر أو فعّل «العناصر غير المرتبطة»." />
+        text="غيّر الفلاتر أو فعّل «الأعمال غير المرتبطة»." />
     }
   `,
   styles: `
@@ -205,7 +205,7 @@ export class DependencyGraph {
 
   protected readonly summary = computed(() => {
     const g = this.graph();
-    return `${g.nodes.length} عنصرًا و${g.edges.length} رابطًا`;
+    return `${g.nodes.length} عملًا و${g.edges.length} رابطًا`;
   });
 
   private readonly neighbours = computed(() => {

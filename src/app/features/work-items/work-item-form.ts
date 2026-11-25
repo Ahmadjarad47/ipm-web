@@ -24,7 +24,7 @@ let nextId = 0;
   imports: [ReactiveFormsModule, DialogShell, DynamicFields, AssigneePicker],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-dialog-shell title="عنصر عمل جديد">
+    <app-dialog-shell title="عمل جديد">
       <form [id]="uid + '-wi-create'" class="form-grid" [formGroup]="form" (ngSubmit)="submit()">
         <div class="field">
           <label [attr.for]="uid + '-wi-project'">المشروع <span class="req">*</span></label>
@@ -63,7 +63,7 @@ let nextId = 0;
           </select>
         </div>
         <div class="field">
-          <label [attr.for]="uid + '-wi-parent'">العنصر الأب</label>
+          <label [attr.for]="uid + '-wi-parent'">العمل الأب</label>
           <select [id]="uid + '-wi-parent'" class="select" formControlName="parentId">
             <option [ngValue]="null">— بدون —</option>
             @for (c of parentCandidates(); track c.id) {

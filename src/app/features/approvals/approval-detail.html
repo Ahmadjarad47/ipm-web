@@ -22,7 +22,7 @@
       }
     </span>
     <a class="subject" [routerLink]="subjectLink()">
-      {{ r.subjectType === 'project' ? 'عرض المشروع' : 'عرض عنصر العمل' }}
+      {{ r.subjectType === 'project' ? 'عرض المشروع' : 'عرض العمل' }}
     </a>
   </div>
 
@@ -44,7 +44,7 @@
       @if (showResubmit()) {
         <button type="button" class="btn btn--primary btn--sm" [disabled]="busy()" (click)="resubmit()">إعادة التقديم</button>
       }
-      <a class="banner-link" [routerLink]="subjectLink()">عرض {{ r.subjectType === 'project' ? 'المشروع' : 'عنصر العمل' }}</a>
+      <a class="banner-link" [routerLink]="subjectLink()">عرض {{ r.subjectType === 'project' ? 'المشروع' : 'العمل' }}</a>
     </div>
   }
 

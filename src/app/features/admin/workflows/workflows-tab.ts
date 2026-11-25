@@ -26,7 +26,7 @@ import { TransitionRuleData, TransitionRuleDialog } from './transition-rule-dial
   styleUrl: './workflows-tab.scss',
   template: `
     <div class="stack">
-      <app-admin-notice tone="warning">العناصر الحالية تحتفظ بحالتها الحالية ولا تتأثر بتغيير سير العمل؛ التغييرات تحكم الانتقالات القادمة فقط (FR-WF-11).</app-admin-notice>
+      <app-admin-notice tone="warning">الأعمال الحالية تحتفظ بحالتها الحالية ولا تتأثر بتغيير سير العمل؛ التغييرات تحكم الانتقالات القادمة فقط (FR-WF-11).</app-admin-notice>
 
       @if (workflows.loading() && !workflows.items().length) {
         <app-skeleton variant="detail" [count]="4" />
@@ -42,7 +42,7 @@ import { TransitionRuleData, TransitionRuleDialog } from './transition-rule-dial
                   <option [value]="w.id" [selected]="w.id === wf.id">{{ w.name }}</option>
                 }
               </select>
-              <span class="hint"><span class="ltr">{{ wf.key }}</span> · {{ wf.scope === 'project' ? 'للمشاريع' : 'لعناصر العمل' }}</span>
+              <span class="hint"><span class="ltr">{{ wf.key }}</span> · {{ wf.scope === 'project' ? 'للمشاريع' : 'للأعمال' }}</span>
             </div>
             <div class="field">
               <label for="wf-init">الحالة الابتدائية (واحدة بالضبط)</label>
@@ -121,10 +121,10 @@ import { TransitionRuleData, TransitionRuleDialog } from './transition-rule-dial
               </ul>
             }
             @if (conflictList().length) {
-              <ul class="conflict-list" aria-label="الحالات التي عليها عناصر">
+              <ul class="conflict-list" aria-label="الحالات التي عليها أعمال">
                 @for (c of conflictList(); track c[0]) { <li><strong>«{{ c[0] }}»</strong>: {{ c[1] }}</li> }
               </ul>
-              <p>انقل العناصر أولًا إلى حالة أخرى باقية في المسار (من لوحة كانبان أو الإجراءات الجماعية)، ثم أعد حفظ المسار.</p>
+              <p>انقل الأعمال أولًا إلى حالة أخرى باقية في المسار (من لوحة كانبان أو الإجراءات الجماعية)، ثم أعد حفظ المسار.</p>
             }
           </div></section>
         }
@@ -222,7 +222,7 @@ export class WorkflowsTab {
         intro: `ستُزال «${name}» من هذا المسار مع انتقالاتها. لا يُحفظ التغيير إلا بزر «حفظ سير العمل».`,
         kind: 'status',
         load: this.statusesApi.impact(id),
-        guidance: 'إن وُجدت عناصر في هذه الحالة فسيرفض الخادم الحفظ: انقل العناصر أولًا إلى حالة أخرى باقية في المسار.',
+        guidance: 'إن وُجدت أعمال في هذه الحالة فسيرفض الخادم الحفظ: انقل الأعمال أولًا إلى حالة أخرى باقية في المسار.',
         confirmText: 'إزالة من المسار',
       })
       .subscribe((ok) => {
@@ -304,7 +304,7 @@ export class WorkflowsTab {
             this.workflows.reload();
           } else if (isConflict(e)) {
             // {statusName: count}: items (or projects) still sitting in a status the new definition removes.
-            const noun = this.workflow()?.scope === 'project' ? 'مشروعًا' : 'عنصرًا';
+            const noun = this.workflow()?.scope === 'project' ? 'مشروعًا' : 'عملًا';
             this.serverMessage.set(e.message);
             this.conflictList.set(errorEntries(e).map(([name, count]) => [name, /^\d+$/.test(count) ? `${count} ${noun}` : count] as const));
           } else {

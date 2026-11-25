@@ -57,7 +57,7 @@
         <option [value]="a[0]" [selected]="a[0] === ui().action">{{ a[1] }}</option>
       }
     </select>
-    <input type="text" class="input ltr" placeholder="معرّف الموضوع / عنصر العمل" aria-label="معرّف الموضوع أو عنصر العمل" [value]="ui().subjectId" (change)="set('subjectId', text($event).trim())" />
+    <input type="text" class="input ltr" placeholder="معرّف الموضوع / العمل" aria-label="معرّف الموضوع أو العمل" [value]="ui().subjectId" (change)="set('subjectId', text($event).trim())" />
     <input type="text" class="input ltr" placeholder="معرّف الارتباط" aria-label="معرّف الارتباط" [value]="ui().correlationId" (change)="set('correlationId', text($event).trim())" />
     <label class="chk"><input type="checkbox" [checked]="ui().security" (change)="onSecurity($event)" /> أحداث أمنية فقط</label>
     <label class="dt">من <input type="date" class="input" aria-label="من تاريخ" [value]="ui().from" (change)="set('from', text($event))" /></label>

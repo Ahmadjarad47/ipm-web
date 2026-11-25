@@ -19,7 +19,7 @@ const LABELS: Readonly<Record<string, string>> = {
   endDate: 'تاريخ النهاية',
   dueDate: 'تاريخ الاستحقاق',
   ownerId: 'المالك',
-  parentId: 'العنصر الأب',
+  parentId: 'العمل الأب',
   priority: 'الأولوية',
   typeId: 'النوع',
   assigneeIds: 'المكلَّفون',

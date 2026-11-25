@@ -45,9 +45,9 @@ const DEFAULT_ACTION: Record<ApprovalEvent, ApprovalAction> = {
       </div>
       @if (subject() === 'work-item') {
         <div class="field">
-          <label for="tt-item">عنصر العمل</label>
+          <label for="tt-item">العمل</label>
           <select id="tt-item" class="select" [ngModel]="workItemId()" (ngModelChange)="workItemId.set($event); result.set(null)" [disabled]="!projectId()">
-            <option value="">— اختر عنصرًا —</option>
+            <option value="">— اختر عملًا —</option>
             @for (w of items.value().items; track w.id) {
               <option [value]="w.id">{{ w.ref }} — {{ w.title }}</option>
             }
@@ -108,7 +108,7 @@ export class TemplateTester {
     const r = this.result();
     if (!r) return null;
     const match = r.match;
-    if (!match) return { tone: 'none', title: 'لا ينطبق أي قالب نشط على هذا العنصر والإجراء.', detail: 'لن تُطلب موافقة، أو سيُرفض الإجراء إن كان محميًا.' };
+    if (!match) return { tone: 'none', title: 'لا ينطبق أي قالب نشط على هذا العمل والإجراء.', detail: 'لن تُطلب موافقة، أو سيُرفض الإجراء إن كان محميًا.' };
     const why = this.why(match);
     if (match.id === this.templateId()) return { tone: 'ok', title: `سيُطبَّق هذا القالب «${match.name}».`, detail: why };
     return { tone: 'other', title: `سيُطبَّق قالب «${match.name}» (${APPROVAL_EVENT_LABELS[match.event]}).`, detail: why };

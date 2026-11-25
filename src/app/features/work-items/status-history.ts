@@ -36,7 +36,7 @@ import { Skeleton } from '@shared/ui/skeleton/skeleton';
         </table>
       </div>
     } @else {
-      <app-empty-state icon="history" title="لا يوجد سجل حالة" text="لم تتغير حالة هذا العنصر بعد." />
+      <app-empty-state icon="history" title="لا يوجد سجل حالة" text="لم تتغير حالة هذا العمل بعد." />
     }
   `,
   styles: `

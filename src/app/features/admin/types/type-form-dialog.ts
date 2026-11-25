@@ -39,7 +39,7 @@ export interface TypeFormData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './type-form-dialog.scss',
   template: `
-    <app-dialog-shell [title]="editing ? 'تعديل نوع العنصر' : 'نوع جديد'" subtitle="الأنواع لا تُحذف؛ يمكن تعطيلها فقط (FR-TYP-09).">
+    <app-dialog-shell [title]="editing ? 'تعديل نوع العمل' : 'نوع جديد'" subtitle="الأنواع لا تُحذف؛ يمكن تعطيلها فقط (FR-TYP-09).">
       @if (editing && canSeeHistory()) {
         <div class="history-row">
           <button type="button" class="btn btn--outline btn--sm" (click)="openHistory()"><app-icon name="history" [size]="14" /> سجل التعديلات</button>
@@ -125,7 +125,7 @@ export interface TypeFormData {
                 <li>«{{ c[0] }}»: {{ c[1] }}</li>
               }
             </ul>
-            <p>انقل العناصر أولًا إلى حالة موجودة في سير العمل الجديد (من لوحة العناصر أو الإجراءات الجماعية)، ثم أعد حفظ النوع.</p>
+            <p>انقل الأعمال أولًا إلى حالة موجودة في سير العمل الجديد (من لوحة الأعمال أو الإجراءات الجماعية)، ثم أعد حفظ النوع.</p>
           </div>
         }
         @for (d of server().general; track d) {
@@ -217,7 +217,7 @@ export class TypeFormDialog {
     request$.subscribe({
       next: (saved) => {
         this.lookup.reload();
-        this.toast.success('تم حفظ نوع العنصر');
+        this.toast.success('تم حفظ نوع العمل');
         this.ref.close(saved);
       },
       error: (e: unknown) => {

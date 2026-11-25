@@ -48,7 +48,7 @@ import { ProjectWorkItemsTab } from './tabs/project-work-items-tab';
 
 type DetailTab = 'items' | 'graph' | 'members' | 'attachments' | 'git' | 'approvals' | 'comments' | 'activity' | 'settings';
 
-const PROGRESS_HELP = 'تُحتسب العناصر الطرفية فقط (التي لا أبناء لها) فلا يتكرر العدّ بين الأب وأبنائه. تُستثنى الملغاة والمؤرشفة، والموافقة لا تعني الإنجاز.';
+const PROGRESS_HELP = 'تُحتسب الأعمال الطرفية فقط (التي لا أبناء لها) فلا يتكرر العدّ بين الأب وأبنائه. تُستثنى الملغاة والمؤرشفة، والموافقة لا تعني الإنجاز.';
 
 @Component({
   selector: 'app-project-detail',
@@ -127,7 +127,7 @@ export class ProjectDetail {
     const id = this.id();
     const attachmentCount = this.attachments.hasValue() ? this.attachments.value().length : null;
     const pending = this.approvals.hasValue() ? this.approvals.value().filter((r) => r.status === 'pending-approval').length : null;
-    const tabs: TabItem<DetailTab>[] = [{ key: 'items', label: 'عناصر العمل', count: p?.workItemCount ?? null }];
+    const tabs: TabItem<DetailTab>[] = [{ key: 'items', label: 'الأعمال', count: p?.workItemCount ?? null }];
     if (this.auth.can('workitem.relations.view', id)) tabs.push({ key: 'graph', label: 'المخطط' });
     tabs.push({ key: 'members', label: 'الأعضاء', count: p?.members.length ?? null });
     if (environment.features.attachments && this.auth.can('files.download', id)) tabs.push({ key: 'attachments', label: 'المرفقات', count: attachmentCount });

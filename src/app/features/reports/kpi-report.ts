@@ -34,9 +34,9 @@ const CATEGORY_COLORS: Record<StatusCategory, string> = {
   cancelled: 'var(--c-danger)',
 };
 
-const HELP_ALL_ITEMS = 'كل العناصر: تشمل العناصر الأب والطرفية معًا. تُستخدم في توزيع الفئات وعدّاد العناصر المفتوحة والمتأخرة.';
-const HELP_LEAF_ITEMS = 'العناصر الطرفية: عناصر دون أبناء، مع استبعاد الملغاة. منها تُحسب نسبة الإنجاز حتى لا يُحتسب الأب وأبناؤه مرتين.';
-const HELP_DEPENDENCY = 'محجوب: عنصر مفتوح يحجبه رابط من عنصر لم يكتمل. حاجب: عنصر مفتوح يحجب غيره. النسبة: العناصر ذات اعتمادية مفتوحة ÷ عناصر النطاق.';
+const HELP_ALL_ITEMS = 'كل الأعمال: تشمل الأعمال الأب والطرفية معًا. تُستخدم في توزيع الفئات وعدّاد الأعمال المفتوحة والمتأخرة.';
+const HELP_LEAF_ITEMS = 'الأعمال الطرفية: أعمال دون أبناء، مع استبعاد الملغاة. منها تُحسب نسبة الإنجاز حتى لا يُحتسب الأب وأبناؤه مرتين.';
+const HELP_DEPENDENCY = 'محجوب: عمل مفتوح يحجبه رابط من عمل لم يكتمل. حاجب: عمل مفتوح يحجب غيره. النسبة: الأعمال ذات اعتمادية مفتوحة ÷ أعمال النطاق.';
 
 /** KPI report (SRS §6.3, FR-UI-08): metrics, distribution by stable category, per-project progress, overdue items, export. */
 @Component({
@@ -204,24 +204,24 @@ export class KpiReport {
       [],
       ['المؤشر', 'القيمة'],
       ['المشاريع النشطة', s?.activeProjects ?? 0],
-      ['عناصر مفتوحة', s?.openWorkItems ?? 0],
-      ['عناصر متأخرة', s?.overdueWorkItems ?? 0],
+      ['أعمال مفتوحة', s?.openWorkItems ?? 0],
+      ['أعمال متأخرة', s?.overdueWorkItems ?? 0],
       ['موافقات معلّقة', s?.pendingApprovals ?? 0],
-      ['عناصر محجوبة', s?.blockedItems ?? 0],
+      ['أعمال محجوبة', s?.blockedItems ?? 0],
       ['نشاط Git (ليس مقياس إنجاز)', s?.gitActivity ?? 0],
       [],
       ['الاعتماديات', 'القيمة'],
-      ['عناصر محجوبة', s?.dependencies.blockedItems ?? 0],
-      ['عناصر حاجبة', s?.dependencies.blockingItems ?? 0],
-      ['نسبة العناصر ذات اعتمادية مفتوحة %', s?.dependencies.itemsWithOpenDependencyPct ?? 0],
+      ['أعمال محجوبة', s?.dependencies.blockedItems ?? 0],
+      ['أعمال حاجبة', s?.dependencies.blockingItems ?? 0],
+      ['نسبة الأعمال ذات اعتمادية مفتوحة %', s?.dependencies.itemsWithOpenDependencyPct ?? 0],
       [],
-      ['فئة الحالة (كل العناصر)', 'العدد'],
+      ['فئة الحالة (كل الأعمال)', 'العدد'],
       ...this.categoryBars().map((b) => [b.label, b.count]),
       [],
-      ['النوع (العناصر الطرفية)', ...this.categories.map((c) => c.label), 'منجز', 'الإجمالي'],
+      ['النوع (الأعمال الطرفية)', ...this.categories.map((c) => c.label), 'منجز', 'الإجمالي'],
       ...this.typeRows().map((t) => [t.name, ...t.cells, t.done, t.total]),
       [],
-      ['الرمز', 'المشروع', 'الحالة', 'التقدم %', 'عناصر منجزة', 'عناصر محسوبة', 'متأخرة'],
+      ['الرمز', 'المشروع', 'الحالة', 'التقدم %', 'أعمال منجزة', 'أعمال محسوبة', 'متأخرة'],
       ...this.projectRows().map((p) => [
         p.code, p.name, this.statuses.get(p.statusId)?.name ?? '—',
         p.progress.percent ?? 'لا توجد بيانات', p.progress.doneLeaves, p.progress.countedLeaves, p.overdueCount,

@@ -39,7 +39,7 @@ import { RelationTypeDialog, RelationTypeDialogData } from './relation-type-dial
       } @else if (lookup.loading() && !lookup.items().length) {
         <div class="card-body"><app-skeleton variant="table" [count]="3" /></div>
       } @else if (!lookup.items().length) {
-        <app-empty-state icon="link" title="لا توجد أنواع روابط" text="أنشئ أول نوع رابط لربط عناصر العمل ببعضها." actionLabel="نوع رابط جديد" (action)="open(null)" />
+        <app-empty-state icon="link" title="لا توجد أنواع روابط" text="أنشئ أول نوع رابط لربط الأعمال ببعضها." actionLabel="نوع رابط جديد" (action)="open(null)" />
       } @else {
         <div class="scroll">
           <table class="atable">

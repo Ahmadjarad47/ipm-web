@@ -16,7 +16,7 @@ import { RANGE_LABELS, rangeProblem, ReportRange, reportFileName, resolveRange }
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <form class="card card-body stack" aria-label="تنزيل تقرير العمل" (submit)="$event.preventDefault(); download()">
-      <p class="muted">ملف Excel فيه ملخص لكل مشروع وقائمة بعناصر العمل التي أُنشئت أو تغيّرت حالتها أو تحدّثت خلال الفترة.</p>
+      <p class="muted">ملف Excel فيه ملخص لكل مشروع وقائمة بالأعمال التي أُنشئت أو تغيّرت حالتها أو تحدّثت خلال الفترة.</p>
 
       <div class="grid">
         <div class="field">

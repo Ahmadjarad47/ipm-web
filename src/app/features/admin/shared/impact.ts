@@ -2,9 +2,9 @@ import { ImpactInfo } from '@domain/work-items/work-item.models';
 
 export type ImpactKind = 'type' | 'status';
 
-/** «سيتأثر: N عنصرًا، M مشروعًا (افتراضي في: …)» — the one-line summary of an impact preview (FR-TYP-09, FR-WF-06). */
+/** «سيتأثر: N عملًا، M مشروعًا (افتراضي في: …)» — the one-line summary of an impact preview (FR-TYP-09, FR-WF-06). */
 export function impactSummary(impact: ImpactInfo, kind: ImpactKind): string {
-  const parts = [`${impact.items} عنصرًا`, `${impact.projects} مشروعًا`];
+  const parts = [`${impact.items} عملًا`, `${impact.projects} مشروعًا`];
   if (kind === 'status') parts.push(`${impact.workflows} مسار عمل`);
   const base = `سيتأثر: ${parts.join('، ')}`;
   if (!impact.asDefaultIn.length) return base;

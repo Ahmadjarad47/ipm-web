@@ -190,7 +190,7 @@ export class WorkItemEditDialog {
         const err = asApiError(e);
         if (err?.status === 409) {
           // Stale version: close so the detail page reloads the item; retrying with the old version would 409 forever.
-          this.toast.info('تم تعديل العنصر من مستخدم آخر. جارٍ تحديث البيانات.');
+          this.toast.info('تم تعديل العمل من مستخدم آخر. جارٍ تحديث البيانات.');
           this.ref.close(this.item);
           return;
         }

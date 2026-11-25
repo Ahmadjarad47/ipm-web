@@ -110,7 +110,7 @@ export const FILTER_GROUP_LABELS: Readonly<Record<string, string>> = {
   createdFrom: 'الإنشاء من',
   createdTo: 'الإنشاء إلى',
   parentId: 'الأب',
-  hasChildren: 'له عناصر فرعية',
+  hasChildren: 'له أعمال فرعية',
   hasDependency: 'له اعتماديات',
   blockedBy: 'محجوب بواسطة',
   blocking: 'يحجب',

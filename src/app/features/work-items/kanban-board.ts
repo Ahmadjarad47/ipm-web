@@ -178,7 +178,7 @@ export class KanbanBoard {
     if (this.busyId()) return;
     // Local pre-check against the item's workflow; the server remains the authority.
     if (!(this.targets().get(item.id) ?? []).includes(statusId)) {
-      this.toast.info('هذا الانتقال غير متاح لهذا العنصر.');
+      this.toast.info('هذا الانتقال غير متاح لهذا العمل.');
       return;
     }
     const fromId = item.statusId;

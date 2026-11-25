@@ -59,13 +59,13 @@ export class ShortcutsDialog {
       items: [
         { keys: ['g', 'd'], label: 'لوحة القيادة' },
         { keys: ['g', 'p'], label: 'المشاريع' },
-        { keys: ['g', 'w'], label: 'عناصر العمل' },
+        { keys: ['g', 'w'], label: 'الأعمال' },
         { keys: ['g', 'a'], label: 'مركز الموافقات' },
       ],
     },
     {
       title: 'إجراءات',
-      items: [{ keys: ['c'], label: 'إنشاء عنصر عمل' }],
+      items: [{ keys: ['c'], label: 'إنشاء عمل' }],
     },
   ];
 }

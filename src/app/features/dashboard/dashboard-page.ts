@@ -36,7 +36,7 @@ const CATEGORY_COLORS: Record<StatusCategory, string> = {
 };
 
 const PERIOD_HELP =
-  'يُحتسب العنصر إذا تقاطع نطاقه (من تاريخ البدء أو الإنشاء إلى تاريخ الاستحقاق أو آخر تحديث) مع الفترة المختارة؛ يكفي تقاطع جزئي. التواريخ حسب المنطقة الزمنية للمؤسسة.';
+  'يُحتسب العمل إذا تقاطع نطاقه (من تاريخ البدء أو الإنشاء إلى تاريخ الاستحقاق أو آخر تحديث) مع الفترة المختارة؛ يكفي تقاطع جزئي. التواريخ حسب المنطقة الزمنية للمؤسسة.';
 
 /** FR-UI-01..07: KPIs, status distribution by stable category, project progress, my work, my approvals, recent activity. */
 @Component({

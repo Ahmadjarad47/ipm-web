@@ -39,7 +39,7 @@ export const PERMISSION_GROUP_LABELS: Record<PermissionGroup, string> = {
   integration: 'تكامل Git',
   security: 'الأمن والتدقيق',
   reporting: 'التقارير',
-  workItemTypes: 'أنواع العناصر',
+  workItemTypes: 'أنواع الأعمال',
   relationships: 'العلاقات',
 };
 

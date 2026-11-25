@@ -67,19 +67,19 @@ let nextId = 0;
             <div class="field">
               <label [attr.for]="uid + '-rl-dir'">الاتجاه</label>
               <select [id]="uid + '-rl-dir'" class="select" (change)="outgoing.set(pick($event) === 'out')">
-                <option value="out">هذا العنصر {{ selectedType()?.name }}…</option>
-                <option value="in">هذا العنصر {{ selectedType()?.inverseName }}…</option>
+                <option value="out">هذا العمل {{ selectedType()?.name }}…</option>
+                <option value="in">هذا العمل {{ selectedType()?.inverseName }}…</option>
               </select>
             </div>
           }
           <div class="field">
-            <label [attr.for]="uid + '-rl-search'">بحث عن العنصر الآخر</label>
+            <label [attr.for]="uid + '-rl-search'">بحث عن العمل الآخر</label>
             <input [id]="uid + '-rl-search'" class="input" type="search" placeholder="المرجع أو العنوان" (input)="search.set(pick($event))" />
           </div>
           <div class="field">
-            <label [attr.for]="uid + '-rl-target'">العنصر</label>
+            <label [attr.for]="uid + '-rl-target'">العمل</label>
             <select [id]="uid + '-rl-target'" class="select" [attr.aria-describedby]="pairsHint() ? uid + '-rl-hint' : null" (change)="targetId.set(pick($event))">
-              <option value="" [selected]="!targetId()">— اختر عنصرًا —</option>
+              <option value="" [selected]="!targetId()">— اختر عملًا —</option>
               @for (c of candidates(); track c.id) {
                 <option [value]="c.id" [selected]="c.id === targetId()" [disabled]="!pairAllowed(c)">
                   {{ ltr(c.ref) }} — {{ c.title }}{{ pairAllowed(c) ? '' : ' (نوع غير مسموح)' }}

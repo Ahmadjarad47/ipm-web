@@ -106,7 +106,7 @@ const KIND_TONES: Record<GitEvent['kind'], BadgeTone> = { push: 'info', pull_req
         }
       </ul>
     } @else {
-      <app-empty-state icon="git" title="لا توجد مستودعات مرتبطة" text="اربط مستودعًا لتُربط الإيداعات وطلبات الدمج بعناصر العمل تلقائيًا." />
+      <app-empty-state icon="git" title="لا توجد مستودعات مرتبطة" text="اربط مستودعًا لتُربط الإيداعات وطلبات الدمج بالأعمال تلقائيًا." />
     }
 
     <app-git-deliveries class="block" [projectId]="project().id" [refreshKey]="refreshKey()" />

@@ -1,6 +1,6 @@
-<app-page-header title="عناصر العمل" subtitle="المهام والأخطاء وبقية عناصر العمل عبر المشاريع">
+<app-page-header title="الأعمال" subtitle="المهام والأخطاء وبقية الأعمال عبر المشاريع">
   @if (canCreate()) {
-    <button type="button" class="btn btn--primary" (click)="openCreate()"><app-icon name="plus" /> إنشاء عنصر عمل</button>
+    <button type="button" class="btn btn--primary" (click)="openCreate()"><app-icon name="plus" /> إنشاء عمل</button>
   }
 </app-page-header>
 
@@ -43,7 +43,7 @@
       <app-error-state [text]="err" (retry)="store.reload()" />
     } @else {
       @if (store.items().length) {
-        <label class="checkbox page-select"><input type="checkbox" [checked]="pageAllSelected()" (change)="togglePage()" /> تحديد كل عناصر هذه الصفحة</label>
+        <label class="checkbox page-select"><input type="checkbox" [checked]="pageAllSelected()" (change)="togglePage()" /> تحديد كل أعمال هذه الصفحة</label>
       }
       <app-data-table
         [tableId]="'work-items'"
@@ -54,7 +54,7 @@
         [page]="store.query().page"
         [pageSize]="store.query().pageSize"
         [sort]="store.query().sort"
-        caption="عناصر العمل"
+        caption="الأعمال"
         (sortChange)="store.setSort($event)"
         (pageChange)="store.setPage($event)"
         (pageSizeChange)="store.setPageSize($event)"
@@ -66,7 +66,7 @@
       <app-kanban-board [project]="project" [filters]="store.filters()" [search]="store.query().search ?? ''" [refreshKey]="boardRefresh()" />
     } @else {
       <div class="board-hint">
-        <p class="muted">اختر مشروعًا لعرض لوحة كانبان. تُبنى الأعمدة من سير عمل أنواع العناصر في المشروع المحدد.</p>
+        <p class="muted">اختر مشروعًا لعرض لوحة كانبان. تُبنى الأعمدة من سير عمل أنواع الأعمال في المشروع المحدد.</p>
         <label for="board-project">المشروع</label>
         <select id="board-project" class="select" (change)="pickBoardProject($event)">
           <option value="">— اختر مشروعًا —</option>

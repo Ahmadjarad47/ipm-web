@@ -53,7 +53,7 @@ export const routes: Routes = [
       },
       {
         path: 'work-items',
-        data: { ...needs('tasks.view'), ...crumbs('عناصر العمل') },
+        data: { ...needs('tasks.view'), ...crumbs('الأعمال') },
         loadChildren: () => import('@features/work-items/work-items.routes').then((m) => m.WORK_ITEM_ROUTES),
       },
       {
@@ -69,7 +69,7 @@ export const routes: Routes = [
       },
       {
         // Children (features/admin/admin.routes.ts) should declare their own `data.crumbs`, e.g.
-        // crumbs('الإدارة', 'أنواع العناصر'); this is the fallback for the whole section.
+        // crumbs('الإدارة', 'أنواع الأعمال'); this is the fallback for the whole section.
         path: 'admin',
         data: crumbs('الإدارة'),
         loadChildren: () => import('@features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),

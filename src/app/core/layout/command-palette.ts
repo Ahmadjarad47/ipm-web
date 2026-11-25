@@ -25,7 +25,7 @@ interface PaletteItem {
 }
 
 const KIND_ICON: Record<SearchHit['kind'], string> = { project: 'folder', 'work-item': 'list', approval: 'approval', user: 'user' };
-const KIND_GROUP: Record<SearchHit['kind'], string> = { project: 'المشاريع', 'work-item': 'عناصر العمل', approval: 'الموافقات', user: 'المستخدمون' };
+const KIND_GROUP: Record<SearchHit['kind'], string> = { project: 'المشاريع', 'work-item': 'الأعمال', approval: 'الموافقات', user: 'المستخدمون' };
 
 /**
  * Global search & navigation (Ctrl/⌘+K). Searches everything the user may see; with an empty
@@ -40,7 +40,7 @@ const KIND_GROUP: Record<SearchHit['kind'], string> = { project: 'المشاري
       <div class="search">
         <app-icon name="search" />
         <input #input type="text" [value]="query()" (input)="query.set($any($event.target).value); active.set(0)" (keydown)="onKey($event)"
-          placeholder="ابحث برمز (ERP-104) أو اسم مشروع أو عنصر…" aria-label="بحث شامل" aria-controls="cp-list"
+          placeholder="ابحث برمز (ERP-104) أو اسم مشروع أو عمل…" aria-label="بحث شامل" aria-controls="cp-list"
           [attr.aria-activedescendant]="items().length ? 'cp-' + active() : null" autocomplete="off" />
         <kbd>Esc</kbd>
       </div>
@@ -125,7 +125,7 @@ export class CommandPalette {
     const act = (key: string, icon: string, title: string, link: string, run?: () => void): PaletteItem => ({ key: `act-${key}`, icon, title, subtitle: '', code: null, link, group: 'إجراءات', run });
     const list: PaletteItem[] = [];
     if (a.can('projects.create')) list.push(act('project', 'plus', 'إنشاء مشروع', '/projects?create=true'));
-    if (a.canSomewhere('tasks.create')) list.push(act('workitem', 'plus', 'إنشاء عنصر عمل', '/work-items?create=true'));
+    if (a.canSomewhere('tasks.create')) list.push(act('workitem', 'plus', 'إنشاء عمل', '/work-items?create=true'));
     list.push(act('notifications', 'bell', 'الإشعارات', '/notifications'));
     list.push(act('profile', 'user', 'الملف الشخصي', '/profile'));
     list.push(act('shortcuts', 'info', 'اختصارات لوحة المفاتيح', '', () => this.shortcuts.openCheatSheet()));

@@ -3,14 +3,14 @@
     <p class="hero__eyebrow">نظام إدارة المشاريع الداخلي</p>
     <h1 id="db-hero">{{ greeting() }}، {{ user()?.name }}</h1>
     <p class="hero__text">
-      نظرة عامة على المشاريع وعناصر العمل والموافقات ضمن صلاحياتك.
+      نظرة عامة على المشاريع والأعمال والموافقات ضمن صلاحياتك.
       @if (statsValue(); as s) {
-        لديك <strong>{{ s.pendingApprovals }}</strong> موافقة بانتظارك و<strong>{{ s.overdueWorkItems }}</strong> عنصر عمل متأخر.
+        لديك <strong>{{ s.pendingApprovals }}</strong> موافقة بانتظارك و<strong>{{ s.overdueWorkItems }}</strong> عمل متأخر.
       }
     </p>
     <div class="hero__actions">
       <a class="btn btn--gold" routerLink="/approvals">الموافقات</a>
-      <a class="btn btn--on-dark" routerLink="/work-items">عناصر العمل</a>
+      <a class="btn btn--on-dark" routerLink="/work-items">الأعمال</a>
     </div>
   </div>
 </section>
@@ -75,9 +75,9 @@
   <section class="grid grid--4 kpis" aria-label="المؤشرات">
     <app-kpi-card label="المشاريع النشطة" icon="folder" [value]="statsValue()?.activeProjects ?? 0" [loading]="stats.isLoading()"
       [hint]="'من أصل ' + (statsValue()?.totalProjects ?? 0) + '. مشاريع غير مؤرشفة في فئة «نشط».'" link="/projects" />
-    <app-kpi-card label="عناصر عمل مفتوحة" icon="list" tone="info" [value]="statsValue()?.openWorkItems ?? 0" [loading]="stats.isLoading()"
+    <app-kpi-card label="أعمال مفتوحة" icon="list" tone="info" [value]="statsValue()?.openWorkItems ?? 0" [loading]="stats.isLoading()"
       [hint]="'ليست في فئة «منجز» أو «ملغى». ' + (statsValue()?.blockedItems ?? 0) + ' محجوبة باعتماديات.'" link="/work-items" />
-    <app-kpi-card label="عناصر عمل متأخرة" icon="alert" tone="danger" [value]="statsValue()?.overdueWorkItems ?? 0" [loading]="stats.isLoading()"
+    <app-kpi-card label="أعمال متأخرة" icon="alert" tone="danger" [value]="statsValue()?.overdueWorkItems ?? 0" [loading]="stats.isLoading()"
       hint="مفتوحة وتجاوزت تاريخ الاستحقاق (حسب المنطقة الزمنية للمؤسسة)." link="/work-items" [queryParams]="{ overdue: 'true' }" />
     <app-kpi-card label="موافقات بانتظارك" icon="approval" tone="gold" [value]="statsValue()?.pendingApprovals ?? 0" [loading]="stats.isLoading()"
       hint="طلبات بانتظار قرارك الآن." link="/approvals" />
@@ -88,12 +88,12 @@
   <section class="card card-body deps" aria-labelledby="db-deps">
     <h2 class="section-title" id="db-deps">
       الاعتماديات
-      <app-help-tip text="«محجوب»: عنصر مفتوح يحجبه رابط من عنصر آخر لم يكتمل. «حاجب»: عنصر مفتوح يحجب غيره. النسبة = العناصر ذات اعتمادية مفتوحة ÷ عناصر النطاق." label="تعريف الاعتماديات" />
+      <app-help-tip text="«محجوب»: عمل مفتوح يحجبه رابط من عمل آخر لم يكتمل. «حاجب»: عمل مفتوح يحجب غيره. النسبة = الأعمال ذات اعتمادية مفتوحة ÷ أعمال النطاق." label="تعريف الاعتماديات" />
     </h2>
     <dl class="dep-grid">
-      <div><dt>عناصر محجوبة</dt><dd>{{ statsValue()?.dependencies?.blockedItems ?? 0 }}</dd></div>
-      <div><dt>عناصر حاجبة</dt><dd>{{ statsValue()?.dependencies?.blockingItems ?? 0 }}</dd></div>
-      <div><dt>عناصر باعتمادية مفتوحة</dt><dd>{{ statsValue()?.dependencies?.itemsWithOpenDependencyPct ?? 0 }}%</dd></div>
+      <div><dt>أعمال محجوبة</dt><dd>{{ statsValue()?.dependencies?.blockedItems ?? 0 }}</dd></div>
+      <div><dt>أعمال حاجبة</dt><dd>{{ statsValue()?.dependencies?.blockingItems ?? 0 }}</dd></div>
+      <div><dt>أعمال باعتمادية مفتوحة</dt><dd>{{ statsValue()?.dependencies?.itemsWithOpenDependencyPct ?? 0 }}%</dd></div>
     </dl>
   </section>
 }
@@ -101,24 +101,24 @@
 <div class="layout">
   <section class="card card-body" aria-labelledby="db-dist">
     <h2 class="section-title" id="db-dist">
-      توزيع العناصر حسب الفئة
-      <app-help-tip text="يشمل كل العناصر في النطاق (الأب والطرفية) حسب فئة الحالة الثابتة. نسبة الإنجاز في الأسفل تخص العناصر الطرفية فقط." label="تعريف التوزيع" />
+      توزيع الأعمال حسب الفئة
+      <app-help-tip text="يشمل كل الأعمال في النطاق (الأب والطرفية) حسب فئة الحالة الثابتة. نسبة الإنجاز في الأسفل تخص الأعمال الطرفية فقط." label="تعريف التوزيع" />
     </h2>
-    <p class="muted def">كل العناصر (الأب والطرفية) في النطاق المختار.</p>
+    <p class="muted def">كل الأعمال (الأب والطرفية) في النطاق المختار.</p>
     @if (stats.error()) {
       <app-error-state title="تعذّر تحميل التوزيع" (retry)="stats.reload()" />
     } @else if (stats.isLoading() && !statsValue()) {
       <app-skeleton variant="lines" [count]="5" />
     } @else {
       <div class="dist">
-        <svg viewBox="0 0 42 42" class="donut" role="img" [attr.aria-label]="'مخطط دائري لتوزيع كل العناصر حسب الفئة، الإجمالي ' + totalItems()">
+        <svg viewBox="0 0 42 42" class="donut" role="img" [attr.aria-label]="'مخطط دائري لتوزيع كل الأعمال حسب الفئة، الإجمالي ' + totalItems()">
           <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--c-emerald-50)" stroke-width="6" />
           @for (s of donut(); track s.key) {
             <circle cx="21" cy="21" r="15.915" fill="none" [attr.stroke]="s.color" stroke-width="6"
               [attr.stroke-dasharray]="s.dash" [attr.stroke-dashoffset]="s.offset" transform="rotate(-90 21 21)" />
           }
           <text x="21" y="20" text-anchor="middle" class="donut-num">{{ totalItems() }}</text>
-          <text x="21" y="26" text-anchor="middle" class="donut-lbl">كل العناصر</text>
+          <text x="21" y="26" text-anchor="middle" class="donut-lbl">كل الأعمال</text>
         </svg>
         <ul class="bars">
           @for (b of categoryBars(); track b.key) {
@@ -131,7 +131,7 @@
         </ul>
       </div>
       <table class="sr-only">
-        <caption>توزيع كل العناصر حسب فئة الحالة</caption>
+        <caption>توزيع كل الأعمال حسب فئة الحالة</caption>
         <thead><tr><th scope="col">الفئة</th><th scope="col">العدد</th><th scope="col">النسبة</th></tr></thead>
         <tbody>
           @for (b of categoryBars(); track b.key) {
@@ -142,7 +142,7 @@
 
       @if (typeRows().length) {
         <h3 class="sub">
-          الإنجاز حسب النوع <small class="muted">(العناصر الطرفية فقط)</small>
+          الإنجاز حسب النوع <small class="muted">(الأعمال الطرفية فقط)</small>
         </h3>
         <ul class="types">
           @for (t of typeRows(); track t.typeId) {
@@ -180,7 +180,7 @@
               <span class="progress"><span [style.width.%]="p.progress.percent ?? 0"></span></span>
               <strong class="pct">{{ p.progress.percent === null ? 'لا توجد بيانات' : p.progress.percent + '%' }}</strong>
             </div>
-            <small class="muted">{{ p.progress.doneLeaves }} من {{ p.progress.countedLeaves }} عنصرًا طرفيًا منجزًا · ينتهي {{ p.endDate | appDate }}</small>
+            <small class="muted">{{ p.progress.doneLeaves }} من {{ p.progress.countedLeaves }} عملًا طرفيًا منجزًا · ينتهي {{ p.endDate | appDate }}</small>
           </a>
         </li>
       } @empty {
@@ -191,11 +191,11 @@
 
   <section class="card card-body" aria-labelledby="db-mine">
     <h2 class="section-title" id="db-mine">
-      عناصر عملي
+      أعمالي
       <a routerLink="/work-items" [queryParams]="{ mine: 'true' }" class="btn btn--ghost btn--sm">عرض الكل</a>
     </h2>
     @if (myItems.error()) {
-      <app-error-state title="تعذّر تحميل عناصر عملك" (retry)="myItems.reload()" />
+      <app-error-state title="تعذّر تحميل أعمالك" (retry)="myItems.reload()" />
     } @else if (myItems.isLoading() && !myItemsValue().length) {
       <app-skeleton variant="lines" [count]="4" />
     } @else {
@@ -213,8 +213,8 @@
             </a>
           </li>
         } @empty {
-          <app-empty-state icon="checkCircle" title="لا توجد عناصر عمل مكلَّف بها" text="ستظهر هنا العناصر المكلَّف بها.">
-            <a class="btn btn--primary" routerLink="/work-items">استعرض كل عناصر العمل</a>
+          <app-empty-state icon="checkCircle" title="لا توجد أعمال مكلَّف بها" text="ستظهر هنا الأعمال المكلَّف بها.">
+            <a class="btn btn--primary" routerLink="/work-items">استعرض كل الأعمال</a>
           </app-empty-state>
         }
       </ul>

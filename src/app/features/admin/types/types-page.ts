@@ -31,7 +31,7 @@ type TypesTab = 'types' | 'hierarchy' | 'relations';
   host: { '(window:beforeunload)': 'onUnload($event)' },
   styleUrl: '../shared/admin-table.scss',
   template: `
-    <app-page-header title="أنواع العناصر" subtitle="عرّف أنواع عناصر العمل وحقولها الإضافية وسير عملها دون تعديل الكود.">
+    <app-page-header title="أنواع الأعمال" subtitle="عرّف أنواع الأعمال وحقولها الإضافية وسير عملها دون تعديل الكود.">
       <button type="button" class="btn btn--primary" [disabled]="!canManage()" (click)="open(null)">
         <app-icon name="plus" [size]="16" /> نوع جديد
       </button>
@@ -44,17 +44,17 @@ type TypesTab = 'types' | 'hierarchy' | 'relations';
         @case ('types') {
           <app-admin-notice>الأنواع لا تُحذف بل تُعطَّل (FR-TYP-09)؛ المفتاح الداخلي ثابت، وتغيير الاسم لا يُعيد كتابة السجل التاريخي.</app-admin-notice>
 
-          <section class="card" aria-label="قائمة أنواع العناصر">
+          <section class="card" aria-label="قائمة أنواع الأعمال">
             @if (types.isLoading() && !types.hasValue()) {
               <app-skeleton variant="table" [count]="5" />
             } @else if (types.error()) {
-              <app-error-state title="تعذّر تحميل أنواع العناصر" (retry)="types.reload()" />
+              <app-error-state title="تعذّر تحميل أنواع الأعمال" (retry)="types.reload()" />
             } @else if (!sorted().length) {
-              <app-empty-state icon="layers" title="لا توجد أنواع بعد" text="أنشئ أول نوع عنصر." actionLabel="نوع جديد" (action)="open(null)" />
+              <app-empty-state icon="layers" title="لا توجد أنواع بعد" text="أنشئ أول نوع عمل." actionLabel="نوع جديد" (action)="open(null)" />
             } @else {
               <div class="scroll">
                 <table class="atable">
-                  <caption class="sr-only">أنواع العناصر</caption>
+                  <caption class="sr-only">أنواع الأعمال</caption>
                   <thead>
                     <tr>
                       <th scope="col">النوع</th>
@@ -164,8 +164,8 @@ export class TypesPage implements HasUnsavedChanges {
     // FR-TYP-09: show who is affected before switching a type off.
     this.impact
       .confirm({
-        title: 'تعطيل نوع العنصر',
-        intro: `سيتم تعطيل «${type.name}»؛ لن يمكن إنشاء عناصر جديدة منه، وتبقى العناصر القائمة كما هي.`,
+        title: 'تعطيل نوع العمل',
+        intro: `سيتم تعطيل «${type.name}»؛ لن يمكن إنشاء أعمال جديدة منه، وتبقى الأعمال القائمة كما هي.`,
         kind: 'type',
         load: this.api.impact(type.id),
         guidance: 'النوع الافتراضي في مشروع لا يمكن تعطيله؛ غيّر الافتراضي في تلك المشاريع أولًا.',

@@ -186,7 +186,7 @@ export class UserDialog {
     const parts: string[] = [];
     if (owned.length) parts.push(`مالك لـ ${owned.length} مشروع (${owned.map((p) => p.name).join('، ')})`);
     if (memberOf) parts.push(`عضو في ${memberOf} مشروع`);
-    return `هذا المستخدم ${parts.join(' و')}. التعطيل يُنهي جلساته فورًا، وتبقى العناصر المفتوحة المكلَّف بها كما هي ويجب إعادة تكليفها. أعد تعيين مالك المشروع قبل التعطيل.`;
+    return `هذا المستخدم ${parts.join(' و')}. التعطيل يُنهي جلساته فورًا، وتبقى الأعمال المفتوحة المكلَّف بها كما هي ويجب إعادة تكليفها. أعد تعيين مالك المشروع قبل التعطيل.`;
   });
 
   protected bad(key: 'name' | 'email' | 'title'): boolean {

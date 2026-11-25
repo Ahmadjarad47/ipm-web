@@ -76,7 +76,7 @@ export function providerLabel(provider: GitProvider): string {
 export function explainDelivery(d: Pick<WebhookDelivery, 'outcome' | 'signatureValid' | 'message' | 'linkedRefs'>): string {
   switch (d.outcome) {
     case 'processed':
-      return d.linkedRefs.length ? `عولج وربط ${d.linkedRefs.length} عنصر عمل.` : 'عولج دون ربط أي عنصر (لا يوجد رمز عنصر في الرسالة أو الفرع).';
+      return d.linkedRefs.length ? `عولج وربط ${d.linkedRefs.length} عمل.` : 'عولج دون ربط أي عمل (لا يوجد رمز عمل في الرسالة أو الفرع).';
     case 'duplicate':
       return 'وصل هذا التسليم من قبل وعولج؛ تجاهله النظام عمدًا لمنع تكرار الروابط. لا يلزم أي إجراء.';
     case 'rejected':

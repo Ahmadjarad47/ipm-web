@@ -203,11 +203,11 @@
     </aside>
   </div>
 } @else if (notFound()) {
-  <app-empty-state icon="search" title="عنصر العمل غير موجود" text="قد يكون محذوفًا أو لا تملك صلاحية عرضه.">
-    <a class="btn btn--outline" routerLink="/work-items">العودة إلى عناصر العمل</a>
+  <app-empty-state icon="search" title="العمل غير موجود" text="قد يكون محذوفًا أو لا تملك صلاحية عرضه.">
+    <a class="btn btn--outline" routerLink="/work-items">العودة إلى الأعمال</a>
   </app-empty-state>
 } @else if (failed()) {
-  <app-error-state text="تعذّر تحميل عنصر العمل." (retry)="resource.reload()" />
+  <app-error-state text="تعذّر تحميل العمل." (retry)="resource.reload()" />
 } @else {
   <app-skeleton variant="detail" />
 }

@@ -18,7 +18,7 @@ type ReportTab = 'timeline' | 'kpi' | 'export';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="no-print">
-      <app-page-header title="التقارير والخط الزمني" subtitle="تابع جدول المشاريع والعناصر ومؤشرات الأداء، ونزّل تقارير العمل." />
+      <app-page-header title="التقارير والخط الزمني" subtitle="تابع جدول المشاريع والأعمال ومؤشرات الأداء، ونزّل تقارير العمل." />
     </div>
     @if (tab() !== 'export') {
       <app-report-filters [(filters)]="filters" />

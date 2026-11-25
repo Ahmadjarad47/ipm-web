@@ -15,7 +15,7 @@ export interface MemberWarningsData {
   imports: [DialogShell, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-dialog-shell title="عناصر مفتوحة لأعضاء أُزيلوا" subtitle="أُزيل الأعضاء، لكن العناصر التالية ما زالت مُسندة إليهم. أعد إسنادها لتفادي بقائها بلا متابعة.">
+    <app-dialog-shell title="أعمال مفتوحة لأعضاء أُزيلوا" subtitle="أُزيل الأعضاء، لكن الأعمال التالية ما زالت مُسندة إليهم. أعد إسنادها لتفادي بقائها بلا متابعة.">
       <ul class="warnings">
         @for (w of data.warnings; track w.userId) {
           <li>
@@ -24,7 +24,7 @@ export interface MemberWarningsData {
             <ul class="refs">
               @for (r of w.refs; track r) {
                 <li>
-                  <a class="ltr" [routerLink]="['/work-items']" [queryParams]="{ projectId: data.projectId }" (click)="ref.close()" [attr.aria-label]="'فتح عناصر المشروع للعنصر ' + r">{{ r }}</a>
+                  <a class="ltr" [routerLink]="['/work-items']" [queryParams]="{ projectId: data.projectId }" (click)="ref.close()" [attr.aria-label]="'فتح أعمال المشروع للعمل ' + r">{{ r }}</a>
                 </li>
               }
             </ul>

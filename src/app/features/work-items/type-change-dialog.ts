@@ -20,7 +20,7 @@ let nextId = 0;
   imports: [DialogShell],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-dialog-shell title="تحويل نوع العنصر" [subtitle]="ltr(item.ref)">
+    <app-dialog-shell title="تحويل نوع العمل" [subtitle]="ltr(item.ref)">
       <div class="field">
         <label [attr.for]="uid + '-tc-type'">النوع الجديد</label>
         <select [id]="uid + '-tc-type'" class="select" (change)="pick($event)">

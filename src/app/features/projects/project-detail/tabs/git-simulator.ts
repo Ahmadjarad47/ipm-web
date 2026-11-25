@@ -49,7 +49,7 @@ interface LinkedRef {
           </select>
         </div>
         <div class="field">
-          <label [attr.for]="uid + '-item'">عنصر عمل (لاقتراح الفرع)</label>
+          <label [attr.for]="uid + '-item'">عمل (لاقتراح الفرع)</label>
           <select [id]="uid + '-item'" class="select" name="item" [ngModel]="itemId()" (ngModelChange)="pickItem($event)">
             <option value="">—</option>
             @for (w of items.value().items; track w.id) {

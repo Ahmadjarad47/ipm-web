@@ -12,7 +12,7 @@
         role="listitem"
         [class.drop-ok]="isDropAllowed(col.id)"
         [class.drop-no]="dragging() && !isDropAllowed(col.id)"
-        [attr.aria-label]="col.name + ' — ' + (byStatus().get(col.id)?.length ?? 0) + ' عنصر'"
+        [attr.aria-label]="col.name + ' — ' + (byStatus().get(col.id)?.length ?? 0) + ' عمل'"
         (dragover)="onDragOver($event, col.id)"
         (drop)="onDrop($event, col.id)"
       >
@@ -25,7 +25,7 @@
           @for (item of byStatus().get(col.id) ?? []; track item.id) {
             <ng-container *ngTemplateOutlet="card; context: { $implicit: item }" />
           } @empty {
-            <p class="muted none">لا توجد عناصر</p>
+            <p class="muted none">لا توجد أعمال</p>
           }
         </div>
       </section>

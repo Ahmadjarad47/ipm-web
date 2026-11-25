@@ -11,7 +11,7 @@ import { Badge } from '@shared/ui/badge/badge';
 import { HelpTip } from '@shared/ui/help-tip/help-tip';
 import { buildOverrideMap, ConflictRow, conflictRows, sameOverrides } from '../project-workflow-overrides';
 
-const OVERRIDE_HELP = 'اختر سير عمل مختلفًا لنوع معيّن داخل هذا المشروع فقط. لا يُسمح بالتغيير إذا كانت عناصر قائمة في حالات غير موجودة في سير العمل الجديد.';
+const OVERRIDE_HELP = 'اختر سير عمل مختلفًا لنوع معيّن داخل هذا المشروع فقط. لا يُسمح بالتغيير إذا كانت أعمال قائمة في حالات غير موجودة في سير العمل الجديد.';
 
 let nextId = 0;
 
@@ -21,8 +21,8 @@ let nextId = 0;
   imports: [TypeChip, Badge, HelpTip],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h3 class="section-title">أنواع عناصر العمل</h3>
-    <p class="muted note">إلغاء إتاحة نوع يمنع إنشاء عناصر جديدة منه فقط؛ العناصر الحالية تبقى قابلة للعرض والتقارير.</p>
+    <h3 class="section-title">أنواع الأعمال</h3>
+    <p class="muted note">إلغاء إتاحة نوع يمنع إنشاء أعمال جديدة منه فقط؛ الأعمال الحالية تبقى قابلة للعرض والتقارير.</p>
     <ul class="types">
       @for (t of types(); track t.id) {
         <li>
@@ -84,10 +84,10 @@ let nextId = 0;
     @if (conflicts().length) {
       <div class="alert" role="alert">
         <strong>تعذّر تطبيق سير العمل المختار</strong>
-        <p>توجد عناصر قائمة في حالات غير موجودة في سير العمل الجديد. انقل هذه العناصر إلى حالة صالحة أو اختر سير عمل يحتوي حالاتها، ثم أعد المحاولة.</p>
+        <p>توجد أعمال قائمة في حالات غير موجودة في سير العمل الجديد. انقل هذه الأعمال إلى حالة صالحة أو اختر سير عمل يحتوي حالاتها، ثم أعد المحاولة.</p>
         <ul>
           @for (c of conflicts(); track c.label) {
-            <li><strong>{{ c.label }}</strong>: {{ c.count }} عنصر</li>
+            <li><strong>{{ c.label }}</strong>: {{ c.count }} عمل</li>
           }
         </ul>
       </div>

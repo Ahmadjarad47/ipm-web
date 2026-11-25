@@ -57,7 +57,7 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   endDate: 'تاريخ الانتهاء',
   dueDate: 'تاريخ الاستحقاق',
   ownerId: 'المالك',
-  parentId: 'العنصر الأب',
+  parentId: 'العمل الأب',
   priority: 'الأولوية',
   typeId: 'النوع',
   assigneeIds: 'المكلَّفون',

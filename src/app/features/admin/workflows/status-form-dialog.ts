@@ -20,7 +20,7 @@ export interface StatusFormData {
 
 const STATUS_CONTROLS: readonly string[] = ['key', 'name', 'color', 'category', 'scope'];
 
-export const SCOPE_LABELS: Record<StatusScope, string> = { project: 'حالات المشاريع', 'work-item': 'حالات عناصر العمل' };
+export const SCOPE_LABELS: Record<StatusScope, string> = { project: 'حالات المشاريع', 'work-item': 'حالات الأعمال' };
 
 @Component({
   selector: 'app-status-form-dialog',

@@ -40,9 +40,9 @@ const badge = (text: string, title: string): RuleBadge => ({ text, title, width:
 export function ruleBadges(t: Transition): readonly RuleBadge[] {
   return [
     ...(t.permission ? [badge('صلاحية', `يتطلب صلاحية: ${PERMISSION_LABELS[t.permission]}`)] : []),
-    ...(t.requiresAssignee ? [badge('مكلَّف', 'يتطلب وجود مكلَّف بالعنصر')] : []),
+    ...(t.requiresAssignee ? [badge('مكلَّف', 'يتطلب وجود مكلَّف بالعمل')] : []),
     ...(t.requiresApproval ? [badge('موافقة', 'يتطلب موافقة معتمدة')] : []),
-    ...(t.blockedByOpenDependencies ? [badge('اعتماديات', 'يُرفض عند وجود اعتماديات مفتوحة تحجب العنصر')] : []),
+    ...(t.blockedByOpenDependencies ? [badge('اعتماديات', 'يُرفض عند وجود اعتماديات مفتوحة تحجب العمل')] : []),
   ];
 }
 

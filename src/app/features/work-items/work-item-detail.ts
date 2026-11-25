@@ -138,7 +138,7 @@ export class WorkItemDetail {
     const item = this.item();
     if (!item) return [];
     return [
-      { label: 'عناصر العمل', link: '/work-items' },
+      { label: 'الأعمال', link: '/work-items' },
       { label: this.project()?.name ?? '—', link: ['/projects', item.projectId] },
       { label: item.ref },
     ];
@@ -367,7 +367,7 @@ export class WorkItemDetail {
             ? this.api.close(item.id, { version: item.version, ...(result.comment ? { comment: result.comment } : {}), ...toStatusId })
             : this.api.reopen(item.id, { version: item.version, comment: result.comment, ...toStatusId });
         // 400 on `toStatusId` = several valid targets and none chosen: ask again with the choice made mandatory.
-        this.runStatus(request$, mode === 'close' ? 'تم إغلاق العنصر' : 'تمت إعادة فتح العنصر', (e) => {
+        this.runStatus(request$, mode === 'close' ? 'تم إغلاق العمل' : 'تمت إعادة فتح العمل', (e) => {
           if (e.status === 400 && e.details?.['toStatusId']) {
             this.openCloseReopen(mode, true, result.comment);
             return true;
@@ -479,7 +479,7 @@ export class WorkItemDetail {
         this.savingInline.set(false);
         const err = asApiError(e);
         if (err?.status === 409) {
-          this.toast.info('تم تعديل العنصر من مستخدم آخر. جارٍ تحديث البيانات.');
+          this.toast.info('تم تعديل العمل من مستخدم آخر. جارٍ تحديث البيانات.');
           this.refresh();
         } else if (err?.details?.['code'] === 'approval_required') {
           this.toast.info('هذا الحقل محمي ويتطلب طلب تعديل حساس. استخدم زر «تعديل».');

@@ -191,7 +191,7 @@ export class ViewsMenu {
   protected readonly all = computed<readonly NamedView[]>(() => {
     const me = this.userId();
     const builtIns: NamedView[] = [
-      { id: 'b-mine', name: 'عناصر عملي', builtIn: true, state: { filters: { assigneeIds: [me] }, view: 'table' } },
+      { id: 'b-mine', name: 'أعمالي', builtIn: true, state: { filters: { assigneeIds: [me] }, view: 'table' } },
       { id: 'b-overdue', name: 'المتأخرة', builtIn: true, state: { filters: { overdue: true }, view: 'table' } },
     ];
     const review = this.statuses.items().find((s) => s.scope === 'work-item' && s.key === 'in_review');

@@ -117,7 +117,7 @@ let nextId = 0;
           <fieldset class="field group scroll">
             <legend>المكلّف</legend>
             <label class="checkbox"><input type="checkbox" [checked]="flag('unassigned')" (change)="setFlag('unassigned', $event)" /> غير مُكلَّف</label>
-            <label class="checkbox"><input type="checkbox" [checked]="mine()" (change)="toggleMine($event)" /> عناصر عملي</label>
+            <label class="checkbox"><input type="checkbox" [checked]="mine()" (change)="toggleMine($event)" /> أعمالي</label>
             @for (u of activeUsers(); track u.id) {
               <label class="checkbox"><input type="checkbox" [checked]="has('assigneeIds', u.id)" (change)="toggle('assigneeIds', u.id)" /> {{ u.name }}</label>
             }
@@ -144,7 +144,7 @@ let nextId = 0;
           <app-item-filter-picker [fieldId]="uid + '-f-blocking'" label="يحجب" [value]="text1('blocking')" [valueLabel]="labelOf('blocking')" (picked)="setItem('blocking', $event)" />
 
           <div class="field">
-            <label [attr.for]="uid + '-f-children'">له عناصر فرعية</label>
+            <label [attr.for]="uid + '-f-children'">له أعمال فرعية</label>
             <select [id]="uid + '-f-children'" class="select" (change)="setTri('hasChildren', $event)">
               <option value="any" [selected]="tri('hasChildren') === 'any'">الكل</option>
               <option value="true" [selected]="tri('hasChildren') === 'true'">نعم</option>

@@ -45,9 +45,9 @@ let nextId = 0;
           }
         }
 
-        <h4 class="muted">العناصر الفرعية ({{ children.value()?.total ?? 0 }})</h4>
+        <h4 class="muted">الأعمال الفرعية ({{ children.value()?.total ?? 0 }})</h4>
         @if (children.error()) {
-          <app-error-state title="تعذّر تحميل العناصر الفرعية" (retry)="children.reload()" />
+          <app-error-state title="تعذّر تحميل الأعمال الفرعية" (retry)="children.reload()" />
         }
         @for (c of children.value()?.items ?? []; track c.id) {
           <div class="row">
@@ -58,7 +58,7 @@ let nextId = 0;
           </div>
         } @empty {
           @if (!children.error()) {
-            <span class="muted">لا توجد عناصر فرعية.</span>
+            <span class="muted">لا توجد أعمال فرعية.</span>
           }
         }
     </div>
@@ -126,7 +126,7 @@ export class HierarchyPanel {
       next: () => {
         this.busy.set(false);
         this.selected.set(null);
-        this.toast.success('تم تحديث العنصر الأب');
+        this.toast.success('تم تحديث العمل الأب');
         this.changedParent.emit();
       },
       error: (e: unknown) => {

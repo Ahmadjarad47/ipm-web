@@ -35,16 +35,16 @@ const PAGE_SIZE = 10;
       <span class="spacer"></span>
       @if (!project().archived) {
         <button *appCan="'tasks.create'; project: project().id" type="button" class="btn btn--primary btn--sm" (click)="create()">
-          <app-icon name="plus" [size]="16" /> إنشاء عنصر عمل
+          <app-icon name="plus" [size]="16" /> إنشاء عمل
         </button>
       }
     </div>
 
     @if (list.error()) {
-      <app-error-state title="تعذّر تحميل عناصر العمل" (retry)="list.reload()" />
+      <app-error-state title="تعذّر تحميل الأعمال" (retry)="list.reload()" />
     } @else if (tree()) {
       @if (nodes().length) {
-        <ul class="tree" role="tree" aria-label="شجرة عناصر العمل">
+        <ul class="tree" role="tree" aria-label="شجرة الأعمال">
           @for (n of nodes(); track n.item.id) {
             <li role="treeitem" [style.padding-inline-start.px]="n.depth * 24" (click)="open(n.item)" (keydown.enter)="open(n.item)" tabindex="0">
               <app-type-chip [typeId]="n.item.typeId" [iconOnly]="true" />
@@ -56,16 +56,16 @@ const PAGE_SIZE = 10;
           }
         </ul>
         @if (list.value().total > nodes().length) {
-          <p class="muted note">تُعرض أول {{ nodes().length }} عنصرًا من أصل {{ list.value().total }}.</p>
+          <p class="muted note">تُعرض أول {{ nodes().length }} عملًا من أصل {{ list.value().total }}.</p>
         }
       } @else if (!list.isLoading()) {
-        <app-empty-state icon="list" title="لا توجد عناصر عمل" />
+        <app-empty-state icon="list" title="لا توجد أعمال" />
       }
     } @else {
       <app-data-table
-        caption="عناصر عمل المشروع"
-        emptyTitle="لا توجد عناصر عمل"
-        emptyText="لم تُضف عناصر إلى هذا المشروع بعد."
+        caption="أعمال المشروع"
+        emptyTitle="لا توجد أعمال"
+        emptyText="لم تُضف أعمال إلى هذا المشروع بعد."
         [rows]="list.value().items"
         [columns]="columns()"
         [loading]="list.isLoading()"

@@ -28,7 +28,7 @@ const BOXES: readonly ApprovalBox[] = ['inbox', 'sent', 'closed'];
 
 const EMPTY: Record<ApprovalBox, { title: string; text: string; icon: string }> = {
   inbox: { title: 'لا توجد طلبات بانتظارك — أحسنت', text: 'لا شيء يحتاج قرارك الآن. ستصلك إشعارات عند وصول طلب جديد.', icon: 'checkCircle' },
-  sent: { title: 'لم ترسل أي طلب موافقة بعد', text: 'يمكنك طلب موافقة من صفحة المشروع أو عنصر العمل.', icon: 'approval' },
+  sent: { title: 'لم ترسل أي طلب موافقة بعد', text: 'يمكنك طلب موافقة من صفحة المشروع أو العمل.', icon: 'approval' },
   closed: { title: 'لا توجد طلبات منتهية', text: 'تظهر هنا الطلبات المعتمدة أو المرفوضة التي يحق لك الاطلاع عليها.', icon: 'approval' },
 };
 

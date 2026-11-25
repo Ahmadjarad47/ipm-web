@@ -25,11 +25,11 @@
       label="التقدّم"
       icon="checkCircle"
       [value]="p.progress.percent === null ? '—' : p.progress.percent + '%'"
-      [hint]="p.progress.percent === null ? 'لا توجد بيانات' : p.progress.doneLeaves + ' من ' + p.progress.countedLeaves + ' عنصرًا طرفيًا'"
+      [hint]="p.progress.percent === null ? 'لا توجد بيانات' : p.progress.doneLeaves + ' من ' + p.progress.countedLeaves + ' عملًا طرفيًا'"
     />
     <app-kpi-card label="الفترة" icon="calendar" tone="info" [value]="p.startDate | appDate" [hint]="'إلى ' + (p.endDate | appDate)" />
     <app-kpi-card label="المالك" icon="user" tone="gold" [value]="p.ownerId | userName" />
-    <app-kpi-card label="عناصر متأخرة" [value]="p.overdueCount" icon="alert" [tone]="p.overdueCount ? 'danger' : 'emerald'" [hint]="'من أصل ' + p.workItemCount + ' عنصر'" />
+    <app-kpi-card label="أعمال متأخرة" [value]="p.overdueCount" icon="alert" [tone]="p.overdueCount ? 'danger' : 'emerald'" [hint]="'من أصل ' + p.workItemCount + ' عمل'" />
   </div>
 
   <section class="card card-body rule" aria-labelledby="rule-title">
@@ -42,7 +42,7 @@
     <app-project-progress [progress]="p.progress" />
     <p class="rule-text">{{ p.progress.rule }}</p>
     <p class="muted rule-scope">
-      تُحتسب العناصر الطرفية فقط: {{ p.progress.doneLeaves }} منجزة من {{ p.progress.countedLeaves }} عنصرًا محتسبًا.
+      تُحتسب الأعمال الطرفية فقط: {{ p.progress.doneLeaves }} منجزة من {{ p.progress.countedLeaves }} عملًا محتسبًا.
     </p>
   </section>
 

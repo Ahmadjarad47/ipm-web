@@ -54,13 +54,13 @@ export const PROTECTABLE_FIELDS: readonly ProtectableField[] = [
   { key: 'description', label: 'الوصف', subject: 'work-item' },
   { key: 'dueDate', label: 'تاريخ الاستحقاق', subject: 'work-item' },
   { key: 'startDate', label: 'تاريخ البداية', subject: 'work-item' },
-  { key: 'parentId', label: 'العنصر الأب', subject: 'work-item' },
+  { key: 'parentId', label: 'العمل الأب', subject: 'work-item' },
   { key: 'priority', label: 'الأولوية', subject: 'work-item' },
   { key: 'typeId', label: 'النوع', subject: 'work-item' },
   { key: 'assigneeIds', label: 'المكلَّفون', subject: 'work-item' },
 ];
 
-const SUBJECT_TITLES: Record<ApprovalSubject, string> = { project: 'حقول المشروع', 'work-item': 'حقول عنصر العمل' };
+const SUBJECT_TITLES: Record<ApprovalSubject, string> = { project: 'حقول المشروع', 'work-item': 'حقول العمل' };
 
 type StageForm = FormGroup<{
   name: FormControl<string>;
@@ -131,7 +131,7 @@ const POSITION_SHORT: Record<ApproverPosition, string> = { project_owner: 'ما�
               </div>
             }
             @if (eventValue() === 'sensitive-change') {
-              <small class="muted">التعديل الحساس يتطلب حقولًا من نوع واحد فقط (مشروع أو عنصر عمل).</small>
+              <small class="muted">التعديل الحساس يتطلب حقولًا من نوع واحد فقط (مشروع أو عمل).</small>
             }
             @if (serverErrors()['protectedFields']; as e) {
               <p class="error" role="alert">{{ e }}</p>

@@ -8,9 +8,9 @@ import { StatusLookup } from '@domain/workflow/workflow.api';
 /** Arabic labels of the field keys that appear in audit `changes`; unknown keys are shown as-is. */
 export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   title: 'العنوان', name: 'الاسم', description: 'الوصف', status: 'الحالة', statusId: 'الحالة', type: 'النوع', typeId: 'النوع',
-  priority: 'الأولوية', assigneeIds: 'المكلّفون', assignees: 'المكلّفون', parent: 'العنصر الأب', parentId: 'العنصر الأب',
+  priority: 'الأولوية', assigneeIds: 'المكلّفون', assignees: 'المكلّفون', parent: 'العمل الأب', parentId: 'العمل الأب',
   startDate: 'تاريخ البدء', dueDate: 'تاريخ الاستحقاق', endDate: 'تاريخ الانتهاء', archived: 'مؤرشف', progress: 'التقدم',
-  children: 'العناصر الفرعية', reason: 'السبب', approval: 'الموافقة', score: 'التقييم', username: 'اسم المستخدم',
+  children: 'الأعمال الفرعية', reason: 'السبب', approval: 'الموافقة', score: 'التقييم', username: 'اسم المستخدم',
   members: 'الأعضاء', ownerId: 'المالك', managerId: 'المدير', projectId: 'المشروع', body: 'النص', active: 'مفعّل',
   email: 'البريد الإلكتروني', role: 'الدور', roles: 'الأدوار', transitions: 'الانتقالات',
 };
@@ -28,7 +28,7 @@ function summarizeStructured(field: string, value: string): string | null {
   if (Array.isArray(parsed)) {
     const n = parsed.length;
     if (/transition/i.test(field)) return n === 0 ? 'بدون انتقالات' : `${n} انتقالًا`;
-    return n === 0 ? '—' : `${n} عنصرًا`;
+    return n === 0 ? '—' : `${n} عملًا`;
   }
   return 'تفاصيل متعددة';
 }

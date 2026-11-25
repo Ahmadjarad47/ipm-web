@@ -14,11 +14,11 @@ import { PageHeader } from '@shared/ui/page-header/page-header';
 import { TelegramLinkCard } from './telegram-link-card';
 
 const NOTIFY_LABELS: readonly { readonly key: NotifyEvent; readonly label: string }[] = [
-  { key: 'assignment', label: 'إسناد عنصر عمل إليّ' },
+  { key: 'assignment', label: 'إسناد عمل إليّ' },
   { key: 'mention', label: 'الإشارة إليّ في تعليق' },
   { key: 'approvalRequest', label: 'طلب موافقة بانتظاري' },
   { key: 'decision', label: 'قرار على طلب أرسلته' },
-  { key: 'comment', label: 'تعليق جديد على عنصر أتابعه' },
+  { key: 'comment', label: 'تعليق جديد على عمل أتابعه' },
 ];
 
 const THEMES: readonly { readonly value: ThemePreference; readonly label: string }[] = [

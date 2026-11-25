@@ -11,15 +11,15 @@ export const PERMISSION_LABELS: Record<PermissionKey, string> = {
   'projects.archive': 'أرشفة المشروع واستعادته',
   'projects.members.manage': 'إضافة أعضاء المشروع وتغيير أدوارهم وإزالتهم',
 
-  'tasks.view': 'عرض عناصر العمل',
-  'tasks.create': 'إنشاء عناصر عمل جديدة',
-  'tasks.edit': 'تعديل بيانات عناصر العمل',
-  'tasks.assign': 'تكليف الأعضاء بعناصر العمل',
-  'tasks.delete': 'أرشفة عناصر العمل',
+  'tasks.view': 'عرض الأعمال',
+  'tasks.create': 'إنشاء أعمال جديدة',
+  'tasks.edit': 'تعديل بيانات الأعمال',
+  'tasks.assign': 'تكليف الأعضاء بالأعمال',
+  'tasks.delete': 'أرشفة الأعمال',
 
   'statuses.manage': 'إدارة الحالات: إنشاؤها وتعديلها وتعطيلها',
   'workflows.manage': 'إدارة مسارات العمل والانتقالات المسموحة',
-  'workflow.transition': 'نقل عنصر العمل بين الحالات',
+  'workflow.transition': 'نقل العمل بين الحالات',
 
   'approvals.request': 'إرسال طلبات موافقة',
   'approvals.view': 'عرض طلبات الموافقة ومسارها',
@@ -48,13 +48,13 @@ export const PERMISSION_LABELS: Record<PermissionKey, string> = {
   'reports.view': 'عرض التقارير والخط الزمني',
   'reports.export': 'تصدير التقارير',
 
-  'workitem.types.view': 'عرض أنواع عناصر العمل',
-  'workitem.types.manage': 'إدارة أنواع عناصر العمل وقواعد التسلسل الهرمي',
-  'workitem.fields.manage': 'إدارة الحقول الإضافية لأنواع العناصر',
+  'workitem.types.view': 'عرض أنواع الأعمال',
+  'workitem.types.manage': 'إدارة أنواع الأعمال وقواعد التسلسل الهرمي',
+  'workitem.fields.manage': 'إدارة الحقول الإضافية لأنواع الأعمال',
   'project.workitemtypes.configure': 'تحديد الأنواع المسموحة والافتراضية داخل المشروع',
 
-  'workitem.relations.view': 'عرض الروابط بين عناصر العمل',
-  'workitem.relations.create': 'إنشاء روابط بين عناصر العمل',
-  'workitem.relations.delete': 'حذف الروابط بين عناصر العمل',
+  'workitem.relations.view': 'عرض الروابط بين الأعمال',
+  'workitem.relations.create': 'إنشاء روابط بين الأعمال',
+  'workitem.relations.delete': 'حذف الروابط بين الأعمال',
   'workitem.relationtypes.manage': 'إدارة أنواع الروابط وأزواج الأنواع المسموحة',
 };

@@ -49,7 +49,7 @@ export function groupMatches(results: readonly { readonly action: ApprovalAction
     } @else if (!options().length) {
       <div class="none" role="status">
         <strong>لا يوجد طلب موافقة متاح الآن</strong>
-        <span>إما لا ينطبق أي قالب نشط على هذا العنصر (اطلب من مدير الموافقات إنشاء قالب أو تفعيله من «قوالب الموافقات»)، أو أن حالته الحالية لا تحتاج طلبًا (لا اعتماد بدء لمشروع قيد التنفيذ، ولا إغلاق لمشروع غير منفَّذ)، أو أن لديه طلبًا معتمدًا لم يُستخدم بعد؛ نفّذ الانتقال به.</span>
+        <span>إما لا ينطبق أي قالب نشط على هذا العمل (اطلب من مدير الموافقات إنشاء قالب أو تفعيله من «قوالب الموافقات»)، أو أن حالته الحالية لا تحتاج طلبًا (لا اعتماد بدء لمشروع قيد التنفيذ، ولا إغلاق لمشروع غير منفَّذ)، أو أن لديه طلبًا معتمدًا لم يُستخدم بعد؛ نفّذ الانتقال به.</span>
       </div>
     } @else {
       @if (selected(); as t) {
@@ -57,7 +57,7 @@ export function groupMatches(results: readonly { readonly action: ApprovalAction
       }
       @if (options().length > 1) {
         <fieldset class="opts">
-          <legend>قوالب أخرى مقبولة لهذا العنصر</legend>
+          <legend>قوالب أخرى مقبولة لهذا العمل</legend>
           @for (o of options(); track o.template.id) {
             <label class="opt">
               <input type="radio" name="tpl-pick" [checked]="selected()?.id === o.template.id" (change)="selected.set(o.template)" />

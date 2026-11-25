@@ -46,7 +46,7 @@ interface ConditionRow {
   `,
   template: `
     <fieldset [disabled]="!isWork()">
-      <legend>أنواع عناصر العمل</legend>
+      <legend>أنواع الأعمال</legend>
       @if (!isWork()) {
         <p class="na">لا ينطبق على أحداث المشاريع.</p>
       }

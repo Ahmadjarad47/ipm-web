@@ -22,7 +22,7 @@ export class ForbiddenPage {}
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="card">
-      <app-empty-state icon="search" title="الصفحة غير موجودة" text="الرابط غير صحيح أو أن العنصر لم يعد متاحًا لك.">
+      <app-empty-state icon="search" title="الصفحة غير موجودة" text="الرابط غير صحيح أو أن العمل لم يعد متاحًا لك.">
         <a class="btn btn--primary" routerLink="/dashboard">العودة للوحة القيادة</a>
       </app-empty-state>
     </div>

@@ -17,7 +17,7 @@ export type ApprovalEvent = 'project-approve' | 'project-close' | 'work-item-app
 export const APPROVAL_EVENT_LABELS: Record<ApprovalEvent, string> = {
   'project-approve': 'اعتماد مشروع',
   'project-close': 'إغلاق مشروع',
-  'work-item-approve': 'موافقة على عنصر عمل',
+  'work-item-approve': 'موافقة على عمل',
   'sensitive-change': 'تعديل حساس',
 };
 

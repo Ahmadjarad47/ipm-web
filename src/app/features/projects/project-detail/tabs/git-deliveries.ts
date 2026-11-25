@@ -184,7 +184,7 @@ export class GitDeliveries {
     { key: 'signatureValid', header: 'التوقيع', align: 'center', template: this.sigCell() },
     { key: 'outcome', header: 'النتيجة', template: this.outcomeCell() },
     { key: 'message', header: 'الشرح', hideOnMobile: true, template: this.msgCell() },
-    { key: 'linkedRefs', header: 'العناصر المرتبطة', template: this.refsCell() },
+    { key: 'linkedRefs', header: 'الأعمال المرتبطة', template: this.refsCell() },
     { key: '_actions', header: '', srHeader: 'إجراءات', required: true, template: this.actionCell() },
   ]);
 

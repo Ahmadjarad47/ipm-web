@@ -16,8 +16,8 @@ let nextId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="card card-body" [attr.aria-labelledby]="uid + '-title'">
-      <h3 class="section-title" [id]="uid + '-title'">نمط رمز العنصر في Git</h3>
-      <p class="muted">يُربط كل إيداع أو فرع أو طلب دمج برمز العنصر الذي يطابق هذا النمط (مجموعة التقاط واحدة).</p>
+      <h3 class="section-title" [id]="uid + '-title'">نمط رمز العمل في Git</h3>
+      <p class="muted">يُربط كل إيداع أو فرع أو طلب دمج برمز العمل الذي يطابق هذا النمط (مجموعة التقاط واحدة).</p>
       <div class="field">
         <label [attr.for]="uid + '-pattern'">النمط (تعبير نمطي)</label>
         <input [id]="uid + '-pattern'" class="input ltr" dir="ltr" autocomplete="off" spellcheck="false" [ngModel]="draft()" (ngModelChange)="draft.set($event); serverError.set('')" [attr.aria-invalid]="!!shownError()" [attr.aria-describedby]="uid + '-hint'" />
@@ -44,7 +44,7 @@ let nextId = 0;
                 }
               }
             </p>
-            <strong>{{ test().refs.length ? 'الرموز المكتشفة:' : 'لم يُكتشف أي رمز عنصر.' }}</strong>
+            <strong>{{ test().refs.length ? 'الرموز المكتشفة:' : 'لم يُكتشف أي رمز عمل.' }}</strong>
             @for (r of test().refs; track r) {
               <span class="ltr ref">{{ r }}</span>
             }

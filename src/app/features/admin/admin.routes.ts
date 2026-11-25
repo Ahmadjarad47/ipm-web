@@ -12,10 +12,10 @@ export const ADMIN_ROUTES: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'types' },
   {
     path: 'types',
-    title: 'أنواع العناصر',
+    title: 'أنواع الأعمال',
     canActivate: [permissionGuard],
     canDeactivate: [unsavedChangesGuard],
-    data: { [ROUTE_PERMISSIONS]: ['workitem.types.manage'], ...crumbs('أنواع العناصر') },
+    data: { [ROUTE_PERMISSIONS]: ['workitem.types.manage'], ...crumbs('أنواع الأعمال') },
     loadComponent: () => import('./types/types-page').then((m) => m.TypesPage),
   },
   {

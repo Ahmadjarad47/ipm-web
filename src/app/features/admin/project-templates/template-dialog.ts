@@ -70,7 +70,7 @@ export interface TemplateDialogData {
         </div>
 
         <fieldset>
-          <legend>أنواع العناصر المسموحة <span class="req">*</span></legend>
+          <legend>أنواع الأعمال المسموحة <span class="req">*</span></legend>
           @for (t of types(); track t.id) {
             <label class="checkbox">
               <input type="checkbox" [checked]="allowed().includes(t.id)" (change)="toggleType(t.id, $any($event.target).checked)" /> {{ t.name }}

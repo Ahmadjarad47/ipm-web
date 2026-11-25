@@ -28,7 +28,7 @@ let nextId = 0;
   imports: [ReactiveFormsModule, DialogShell],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-dialog-shell [title]="data.mode === 'close' ? 'إغلاق العنصر' : 'إعادة فتح العنصر'" [subtitle]="ltr(data.ref)">
+    <app-dialog-shell [title]="data.mode === 'close' ? 'إغلاق العمل' : 'إعادة فتح العمل'" [subtitle]="ltr(data.ref)">
       <form [id]="uid + '-cr-form'" class="stack" [formGroup]="form" (ngSubmit)="submit()">
         @if (showChoice()) {
           <div class="field">

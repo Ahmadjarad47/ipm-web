@@ -78,7 +78,7 @@ const KNOWN = ['key', 'name', 'inverseName', 'directed', 'acyclic', 'allowedPair
           <div class="field">
             <label for="r-inv">الاسم العكسي <span class="req">*</span></label>
             <input id="r-inv" class="input" formControlName="inverseName" [attr.aria-invalid]="srv()['inverseName'] ? 'true' : null" />
-            <span class="hint">{{ symmetric() ? 'الرابط متماثل: يطابق الاسم العكسي الاسمَ تلقائيًا.' : 'يظهر من جهة العنصر الهدف.' }}</span>
+            <span class="hint">{{ symmetric() ? 'الرابط متماثل: يطابق الاسم العكسي الاسمَ تلقائيًا.' : 'يظهر من جهة العمل الهدف.' }}</span>
             @if (!symmetric() && form.controls.inverseName.touched && form.controls.inverseName.invalid) { <span class="error">الاسم العكسي مطلوب.</span> }
             @if (srv()['inverseName']; as msg) { <span class="error" role="alert">{{ msg }}</span> }
           </div>

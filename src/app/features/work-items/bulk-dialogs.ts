@@ -35,7 +35,7 @@ let nextId = 0;
   imports: [FormsModule, DialogShell],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-dialog-shell [title]="title" [subtitle]="'سيُطبَّق على ' + data.count + ' عنصر'">
+    <app-dialog-shell [title]="title" [subtitle]="'سيُطبَّق على ' + data.count + ' عمل'">
       @switch (data.kind) {
         @case ('assign') {
           <fieldset class="opts">
@@ -67,7 +67,7 @@ let nextId = 0;
               }
             </select>
             @if (!data.statuses.length) {
-              <span class="muted">لا توجد حالة مشتركة بين سير عمل العناصر المحددة.</span>
+              <span class="muted">لا توجد حالة مشتركة بين سير عمل الأعمال المحددة.</span>
             }
           </div>
         }

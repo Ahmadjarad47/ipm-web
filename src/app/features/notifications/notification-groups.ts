@@ -10,7 +10,7 @@ export const MENTION_LABEL = 'الإشارة إليك';
 export const KIND_LABELS: Readonly<Record<KindFilter, string>> = {
   all: 'الكل',
   approvals: 'الموافقات',
-  workItems: 'عناصر العمل',
+  workItems: 'الأعمال',
   projects: 'المشاريع',
   mention: 'منشن',
   other: 'أخرى',

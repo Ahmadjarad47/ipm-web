@@ -37,7 +37,7 @@ import { diffSets, PairSet, pairsToSet, sameSet, setToPairs, toggleCell, pairKey
     } @else {
       <div class="stack">
         <app-admin-notice>
-          حدّد لكل نوع (صف) الأنواع المسموح أن تكون أبناءً مباشرين له (أعمدة). تُحفظ القواعد كاملة دفعة واحدة، ولا تُغيّر العناصر القائمة.
+          حدّد لكل نوع (صف) الأنواع المسموح أن تكون أبناءً مباشرين له (أعمدة). تُحفظ القواعد كاملة دفعة واحدة، ولا تُغيّر الأعمال القائمة.
         </app-admin-notice>
 
         <section class="card" aria-labelledby="hr-title"><div class="card-body stack">
@@ -76,7 +76,7 @@ import { diffSets, PairSet, pairsToSet, sameSet, setToPairs, toggleCell, pairKey
           <ul class="legend" aria-label="دليل الألوان">
             <li>☑ مسموح أن يكون الابن (العمود) تحت الأب (الصف)</li>
             <li>☐ غير مسموح</li>
-            <li>لا يُسمح بالحلقات ولا بنقل عنصر تحت أحد أبنائه.</li>
+            <li>لا يُسمح بالحلقات ولا بنقل عمل تحت أحد أبنائه.</li>
           </ul>
 
           @if (errors().length) {

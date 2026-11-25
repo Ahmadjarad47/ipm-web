@@ -20,7 +20,7 @@ export const NAVIGATION: readonly NavSection[] = [
     items: [
       { label: 'لوحة القيادة', icon: 'dashboard', link: '/dashboard', permissions: ['dashboard.view'], exact: true },
       { label: 'المشاريع', icon: 'folder', link: '/projects', permissions: ['projects.view'] },
-      { label: 'عناصر العمل', icon: 'list', link: '/work-items', permissions: ['tasks.view'] },
+      { label: 'الأعمال', icon: 'list', link: '/work-items', permissions: ['tasks.view'] },
       { label: 'مركز الموافقات', icon: 'approval', link: '/approvals', permissions: ['approvals.view', 'approvals.decide'] },
       { label: 'التقارير والخط الزمني', icon: 'calendar', link: '/reports', permissions: ['reports.view'] },
     ],
@@ -28,7 +28,7 @@ export const NAVIGATION: readonly NavSection[] = [
   {
     title: 'الإدارة',
     items: [
-      { label: 'أنواع العناصر', icon: 'layers', link: '/admin/types', permissions: ['workitem.types.manage'] },
+      { label: 'أنواع الأعمال', icon: 'layers', link: '/admin/types', permissions: ['workitem.types.manage'] },
       { label: 'الحالات وسير العمل', icon: 'flow', link: '/admin/workflows', permissions: ['statuses.manage', 'workflows.manage'] },
       { label: 'قوالب الموافقات', icon: 'checkCircle', link: '/admin/approval-templates', permissions: ['approvals.configure'] },
       { label: 'المستخدمون والأدوار', icon: 'shield', link: '/admin/access', permissions: ['roles.manage'] },

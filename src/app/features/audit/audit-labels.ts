@@ -2,11 +2,11 @@ import { SubjectType } from '@domain/activity/activity.models';
 
 export const SUBJECT_TYPE_LABELS: Readonly<Record<SubjectType, string>> = {
   project: 'مشروع',
-  workItem: 'عنصر عمل',
+  workItem: 'عمل',
   approval: 'موافقة',
   user: 'مستخدم',
   role: 'دور',
-  type: 'نوع عنصر',
+  type: 'نوع عمل',
   status: 'حالة',
   relation: 'علاقة',
   git: 'Git',

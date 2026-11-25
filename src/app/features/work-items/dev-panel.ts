@@ -113,7 +113,7 @@ const PR_LABEL: Readonly<Record<PrState, string>> = { open: 'مفتوح', merged
         @if (canEdit()) {
           <button type="button" class="btn btn--outline" (click)="openLink()"><app-icon name="link" [size]="14" /> ربط Commit يدويًا</button>
         }
-        <p class="muted note">دمج PR في Git لا يُغلق العنصر ولا يعتمده؛ الإغلاق يتم عبر سير العمل.</p>
+        <p class="muted note">دمج PR في Git لا يُغلق العمل ولا يعتمده؛ الإغلاق يتم عبر سير العمل.</p>
       </div>
     </section>
 

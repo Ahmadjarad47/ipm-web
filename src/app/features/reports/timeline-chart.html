@@ -11,7 +11,7 @@
     <button type="button" class="btn btn--ghost btn--sm" (click)="setAllCollapsed(!allCollapsed())">{{ allCollapsed() ? 'توسيع الكل' : 'طيّ الكل' }}</button>
     <span class="spacer"></span>
     @if (hasMore()) {
-      <span class="muted" role="status">عُرض {{ loadedCount() }} من {{ total() }} عنصرًا</span>
+      <span class="muted" role="status">عُرض {{ loadedCount() }} من {{ total() }} عملًا</span>
       <button type="button" class="btn btn--outline btn--sm" [disabled]="loadingMore()" (click)="loadMore()">{{ loadingMore() ? 'جارٍ التحميل…' : 'تحميل المزيد' }}</button>
     }
   </div>
@@ -21,12 +21,12 @@
   } @else if (data.error()) {
     <app-error-state title="تعذّر تحميل الخط الزمني" (retry)="data.reload()" />
   } @else if (!rows().length) {
-    <app-empty-state icon="calendar" title="لا توجد عناصر ضمن هذه المرشحات" text="غيّر الفترة أو المشروع أو فئة الحالة لعرض عناصر لها تواريخ." />
+    <app-empty-state icon="calendar" title="لا توجد أعمال ضمن هذه المرشحات" text="غيّر الفترة أو المشروع أو فئة الحالة لعرض أعمال لها تواريخ." />
   } @else {
     <div #scroller class="scroller" tabindex="0" role="region" aria-label="مخطط الخط الزمني (قابل للتمرير أفقيًا)">
       <div class="chart" [style.width.px]="labelWidth + trackWidth()">
         <div class="line head">
-          <div class="lbl">العنصر</div>
+          <div class="lbl">العمل</div>
           <div class="track head-track" [style.width.px]="trackWidth()" aria-hidden="true">
             @for (t of ticks(); track t.left) {
               <span class="tick" [style.inset-inline-start.px]="t.left" [style.width.px]="t.width">{{ t.label }}</span>
