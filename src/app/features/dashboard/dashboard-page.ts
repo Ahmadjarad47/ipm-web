@@ -19,7 +19,6 @@ import { EmptyState } from '@shared/ui/empty-state/empty-state';
 import { ErrorState } from '@shared/ui/error-state/error-state';
 import { HelpTip } from '@shared/ui/help-tip/help-tip';
 import { KpiCard } from '@shared/ui/kpi-card/kpi-card';
-import { PageHeader } from '@shared/ui/page-header/page-header';
 import { Skeleton } from '@shared/ui/skeleton/skeleton';
 import { AuditFormatter, subjectLink } from '@shared/util/audit-format';
 import { orgToday } from '@shared/util/org-date';
@@ -43,7 +42,7 @@ const PERIOD_HELP =
 @Component({
   selector: 'app-dashboard-page',
   imports: [
-    FormsModule, RouterLink, PageHeader, KpiCard, EmptyState, ErrorState, HelpTip, Skeleton, Avatar,
+    FormsModule, RouterLink, KpiCard, EmptyState, ErrorState, HelpTip, Skeleton, Avatar,
     StatusBadge, TypeChip, PriorityBadge, ApprovalStatusBadge, AppDatePipe, RelativeTimePipe, UserNamePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

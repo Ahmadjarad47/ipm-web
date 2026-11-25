@@ -40,7 +40,7 @@ export interface Crumb {
   `,
   styles: `
     .ph { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s-4); margin-bottom: var(--s-5); flex-wrap: wrap; }
-    h1 { font-size: var(--fs-2xl); color: var(--c-emerald-900); }
+    h1 { font-size: 23px; color: var(--c-text); }
     .crumbs { display: flex; align-items: center; gap: 4px; font-size: var(--fs-sm); color: var(--c-muted); margin-bottom: 4px; }
     .crumbs a { color: var(--c-muted); } .crumbs a:hover { color: var(--c-emerald-700); }
     .actions { display: flex; gap: var(--s-2); flex-wrap: wrap; }

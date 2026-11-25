@@ -54,6 +54,10 @@
         <kbd>{{ isMac ? '⌘' : 'Ctrl' }} K</kbd>
       </button>
       <div class="spacer"></div>
+      <span class="today"><app-icon name="calendar" [size]="16" />{{ today }}</span>
+      <button type="button" class="btn btn--ghost btn--icon" (click)="toggleTheme()" [attr.aria-label]="isDark() ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن'" [title]="isDark() ? 'الوضع الفاتح' : 'الوضع الداكن'">
+        <app-icon [name]="isDark() ? 'sun' : 'moon'" />
+      </button>
 
       <div class="notif">
         <button #notifBtn type="button" class="btn btn--ghost btn--icon" (click)="toggleNotif()"
@@ -98,6 +102,7 @@
           <button #userBtn type="button" class="avatar-btn" (click)="toggleUserMenu()" aria-haspopup="menu"
             [attr.aria-expanded]="userMenuOpen()" aria-controls="user-menu-list" [attr.aria-label]="'قائمة المستخدم: ' + user.name">
             <app-avatar [name]="user.name" [size]="34" />
+            <span class="who"><strong>{{ user.name }}</strong><small>{{ user.title }}</small></span>
           </button>
           @if (userMenuOpen()) {
             <div id="user-menu-list" class="menu card" role="menu" aria-label="قائمة المستخدم" (keydown)="onMenuKey($event)">

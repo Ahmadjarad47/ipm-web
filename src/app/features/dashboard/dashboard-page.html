@@ -1,4 +1,19 @@
-<app-page-header [title]="greeting() + '، ' + (user()?.name ?? '')" subtitle="نظرة عامة على المشاريع وعناصر العمل والموافقات ضمن صلاحياتك." />
+<section class="hero" aria-labelledby="db-hero">
+  <div>
+    <p class="hero__eyebrow">نظام إدارة المشاريع الداخلي</p>
+    <h1 id="db-hero">{{ greeting() }}، {{ user()?.name }}</h1>
+    <p class="hero__text">
+      نظرة عامة على المشاريع وعناصر العمل والموافقات ضمن صلاحياتك.
+      @if (statsValue(); as s) {
+        لديك <strong>{{ s.pendingApprovals }}</strong> موافقة بانتظارك و<strong>{{ s.overdueWorkItems }}</strong> عنصر عمل متأخر.
+      }
+    </p>
+    <div class="hero__actions">
+      <a class="btn btn--gold" routerLink="/approvals">الموافقات</a>
+      <a class="btn btn--on-dark" routerLink="/work-items">عناصر العمل</a>
+    </div>
+  </div>
+</section>
 
 <form class="card card-body fbar" aria-label="مرشحات لوحة القيادة" (submit)="$event.preventDefault()">
   <div class="field">

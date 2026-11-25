@@ -2,60 +2,60 @@
 // dark emerald sidebar, ivory background, calm gold accents, white rounded cards.
 :root {
   // Brand
-  --c-emerald-950: #072a20;
-  --c-emerald-900: #0b3d2e;
-  --c-emerald-800: #0f4d3a;
-  --c-emerald-700: #14614a;
-  --c-emerald-600: #1a7a5c;
-  --c-emerald-500: #23946f;
-  --c-emerald-100: #dcefe6;
-  --c-emerald-50: #eef7f2;
+  --c-emerald-950: #002623;
+  --c-emerald-900: #033530;
+  --c-emerald-800: #054239;
+  --c-emerald-700: #054239;
+  --c-emerald-600: #2c6a5f;
+  --c-emerald-500: #428177;
+  --c-emerald-100: #e1edea;
+  --c-emerald-50: #f0f6f4;
 
-  --c-gold-600: #86671e;
-  --c-gold-500: #c9a24a;
-  --c-gold-300: #e5cf91;
-  --c-gold-100: #f7efd9;
+  --c-gold-600: #6e5e3f;
+  --c-gold-500: #b9a779;
+  --c-gold-300: #d8ccab;
+  --c-gold-100: #edebe0;
 
   // Fixed brand surfaces that stay dark in every theme (sidebar, login hero, toasts)
-  --c-ink-1: #0b3d2e;
-  --c-ink-2: #072a20;
-  --c-on-gold: #072a20;
+  --c-ink-1: #033530;
+  --c-ink-2: #002623;
+  --c-on-gold: #002623;
   // Solid fills that carry white text
-  --c-primary: #14614a;
-  --c-primary-hover: #0f4d3a;
-  --c-danger-solid: #c0392b;
+  --c-primary: #054239;
+  --c-primary-hover: #033530;
+  --c-danger-solid: #9b2c3a;
 
   // Neutrals
-  --c-bg: #f8f5ee;
+  --c-bg: #f5f4ef;
   --c-surface: #ffffff;
-  --c-surface-2: #fbf9f4;
-  --c-border: #e9e3d6;
-  --c-border-strong: #d8d0bd;
-  --c-text: #1d2823;
-  --c-text-2: #4b5952;
-  --c-muted: #5f6d66;
+  --c-surface-2: #faf9f5;
+  --c-border: #e4e0d3;
+  --c-border-strong: #d2ccb9;
+  --c-text: #1c1f1e;
+  --c-text-2: #3d4642;
+  --c-muted: #5f6662;
 
   // Semantic
-  --c-info: #2f6eb3;
-  --c-info-bg: #e7f0fa;
-  --c-success: #1c7b51;
-  --c-success-bg: #e3f4ea;
-  --c-warning: #966319;
-  --c-warning-bg: #fcf1dc;
-  --c-danger: #c0392b;
-  --c-danger-bg: #fbe8e5;
+  --c-info: #33658a;
+  --c-info-bg: #e3edf5;
+  --c-success: #2a7050;
+  --c-success-bg: #e2f1ea;
+  --c-warning: #8f6212;
+  --c-warning-bg: #f8eed8;
+  --c-danger: #9b2c3a;
+  --c-danger-bg: #f4e3e5;
   --c-neutral: #666c7a;
   --c-neutral-bg: #eef0ef;
 
   // Shape & depth
   --r-sm: 8px;
   --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 20px;
+  --r-lg: 18px;
+  --r-xl: 24px;
   --r-pill: 999px;
-  --shadow-sm: 0 1px 2px rgb(16 40 30 / 6%);
-  --shadow-md: 0 4px 16px rgb(16 40 30 / 8%);
-  --shadow-lg: 0 18px 48px rgb(16 40 30 / 18%);
+  --shadow-sm: 0 1px 3px rgb(0 38 35 / 7%), 0 1px 2px rgb(0 38 35 / 4%);
+  --shadow-md: 0 6px 18px -6px rgb(0 38 35 / 14%), 0 2px 6px rgb(0 38 35 / 5%);
+  --shadow-lg: 0 24px 48px -16px rgb(0 38 35 / 28%);
 
   // Spacing scale
   --s-1: 4px;
@@ -76,8 +76,12 @@
   --fs-xl: 20px;
   --fs-2xl: 26px;
 
-  --sidebar-w: 264px;
-  --topbar-h: 64px;
+  --sidebar-w: 272px;
+  --topbar-h: 68px;
+  --shadow-xs: 0 1px 2px rgb(0 38 35 / 6%);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  // Geometric lattice used at low opacity on the sidebar and hero (Raad UI)
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80' fill='none' stroke='white' stroke-width='1.2'%3E%3Cpath d='M40 4 L52 28 L76 40 L52 52 L40 76 L28 52 L4 40 L28 28 Z'/%3E%3Crect x='22' y='22' width='36' height='36' transform='rotate(45 40 40)'/%3E%3Ccircle cx='40' cy='40' r='6'/%3E%3Cpath d='M0 0 L12 12 M80 0 L68 12 M0 80 L12 68 M80 80 L68 68'/%3E%3C/svg%3E");
   --focus-ring: 0 0 0 2px var(--c-surface), 0 0 0 4px var(--c-emerald-600);
   // Focus ring for the always-dark surfaces (sidebar, hero)
   --focus-ring-on-dark: 0 0 0 2px var(--c-gold-300);
@@ -90,47 +94,47 @@
 // Applied by ThemeService via :root[data-theme='dark'], or automatically when the OS prefers dark and
 // the user did not force light (data-theme='light').
 @mixin dark-tokens {
-  --c-emerald-950: #031a13;
+  --c-emerald-950: #061412;
   --c-emerald-900: #c4ecdb;
   --c-emerald-800: #a9dfc6;
   --c-emerald-700: #86d3b4;
   --c-emerald-600: #52bb92;
   --c-emerald-500: #44a883;
-  --c-emerald-100: #1f3b30;
-  --c-emerald-50: #1b3128;
+  --c-emerald-100: #1c332e;
+  --c-emerald-50: #172a26;
 
   --c-gold-600: #e2c36f;
-  --c-gold-500: #c9a24a;
-  --c-gold-300: #e5cf91;
-  --c-gold-100: #3a3120;
+  --c-gold-500: #c9b98c;
+  --c-gold-300: #d8ccab;
+  --c-gold-100: #2f2b1f;
 
-  --c-primary: #1c7558;
-  --c-primary-hover: #18664d;
-  --c-danger-solid: #b5382b;
+  --c-primary: #1f6b5c;
+  --c-primary-hover: #1a5c4f;
+  --c-danger-solid: #a8323f;
 
-  --c-bg: #0e1512;
-  --c-surface: #151f1a;
-  --c-surface-2: #1a2620;
-  --c-border: #2b3a32;
-  --c-border-strong: #3d4f45;
-  --c-text: #e8f0ec;
-  --c-text-2: #bccac2;
-  --c-muted: #9fb0a6;
+  --c-bg: #0b1514;
+  --c-surface: #111e1c;
+  --c-surface-2: #142321;
+  --c-border: #22332f;
+  --c-border-strong: #2f4540;
+  --c-text: #e8ece9;
+  --c-text-2: #c0ccc7;
+  --c-muted: #a3b0ab;
 
-  --c-info: #7db8f0;
-  --c-info-bg: #172b40;
-  --c-success: #5fcf97;
-  --c-success-bg: #15321f;
-  --c-warning: #e8b455;
-  --c-warning-bg: #3a2c10;
-  --c-danger: #ff9585;
-  --c-danger-bg: #401d19;
+  --c-info: #79a9cf;
+  --c-info-bg: #17283a;
+  --c-success: #5cb38e;
+  --c-success-bg: #143026;
+  --c-warning: #d9a24a;
+  --c-warning-bg: #2f2512;
+  --c-danger: #ee8e99;
+  --c-danger-bg: #3a1c21;
   --c-neutral: #a3aeaa;
   --c-neutral-bg: #262f2b;
 
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%);
-  --shadow-md: 0 4px 16px rgb(0 0 0 / 45%);
-  --shadow-lg: 0 18px 48px rgb(0 0 0 / 60%);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 40%);
+  --shadow-md: 0 6px 18px -6px rgb(0 0 0 / 50%);
+  --shadow-lg: 0 24px 48px -16px rgb(0 0 0 / 60%);
 
   color-scheme: dark;
 }

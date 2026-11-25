@@ -3,6 +3,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { AuthService } from '@core/auth/auth.service';
+import { PreferencesStore } from '@core/preferences/preferences.store';
 import { NotificationSeenDirective } from '@core/notifications/notification-seen.directive';
 import { NotificationStore } from '@core/notifications/notification.store';
 import { Notification } from '@domain/activity/activity.models';
@@ -35,6 +36,7 @@ export class Shell {
   protected readonly auth = inject(AuthService);
   protected readonly notifications = inject(NotificationStore);
   protected readonly crumbs = inject(RouteCrumbs);
+  private readonly prefs = inject(PreferencesStore);
   private readonly router = inject(Router);
   private readonly dialog = inject(DialogService);
   private readonly shortcuts = inject(Shortcuts);
@@ -44,6 +46,11 @@ export class Shell {
   protected readonly notifOpen = signal(false);
   protected readonly userMenuOpen = signal(false);
   protected readonly notifTab = signal<NotifTab>('all');
+  protected readonly today = new Intl.DateTimeFormat('ar', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+  protected readonly isDark = computed(() => {
+    const theme = this.prefs.prefs().theme;
+    return theme === 'dark' || (theme === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  });
   protected readonly isMac = /Mac|iPhone|iPad/.test(navigator.platform);
   private paletteOpen = false;
 
@@ -122,6 +129,10 @@ export class Shell {
       event.preventDefault();
       items[next]?.focus();
     }
+  }
+
+  protected toggleTheme(): void {
+    this.prefs.update({ theme: this.isDark() ? 'light' : 'dark' });
   }
 
   protected openShortcuts(): void {
