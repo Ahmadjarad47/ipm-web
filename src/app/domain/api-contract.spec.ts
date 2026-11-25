@@ -2,7 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { AuthService } from '@core/auth/auth.service';
 import { ApprovalRequestsApi } from './approvals/approval.api';
+import { TelegramLinkStore } from './telegram/telegram.api';
 import { NotificationsApi } from './activity/activity.api';
 import { ProjectsApi } from './projects/project.api';
 import { WorkReportApi } from './reports/report.api';
@@ -150,5 +152,29 @@ describe('API contract of the domain services', () => {
     expect(req.request.params.has('projectIds')).toBe(false);
     expect(req.request.params.has('assigneeId')).toBe(false);
     req.flush(new Blob());
+  });
+
+  it('reads the Telegram link status quietly (GET /telegram/link, X-Silent-Error)', () => {
+    TestBed.inject(AuthService).establish({ token: 't', expiresAt: new Date(Date.now() + 3_600_000).toISOString(), user: { id: 'u', name: 'U', email: 'u@x', title: '' }, systemPermissions: [], projectPermissions: {}, denied: [] });
+    TestBed.inject(TelegramLinkStore);
+    TestBed.tick();
+
+    const req = http.expectOne((r) => r.method === 'GET' && r.url.endsWith('/telegram/link'));
+    expect(req.request.headers.get('X-Silent-Error')).toBe('1');
+    req.flush({ enabled: true, botUsername: 'b', linked: false, telegramUsername: null, linkedAt: null });
+  });
+
+  it('asks for a Telegram deep link with POST /telegram/link and no body', () => {
+    TestBed.inject(TelegramLinkStore).createLink().subscribe();
+
+    const req = http.expectOne((r) => r.method === 'POST' && r.url.endsWith('/telegram/link'));
+    expect(req.request.body).toBeNull();
+    req.flush({ deepLink: 'https://t.me/b?start=x', expiresAt: '2026-01-01T00:00:00Z' });
+  });
+
+  it('unlinks Telegram with DELETE /telegram/link', () => {
+    TestBed.inject(TelegramLinkStore).unlink().subscribe();
+
+    http.expectOne((r) => r.method === 'DELETE' && r.url.endsWith('/telegram/link')).flush(null, { status: 204, statusText: 'No Content' });
   });
 });

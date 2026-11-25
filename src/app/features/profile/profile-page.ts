@@ -11,6 +11,7 @@ import {
 import { RoleLookup, UserLookup } from '@domain/users/user.api';
 import { AppDatePipe } from '@shared/pipes/pipes';
 import { PageHeader } from '@shared/ui/page-header/page-header';
+import { TelegramLinkCard } from './telegram-link-card';
 
 const NOTIFY_LABELS: readonly { readonly key: NotifyEvent; readonly label: string }[] = [
   { key: 'assignment', label: 'إسناد عنصر عمل إليّ' },
@@ -28,7 +29,7 @@ const THEMES: readonly { readonly value: ThemePreference; readonly label: string
 
 @Component({
   selector: 'app-profile-page',
-  imports: [PageHeader, AppDatePipe],
+  imports: [PageHeader, AppDatePipe, TelegramLinkCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-page-header title="الملف الشخصي" subtitle="بيانات حسابك وتفضيلات الواجهة." />
@@ -54,6 +55,8 @@ const THEMES: readonly { readonly value: ThemePreference; readonly label: string
         </dl>
         <button type="button" class="btn btn--danger" (click)="auth.logout()">إنهاء الجلسة</button>
       </section>
+
+      <app-telegram-link-card />
     </div>
 
     <section id="preferences" class="card card-body prefs" aria-labelledby="pref-h">
