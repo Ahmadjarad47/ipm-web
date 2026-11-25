@@ -27,7 +27,6 @@ import { DialogService } from '@shared/ui/dialog/dialog.service';
 import { EmptyState } from '@shared/ui/empty-state/empty-state';
 import { ErrorState } from '@shared/ui/error-state/error-state';
 import { HelpTip } from '@shared/ui/help-tip/help-tip';
-import { Icon } from '@shared/ui/icon/icon';
 import { KpiCard } from '@shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '@shared/ui/page-header/page-header';
 import { Skeleton } from '@shared/ui/skeleton/skeleton';
@@ -35,6 +34,7 @@ import { TabItem, Tabs } from '@shared/ui/tabs/tabs';
 import { TransitionDialog, TransitionDialogData } from './transition-dialog';
 import { ProjectForm, ProjectFormData } from '../project-form/project-form';
 import { ProjectProgress } from '../project-progress';
+import { DecisionDialog, DecisionDialogData } from '../../approvals/decision-dialog';
 import { ActionsMenu, MenuAction } from './actions-menu';
 import { ApprovalRequestDialog, ApprovalRequestData } from './approval-request-dialog';
 import { fetchProjectApprovals } from './project-approvals-source';
@@ -53,7 +53,7 @@ const PROGRESS_HELP = 'تُحتسب العناصر الطرفية فقط (الت
 @Component({
   selector: 'app-project-detail',
   imports: [
-    CanDirective, PageHeader, EmptyState, ErrorState, Skeleton, HelpTip, Icon, StatusBadge, Badge, KpiCard, Tabs, ProjectProgress, AppDatePipe, UserNamePipe, RouterLink,
+    CanDirective, PageHeader, EmptyState, ErrorState, Skeleton, HelpTip, StatusBadge, Badge, KpiCard, Tabs, ProjectProgress, AppDatePipe, UserNamePipe, RouterLink,
     ActionsMenu, ProjectStatusHistory,
     ProjectWorkItemsTab, ProjectGraphTab, ProjectSettingsTab, AttachmentsPanel, ProjectMembersTab, ProjectGitTab, ProjectApprovalsTab, CommentsPanel, ActivityLog,
   ],
@@ -147,26 +147,101 @@ export class ProjectDetail {
   });
 
   /** Workflow transitions leaving the current status (§4.3: status never changes by editing). */
+  /** An approved request that no move has spent yet: the next move that needs an approval uses it. */
+  protected readonly hasApprovedRequest = computed(() => this.approvals.hasValue() && this.approvals.value().some((r) => r.status === 'approved' && !r.consumedAt));
+
+  /** A request still waiting for a decision on this project, and the one the caller may decide right now. */
+  protected readonly hasPendingRequest = computed(() => this.approvals.hasValue() && this.approvals.value().some((r) => r.status === 'pending-approval'));
+  protected readonly decidableRequest = computed(() => (this.approvals.hasValue() ? this.approvals.value().find((r) => r.status === 'pending-approval' && r.canDecide) : undefined) ?? null);
+
+  /** Approving activates the project and rejecting cancels it: the server moves the status (no manual move). */
+  protected approvePending(): void {
+    this.decide('approve', '');
+  }
+
+  protected rejectPending(): void {
+    const r = this.decidableRequest();
+    if (!r || this.busy()) return;
+    this.dialog
+      .open<DecisionDialog, DecisionDialogData, string>(DecisionDialog, { data: { decision: 'reject', requestTitle: r.title }, width: 'min(520px, calc(100vw - 32px))' })
+      .afterClosed.subscribe((comment) => {
+        if (comment) this.decide('reject', comment);
+      });
+  }
+
+  private decide(decision: 'approve' | 'reject', comment: string): void {
+    const r = this.decidableRequest();
+    if (!r || this.busy()) return;
+    this.busy.set(true);
+    this.approvalsApi.decide(r.id, { decision, comment, revision: r.revision }).subscribe({
+      next: () => {
+        this.busy.set(false);
+        this.toast.success(decision === 'approve' ? 'تمت الموافقة، وأصبح المشروع نشطًا' : 'تم الرفض، وأُلغي المشروع');
+        this.approvalsKey.update((k) => k + 1);
+        this.refresh();
+      },
+      error: (err: unknown) => {
+        this.busy.set(false);
+        if (isApiError(err) && err.status === 409) {
+          this.approvalsKey.update((k) => k + 1);
+          this.refresh();
+        }
+      },
+    });
+  }
+
   protected readonly transitions = computed(() => {
     const p = this.project();
     if (!p) return [];
-    return this.workflows.transitionsFrom('wf-project', p.statusId).map((t) => ({
+    return this.workflows.transitionsFrom(this.workflows.projectWorkflow()?.id, p.statusId).map((t) => ({
       toStatusId: t.toStatusId,
       name: this.statuses.get(t.toStatusId)?.name ?? '—',
       requiresApproval: !!t.requiresApproval,
+      /** Ready to run now: it needs no approval, or an approved request is waiting to be spent. */
+      ready: !t.requiresApproval || this.hasApprovedRequest(),
     }));
   });
 
-  /** Everything except the single primary action («طلب موافقة») lives in the «المزيد» menu. */
+  /**
+   * Moves the user makes by hand (on hold, completed, back to active…). Leaving «قيد الإعداد» for active or cancelled is not one of them:
+   * the approval decision makes that move by itself.
+   */
+  protected readonly manualTransitions = computed(() => {
+    const p = this.project();
+    if (!p) return [];
+    const waiting = this.statuses.get(p.statusId)?.category === 'not-started';
+    return this.transitions().filter((t) => {
+      const target = this.statuses.get(t.toStatusId)?.category;
+      return !(waiting && (target === 'active' || target === 'cancelled'));
+    });
+  });
+
+  /**
+   * An approval granted before moves became automatic (or whose automatic move could not run) leaves the project waiting: this is the way out,
+   * spending the approved request on the move to the active status.
+   */
+  protected readonly activation = computed(() => {
+    const p = this.project();
+    if (!p || p.archived || !this.hasApprovedRequest() || this.statuses.get(p.statusId)?.category !== 'not-started') return null;
+    return this.transitions().find((t) => this.statuses.get(t.toStatusId)?.category === 'active') ?? null;
+  });
+
+  /** Approval actions, manual moves, editing and archiving all live in the «المزيد» menu. */
   protected readonly menuActions = computed<readonly MenuAction[]>(() => {
     const p = this.project();
     if (!p) return [];
     const items: MenuAction[] = [];
-    if (!p.archived && this.auth.can('projects.edit', p.id)) {
+    const canEdit = !p.archived && this.auth.can('projects.edit', p.id);
+    if (this.decidableRequest()) {
+      items.push({ key: 'approve', label: 'موافقة', icon: 'check' }, { key: 'reject', label: 'رفض', icon: 'close', danger: true });
+    } else if (!this.hasApprovedRequest() && !this.hasPendingRequest() && this.auth.can('approvals.request', p.id)) {
+      items.push({ key: 'request-approval', label: 'طلب موافقة', icon: 'approval' });
+    }
+    const activation = this.activation();
+    if (canEdit && activation) items.push({ key: 'activate', label: 'تفعيل المشروع (تمت الموافقة)', icon: 'check' });
+    if (canEdit) for (const t of this.manualTransitions()) items.push({ key: 't:' + t.toStatusId, label: 'نقل إلى «' + t.name + '»', icon: 'flow' });
+    if (canEdit) {
       items.push({ key: 'edit', label: 'تعديل المشروع', icon: 'edit' });
-      for (const t of this.transitions()) {
-        items.push({ key: `t:${t.toStatusId}`, label: `انتقال إلى «${t.name}»${t.requiresApproval ? ' (يتطلب موافقة)' : ''}`, icon: 'flow' });
-      }
     }
     if (this.auth.can('projects.archive', p.id)) {
       items.push({ key: 'archive', label: p.archived ? 'إلغاء الأرشفة' : 'أرشفة المشروع', icon: 'archive', danger: !p.archived });
@@ -193,6 +268,13 @@ export class ProjectDetail {
   protected onMenu(project: ProjectSummary, key: string): void {
     if (key === 'edit') this.edit(project);
     else if (key === 'archive') this.toggleArchive(project);
+    else if (key === 'approve') this.approvePending();
+    else if (key === 'reject') this.rejectPending();
+    else if (key === 'request-approval') this.requestApproval(project);
+    else if (key === 'activate') {
+      const a = this.activation();
+      if (a) this.transition(project, a);
+    }
     else if (key.startsWith('t:')) {
       const t = this.transitions().find((x) => x.toStatusId === key.slice(2));
       if (t) this.transition(project, t);

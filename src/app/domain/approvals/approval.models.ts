@@ -140,6 +140,13 @@ export interface DecideRequest {
   readonly revision: number;
 }
 
+/** Final decision by a holder of `approvals.override`: skips the remaining stages. Comment is mandatory (audited). */
+export interface OverrideRequest {
+  readonly decision: 'approve' | 'reject';
+  readonly comment: string;
+  readonly revision: number;
+}
+
 export type ApprovalBox = 'inbox' | 'sent' | 'closed';
 
 /** FR-APR-11: temporary delegation of approval authority. */

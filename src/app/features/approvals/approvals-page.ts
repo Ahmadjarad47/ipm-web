@@ -134,7 +134,11 @@ export class ApprovalsPage {
   }
 
   protected isSelectable(row: ApprovalRequest): boolean {
-    return row.status === 'pending-approval' && !!row.canDecide && row.requesterId !== this.me();
+    return row.status === 'pending-approval' && !!row.canDecide;
+  }
+
+  protected isMine(row: ApprovalRequest): boolean {
+    return row.requesterId === this.me();
   }
 
   protected isSelected(row: ApprovalRequest): boolean {

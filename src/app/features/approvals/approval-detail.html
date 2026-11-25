@@ -171,6 +171,17 @@
           </div>
         </section>
       }
+
+      @if (showOverride()) {
+        <section class="card card-body decide" aria-labelledby="override-title">
+          <h2 class="section-title" id="override-title">قرار مدير النظام</h2>
+          <p class="muted note"><app-icon name="info" [size]="14" /> قرار نهائي يتخطى بقية المراحل (حتى لو كنت مقدّم الطلب) ويُسجَّل في التدقيق.</p>
+          <div class="row">
+            <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="overrideDecision('approve')">اعتماد نهائي…</button>
+            <button type="button" class="btn btn--danger" [disabled]="busy()" (click)="overrideDecision('reject')">رفض نهائي…</button>
+          </div>
+        </section>
+      }
     </div>
   </div>
 

@@ -22,4 +22,8 @@ export interface Role extends Entity {
   readonly denied: readonly PermissionKey[];
   /** Seeded roles cannot be deleted, only edited. */
   readonly builtIn: boolean;
+  /** List counters: the roles list carries counts instead of the permission arrays (those come with the single read). */
+  readonly permissionCount?: number;
+  /** Accounts holding this role as a system role (the server does not count project memberships). */
+  readonly userCount?: number;
 }

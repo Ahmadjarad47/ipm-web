@@ -68,6 +68,8 @@
     <div class="hint-row">
       @if (row.canDecide) {
         <app-badge tone="gold">بانتظار قرارك</app-badge>
+      } @else if (isMine(row)) {
+        <small class="muted">أنت مقدّم الطلب، ولا يجوز الموافقة على طلبك (فصل المهام)</small>
       } @else {
         <small class="muted">ليس دورك الآن في هذا الطلب</small>
       }

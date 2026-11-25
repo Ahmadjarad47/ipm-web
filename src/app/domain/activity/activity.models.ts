@@ -63,6 +63,7 @@ export const AUDIT_ACTION_LABELS: Readonly<Record<string, string>> = {
   'type.updated': 'عدّل نوع عنصر',
   'type.created': 'أنشأ نوع عنصر',
   'status.updated': 'عدّل حالة',
+  'workflow.updated': 'عدّل مسار العمل',
   'git.push': 'دفع Commit',
   'git.pr': 'فتح طلب دمج (PR)',
   'git.connected': 'ربط مستودع Git',

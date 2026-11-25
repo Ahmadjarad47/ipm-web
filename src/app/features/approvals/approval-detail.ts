@@ -26,6 +26,7 @@ import { ApprovalStatusBadge } from '@shared/domain-ui/domain-ui';
 import { AppDatePipe, UserNamePipe } from '@shared/pipes/pipes';
 import { Avatar } from '@shared/ui/avatar/avatar';
 import { Badge } from '@shared/ui/badge/badge';
+import { ConfirmService } from '@shared/ui/dialog/confirm-dialog';
 import { DialogService } from '@shared/ui/dialog/dialog.service';
 import { EmptyState } from '@shared/ui/empty-state/empty-state';
 import { ErrorState } from '@shared/ui/error-state/error-state';
@@ -89,6 +90,7 @@ export class ApprovalDetail {
   private readonly projects = inject(ProjectLookup);
   private readonly types = inject(WorkItemTypeLookup);
   private readonly dialog = inject(DialogService);
+  private readonly confirm = inject(ConfirmService);
   private readonly pageTitle = inject(PageTitle);
   private readonly recent = inject(RecentItems);
 
@@ -129,7 +131,11 @@ export class ApprovalDetail {
 
   protected readonly isRequester = computed(() => this.request()?.requesterId === this.auth.user()?.id);
   protected readonly isPending = computed(() => this.request()?.status === 'pending-approval');
-  protected readonly showDecisionPanel = computed(() => !!this.request()?.canDecide && !this.isRequester());
+  protected readonly showDecisionPanel = computed(() => !!this.request()?.canDecide);
+  protected readonly showOverride = computed(() => {
+    const r = this.request();
+    return !!r && r.status === 'pending-approval' && this.auth.can('approvals.override');
+  });
   protected readonly canRemind = computed(() => {
     const r = this.request();
     return !!r && r.status === 'pending-approval' && (this.isRequester() || this.auth.can('approvals.configure', r.projectId));
@@ -217,6 +223,35 @@ export class ApprovalDetail {
       })
       .afterClosed.subscribe((comment) => {
         if (comment) this.submitDecision(decision, comment);
+      });
+  }
+
+  protected overrideDecision(decision: 'approve' | 'reject'): void {
+    const r = this.request();
+    if (!r || this.busy()) return;
+    const approve = decision === 'approve';
+    this.confirm
+      .reason({
+        title: approve ? 'اعتماد نهائي بصفة مدير النظام' : 'رفض نهائي بصفة مدير النظام',
+        message: 'سيُحسم الطلب فورًا ويتخطى جميع المراحل المتبقية، ويُسجَّل قرارك والسبب في سجل التدقيق.',
+        requireReason: 'سبب التخطي',
+        confirmText: approve ? 'اعتماد وتخطي المراحل' : 'رفض وتخطي المراحل',
+        danger: !approve,
+      })
+      .subscribe((comment) => {
+        if (!comment) return;
+        this.busy.set(true);
+        this.api.override(r.id, { decision, comment, revision: r.revision }).subscribe({
+          next: () => {
+            this.busy.set(false);
+            this.toast.success(approve ? 'تم الاعتماد النهائي' : 'تم الرفض النهائي');
+            this.resource.reload();
+          },
+          error: (err: unknown) => {
+            this.busy.set(false);
+            if (isApiError(err) && err.status === 409) this.resource.reload();
+          },
+        });
       });
   }
 

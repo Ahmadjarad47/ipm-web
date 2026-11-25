@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { isApiError } from '@core/models/api-error.model';
 import { ToastService } from '@core/notifications/toast.service';
 import { ProjectLookup } from '@domain/projects/project.api';
-import { RoleLookup, RolesApi, UserLookup } from '@domain/users/user.api';
+import { RoleLookup, RolesApi } from '@domain/users/user.api';
 import { Role } from '@domain/users/user.models';
 import { Badge } from '@shared/ui/badge/badge';
 import { ConfirmService } from '@shared/ui/dialog/confirm-dialog';
@@ -58,7 +58,7 @@ import { RoleDialog, RoleDialogData } from './role-dialog';
                   @if (r.builtIn) {
                     <app-badge tone="neutral">مدمج</app-badge>
                   }
-                  <app-badge tone="emerald">{{ r.permissions.length }} صلاحية</app-badge>
+                  <app-badge tone="emerald">{{ permissionTotal(r) }} صلاحية</app-badge>
                   <app-badge tone="info">يستخدمه {{ usage(r) }} {{ usage(r) === 1 ? 'مستخدم' : 'مستخدمًا' }}</app-badge>
                   @if (r.denied.length) {
                     <app-badge tone="danger">{{ r.denied.length }} ممنوعة</app-badge>
@@ -82,25 +82,26 @@ import { RoleDialog, RoleDialogData } from './role-dialog';
 export class RolesTab {
   protected readonly roles = inject(RoleLookup);
   private readonly dialog = inject(DialogService);
-  private readonly users = inject(UserLookup);
   private readonly projects = inject(ProjectLookup);
   private readonly api = inject(RolesApi);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(ToastService);
 
-  /** roleId -> number of distinct users holding it (system roles via the account, project roles via memberships). */
-  private readonly usageByRole = computed(() => {
+  /** roleId -> distinct users holding it through project memberships (the server counts only system-role holders). */
+  private readonly projectHolders = computed(() => {
     const holders = new Map<string, Set<string>>();
-    const add = (roleId: string, userId: string): void => {
-      holders.set(roleId, (holders.get(roleId) ?? new Set<string>()).add(userId));
-    };
-    for (const u of this.users.items()) for (const id of u.systemRoleIds) add(id, u.id);
-    for (const p of this.projects.items()) for (const m of p.members) add(m.roleId, m.userId);
+    for (const p of this.projects.items()) {
+      for (const m of p.members) holders.set(m.roleId, (holders.get(m.roleId) ?? new Set<string>()).add(m.userId));
+    }
     return holders;
   });
 
   protected usage(role: Role): number {
-    return this.usageByRole().get(role.id)?.size ?? 0;
+    return role.scope === 'system' ? (role.userCount ?? 0) : (this.projectHolders().get(role.id)?.size ?? 0);
+  }
+
+  protected permissionTotal(role: Role): number {
+    return role.permissionCount ?? role.permissions.length;
   }
 
   protected remove(role: Role): void {
@@ -122,6 +123,12 @@ export class RolesTab {
   }
 
   protected open(role: Role | null): void {
+    // The list rows carry counts only; editing needs the full role (permissions, denied, current version), or saving would wipe them.
+    if (!role) return this.openDialog(null);
+    this.api.getById(role.id).subscribe((full) => this.openDialog(full));
+  }
+
+  private openDialog(role: Role | null): void {
     this.dialog.open<RoleDialog, RoleDialogData, Role>(RoleDialog, {
       data: { role },
       width: 'min(820px, calc(100vw - 32px))',

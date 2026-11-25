@@ -23,6 +23,8 @@ interface MeResponse {
 
 /** The access token is renewed this long before it expires. */
 const RENEW_AHEAD_MS = 60_000;
+/** A tab shown again re-reads the grants if the last read is older than this. */
+const RECHECK_AFTER_MS = 30_000;
 const SILENT = { 'X-Silent-Error': '1' };
 
 /**
@@ -53,6 +55,17 @@ export class AuthService {
   readonly mustChangePassword = computed(() => this._session()?.mustChangePassword ?? false);
   private readonly systemGrants = computed(() => new Set(this._session()?.systemPermissions ?? []));
   private readonly denied = computed(() => new Set(this._session()?.denied ?? []));
+
+  constructor() {
+    // Grants are a snapshot of the last sign-in or renewal: re-read them when the tab comes back, so a role or permission an
+    // administrator changed meanwhile shows up without signing out and in again.
+    let lastRead = Date.now();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible' || !this.isAuthenticated() || Date.now() - lastRead < RECHECK_AFTER_MS) return;
+      lastRead = Date.now();
+      this.refreshSession().subscribe({ error: () => undefined });
+    });
+  }
 
   /** Runs once at start-up: brings back the session of a returning user, quietly. */
   initialize(): Promise<void> {
@@ -93,7 +106,7 @@ export class AuthService {
    * (creating a project, membership or role changes) — grants are otherwise a snapshot of the last sign-in or renewal.
    */
   refreshSession(): Observable<AuthSession> {
-    return this.http.get<MeResponse>(`${this.baseUrl}/auth/me`).pipe(
+    return this.http.get<MeResponse>(`${this.baseUrl}/auth/me`, { headers: SILENT }).pipe(
       map((me) => ({ ...this.requireSession(), ...me })),
       tap((session) => this.establish(session)),
     );

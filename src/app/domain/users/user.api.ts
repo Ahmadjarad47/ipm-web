@@ -121,6 +121,8 @@ const toRole = (s: ServerRole): Role => ({
   permissions: s.permissions ?? [],
   denied: s.denied ?? [],
   builtIn: s.isBuiltIn,
+  permissionCount: s.permissionCount ?? s.permissions?.length,
+  userCount: s.userCount,
   version: s.version ?? 0,
   createdAt: '',
   updatedAt: '',

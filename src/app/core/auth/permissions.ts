@@ -6,7 +6,7 @@ export const PERMISSION_GROUPS = {
   projects: ['projects.view', 'projects.create', 'projects.edit', 'projects.archive', 'projects.members.manage'],
   tasks: ['tasks.view', 'tasks.create', 'tasks.edit', 'tasks.assign', 'tasks.delete'],
   workflow: ['statuses.manage', 'workflows.manage', 'workflow.transition'],
-  approvals: ['approvals.request', 'approvals.view', 'approvals.decide', 'approvals.configure'],
+  approvals: ['approvals.request', 'approvals.view', 'approvals.decide', 'approvals.configure', 'approvals.override'],
   collaboration: ['comments.create', 'comments.edit_own', 'files.upload', 'files.download', 'files.delete'],
   integration: ['git.view', 'git.manage', 'git.sync'],
   security: ['roles.manage', 'permissions.assign', 'audit.view', 'audit.export', 'audit.override', 'settings.manage'],

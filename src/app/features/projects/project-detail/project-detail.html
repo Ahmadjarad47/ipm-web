@@ -11,9 +11,6 @@
     @if (p.archived) {
       <app-badge tone="neutral">مؤرشف</app-badge>
     }
-    <button *appCan="'approvals.request'; project: p.id" type="button" class="btn btn--gold" (click)="requestApproval(p)">
-      <app-icon name="approval" [size]="16" /> طلب موافقة
-    </button>
     @if (menuActions().length) {
       <app-actions-menu [items]="menuActions()" (select)="onMenu(p, $event)" />
     }
