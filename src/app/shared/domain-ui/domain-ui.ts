@@ -33,8 +33,8 @@ export class StatusBadge {
     }
   `,
   styles: `
-    :host { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); font-weight: 600; color: var(--type-color); white-space: nowrap; }
-    .ico { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: color-mix(in srgb, var(--type-color) 14%, var(--c-surface)); }
+    :host { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); font-weight: 600; color: color-mix(in srgb, var(--type-color) 78%, var(--c-text)); white-space: nowrap; }
+    .ico { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: color-mix(in srgb, var(--type-color) 20%, var(--c-surface)); border: 1px solid color-mix(in srgb, var(--type-color) 40%, transparent); }
   `,
 })
 export class TypeChip {
@@ -44,7 +44,7 @@ export class TypeChip {
   protected readonly type = computed(() => this.types.get(this.typeId()));
 }
 
-const PRIORITY_TONES: Record<Priority, BadgeTone> = { low: 'neutral', medium: 'info', high: 'warning', critical: 'danger' };
+const PRIORITY_TONES: Record<Priority, BadgeTone> = { low: 'neutral', medium: 'info', high: 'warning', critical: 'danger-solid' };
 
 @Component({
   selector: 'app-priority-badge',
