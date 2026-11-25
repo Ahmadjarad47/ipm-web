@@ -71,19 +71,30 @@
         @if (notifOpen()) {
           <div id="notif-panel" class="notif-panel card" role="dialog" aria-label="الإشعارات">
             <header>
-              <strong>الإشعارات</strong>
+              <div class="head-title">
+                <strong>الإشعارات</strong>
+                @if (notifications.unread()) {
+                  <span class="head-count">{{ notifications.unread() }} جديد</span>
+                }
+              </div>
               @if (notifications.unread()) {
-                <button type="button" class="btn btn--ghost btn--sm" (click)="notifications.markAllRead()">تعليم الكل كمقروء</button>
+                <button type="button" class="mark-all" (click)="notifications.markAllRead()"><app-icon name="check" [size]="14" /> تعليم الكل كمقروء</button>
               }
             </header>
             <app-tabs [tabs]="notifTabs()" [(active)]="notifTab" idPrefix="notif-tab-" />
             <ul aria-live="polite">
               @for (n of visibleNotifications(); track n.id) {
                 <li [appNotificationSeen]="n">
-                  <button type="button" [class.unread]="!n.read" (click)="openNotification(n)">
-                    <strong>{{ n.title }}</strong>
-                    <span>{{ n.body }}</span>
-                    <small>{{ n.createdAt | relativeTime }}</small>
+                  <button type="button" class="item" [class.unread]="!n.read" (click)="openNotification(n)">
+                    <span class="ico tone-{{ visual(n.kind).tone }}"><app-icon [name]="visual(n.kind).icon" [size]="16" /></span>
+                    <span class="txt">
+                      <strong>{{ n.title }}</strong>
+                      <span class="body">{{ n.body }}</span>
+                      <small>{{ n.createdAt | relativeTime }}</small>
+                    </span>
+                    @if (!n.read) {
+                      <span class="pip" role="img" aria-label="غير مقروء"></span>
+                    }
                   </button>
                 </li>
               } @empty {
@@ -91,7 +102,7 @@
               }
             </ul>
             <footer>
-              <a routerLink="/notifications" (click)="notifOpen.set(false)">عرض كل الإشعارات</a>
+              <a routerLink="/notifications" (click)="notifOpen.set(false)">عرض كل الإشعارات <app-icon name="chevronLeft" [size]="14" /></a>
             </footer>
           </div>
         }

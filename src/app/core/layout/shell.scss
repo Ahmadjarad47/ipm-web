@@ -248,7 +248,7 @@
   position: absolute;
   inset-block-start: calc(100% + 8px);
   inset-inline-end: 0;
-  width: min(360px, calc(100vw - 32px));
+  width: min(400px, calc(100vw - 32px));
   box-shadow: var(--shadow-lg);
   overflow: hidden;
 
@@ -256,8 +256,51 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: var(--s-3);
     padding: var(--s-3) var(--s-4);
+    background: var(--c-emerald-50);
     border-bottom: 1px solid var(--c-border);
+  }
+
+  .head-title {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+
+    strong {
+      font-size: var(--fs-md, 1rem);
+      color: var(--c-emerald-900);
+    }
+  }
+
+  .head-count {
+    padding: 2px 10px;
+    border-radius: var(--r-pill);
+    background: var(--c-gold-100);
+    border: 1px solid color-mix(in srgb, var(--c-gold-500) 55%, transparent);
+    color: var(--c-gold-600);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+  }
+
+  .mark-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-block-size: 32px;
+    padding: 0 var(--s-2);
+    border: 0;
+    border-radius: var(--r-md, 8px);
+    background: none;
+    color: var(--c-emerald-700);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--c-emerald-100);
+    }
   }
 
   ul {
@@ -268,10 +311,11 @@
     overflow-y: auto;
   }
 
-  li button {
+  li button.item {
+    position: relative;
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: flex-start;
+    gap: var(--s-3);
     width: 100%;
     padding: var(--s-3) var(--s-4);
     border: 0;
@@ -279,24 +323,96 @@
     background: none;
     text-align: start;
     cursor: pointer;
+    transition: background-color 0.15s var(--ease);
 
     &:hover {
       background: var(--c-emerald-50);
     }
 
     &.unread {
-      background: var(--c-gold-100);
-      box-shadow: inset -3px 0 0 var(--c-gold-500);
+      background: color-mix(in srgb, var(--c-gold-100) 70%, var(--c-surface));
+      box-shadow: inset 3px 0 0 var(--c-gold-500);
+
+      &:hover {
+        background: var(--c-gold-100);
+      }
+
+      .txt strong {
+        color: var(--c-text);
+      }
     }
 
-    span {
-      font-size: var(--fs-sm);
-      color: var(--c-text-2);
+    .ico {
+      flex: none;
+      display: grid;
+      place-items: center;
+      inline-size: 34px;
+      block-size: 34px;
+      border-radius: 10px;
+      border: 1px solid color-mix(in srgb, var(--tone) 38%, transparent);
+      background: color-mix(in srgb, var(--tone) 16%, var(--c-surface));
+      color: color-mix(in srgb, var(--tone) 78%, var(--c-text));
+
+      &.tone-success {
+        --tone: var(--c-success);
+      }
+
+      &.tone-info {
+        --tone: var(--c-info);
+      }
+
+      &.tone-gold {
+        --tone: var(--c-gold-500);
+        color: var(--c-gold-600);
+      }
+
+      &.tone-warning {
+        --tone: var(--c-warning);
+      }
+
+      &.tone-neutral {
+        --tone: var(--c-neutral);
+      }
     }
 
-    small {
-      font-size: var(--fs-xs);
-      color: var(--c-muted);
+    .txt {
+      flex: 1;
+      min-inline-size: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      strong {
+        font-size: var(--fs-sm);
+        font-weight: 600;
+        color: var(--c-text-2);
+      }
+
+      .body {
+        font-size: var(--fs-sm);
+        color: var(--c-text-2);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        overflow-wrap: anywhere;
+      }
+
+      small {
+        font-size: var(--fs-xs);
+        color: var(--c-muted);
+      }
+    }
+
+    .pip {
+      flex: none;
+      inline-size: 9px;
+      block-size: 9px;
+      margin-block-start: 6px;
+      border-radius: 50%;
+      background: var(--c-gold-500);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-gold-500) 25%, transparent);
     }
   }
 
@@ -504,15 +620,22 @@
 }
 
 .notif-panel footer {
-  padding: var(--s-3) var(--s-4);
+  padding: var(--s-2) var(--s-4);
   border-top: 1px solid var(--c-border);
+  background: var(--c-emerald-50);
   text-align: center;
 
   a {
     display: inline-flex;
     align-items: center;
-    min-height: 32px;
+    gap: 4px;
+    min-height: 36px;
+    color: var(--c-emerald-700);
     font-weight: 600;
+
+    &:hover {
+      color: var(--c-emerald-900);
+    }
   }
 }
 

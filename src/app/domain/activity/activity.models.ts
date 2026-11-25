@@ -106,6 +106,8 @@ export interface CommentRevision {
 
 export interface Notification extends Entity {
   readonly userId: string;
+  /** Server kind key (e.g. `work-item.assigned`); picks the icon and tone in the list. */
+  readonly kind?: string;
   readonly title: string;
   readonly body: string;
   readonly link: string;

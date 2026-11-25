@@ -7,6 +7,7 @@ import { PreferencesStore } from '@core/preferences/preferences.store';
 import { NotificationSeenDirective } from '@core/notifications/notification-seen.directive';
 import { NotificationStore } from '@core/notifications/notification.store';
 import { Notification } from '@domain/activity/activity.models';
+import { notificationVisual } from '@features/notifications/notification-kind';
 import { Avatar } from '@shared/ui/avatar/avatar';
 import { Icon } from '@shared/ui/icon/icon';
 import { RelativeTimePipe } from '@shared/pipes/pipes';
@@ -43,6 +44,7 @@ export class Shell {
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly sidebarOpen = signal(false);
+  protected readonly visual = notificationVisual;
   protected readonly notifOpen = signal(false);
   protected readonly userMenuOpen = signal(false);
   protected readonly notifTab = signal<NotifTab>('all');
