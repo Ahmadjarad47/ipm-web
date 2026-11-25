@@ -87,7 +87,7 @@ let nextId = 0;
         <p>توجد أعمال قائمة في حالات غير موجودة في سير العمل الجديد. انقل هذه الأعمال إلى حالة صالحة أو اختر سير عمل يحتوي حالاتها، ثم أعد المحاولة.</p>
         <ul>
           @for (c of conflicts(); track c.label) {
-            <li><strong>{{ c.label }}</strong>: {{ c.count }} عمل</li>
+            <li><strong>{{ c.label }}</strong>: الأعمال: {{ c.count }}</li>
           }
         </ul>
       </div>

@@ -56,7 +56,7 @@ const PAGE_SIZE = 10;
           }
         </ul>
         @if (list.value().total > nodes().length) {
-          <p class="muted note">تُعرض أول {{ nodes().length }} عملًا من أصل {{ list.value().total }}.</p>
+          <p class="muted note">تُعرض أول {{ nodes().length }} من أصل {{ list.value().total }} من الأعمال.</p>
         }
       } @else if (!list.isLoading()) {
         <app-empty-state icon="list" title="لا توجد أعمال" />

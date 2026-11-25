@@ -25,7 +25,7 @@ interface GraphData {
       <app-error-state title="تعذّر تحميل المخطط" (retry)="resource.reload()" />
     } @else if (resource.value(); as data) {
       @if (data.total > pageSize) {
-        <p class="muted note">يعرض أول {{ pageSize }} عمل</p>
+        <p class="muted note">يعرض أول {{ pageSize }} من الأعمال</p>
       }
       <app-dependency-graph [items]="data.items" [relations]="data.relations" (open)="router.navigate(['/work-items', $event.id])" />
     } @else {

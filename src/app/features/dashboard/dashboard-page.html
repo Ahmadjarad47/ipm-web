@@ -180,7 +180,7 @@
               <span class="progress"><span [style.width.%]="p.progress.percent ?? 0"></span></span>
               <strong class="pct">{{ p.progress.percent === null ? 'لا توجد بيانات' : p.progress.percent + '%' }}</strong>
             </div>
-            <small class="muted">{{ p.progress.doneLeaves }} من {{ p.progress.countedLeaves }} عملًا طرفيًا منجزًا · ينتهي {{ p.endDate | appDate }}</small>
+            <small class="muted">{{ p.progress.doneLeaves }} من أصل {{ p.progress.countedLeaves }} من الأعمال الطرفية منجزة · ينتهي {{ p.endDate | appDate }}</small>
           </a>
         </li>
       } @empty {

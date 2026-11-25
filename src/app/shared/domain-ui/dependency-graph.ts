@@ -205,7 +205,7 @@ export class DependencyGraph {
 
   protected readonly summary = computed(() => {
     const g = this.graph();
-    return `${g.nodes.length} عملًا و${g.edges.length} رابطًا`;
+    return `${g.nodes.length} من الأعمال و${g.edges.length} رابطًا`;
   });
 
   private readonly neighbours = computed(() => {

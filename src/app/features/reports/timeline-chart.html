@@ -11,7 +11,7 @@
     <button type="button" class="btn btn--ghost btn--sm" (click)="setAllCollapsed(!allCollapsed())">{{ allCollapsed() ? 'توسيع الكل' : 'طيّ الكل' }}</button>
     <span class="spacer"></span>
     @if (hasMore()) {
-      <span class="muted" role="status">عُرض {{ loadedCount() }} من {{ total() }} عملًا</span>
+      <span class="muted" role="status">عُرض {{ loadedCount() }} من {{ total() }} من الأعمال</span>
       <button type="button" class="btn btn--outline btn--sm" [disabled]="loadingMore()" (click)="loadMore()">{{ loadingMore() ? 'جارٍ التحميل…' : 'تحميل المزيد' }}</button>
     }
   </div>

@@ -28,7 +28,7 @@ function summarizeStructured(field: string, value: string): string | null {
   if (Array.isArray(parsed)) {
     const n = parsed.length;
     if (/transition/i.test(field)) return n === 0 ? 'بدون انتقالات' : `${n} انتقالًا`;
-    return n === 0 ? '—' : `${n} عملًا`;
+    return n === 0 ? '—' : `${n} من الأعمال`;
   }
   return 'تفاصيل متعددة';
 }
