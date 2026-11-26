@@ -17,6 +17,7 @@ interface ServerUser {
   readonly isActive: boolean;
   readonly managerId?: string | null;
   readonly systemRoleIds?: readonly string[];
+  readonly isLockedOut?: boolean;
   readonly version?: number;
 }
 
@@ -28,6 +29,7 @@ const toUser = (s: ServerUser): User => ({
   title: s.title ?? '',
   active: s.isActive,
   systemRoleIds: s.systemRoleIds ?? [],
+  lockedOut: s.isLockedOut ?? false,
   managerId: s.managerId ?? undefined,
   version: s.version ?? 0,
   createdAt: '',
@@ -79,6 +81,11 @@ export class UsersApi extends BaseApiService<User, UserCreate> {
         );
       }),
     );
+  }
+
+  /** The admin lifts the sign-in lockout (too many failed attempts) right away; the password stays as it is. */
+  unlock(id: string): Observable<void> {
+    return this.http.post<void>(`${this.url}/${encodeURIComponent(id)}/unlock`, {});
   }
 
   /** The admin sets a new password; the user must change it at the next sign-in. */

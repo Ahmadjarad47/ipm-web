@@ -7,6 +7,8 @@ export interface User extends Entity {
   readonly email: string;
   readonly title: string;
   readonly active: boolean;
+  /** Sign-in is blocked for a while after repeated failed attempts; an administrator can lift it. */
+  readonly lockedOut?: boolean;
   /** System-scope roles. Project roles live on `ProjectMember`. */
   readonly systemRoleIds: readonly string[];
   /** Direct manager; resolves the `direct_manager` approval position (FR-APR-02). */

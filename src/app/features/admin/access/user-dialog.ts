@@ -75,6 +75,17 @@ const FIELD_KEYS: readonly string[] = ['name', 'email', 'title', 'managerId', 's
           </div>
         </form>
 
+        @if (lockedOut()) {
+          <app-admin-notice tone="warning">
+            الحساب مقفل مؤقتًا بسبب محاولات دخول فاشلة متكررة.
+            @if (canAssign()) {
+              <button type="button" class="btn btn--outline" [disabled]="unlocking()" (click)="unlock()">
+                <app-icon name="lock" [size]="16" /> {{ unlocking() ? 'جارٍ الفك…' : 'فك القفل الآن' }}
+              </button>
+            }
+          </app-admin-notice>
+        }
+
         <div class="row">
           <app-active-toggle [checked]="active()" [disabled]="locked()" label="الحساب نشط" (toggled)="active.set($event)" />
           <span>{{ active() ? 'الحساب نشط' : 'الحساب معطّل' }}</span>
@@ -160,6 +171,9 @@ export class UserDialog {
     Object.entries(this.serverErrors()).filter(([key]) => !FIELD_KEYS.includes(key)).map(([key, message]) => ({ key, message })),
   );
 
+  protected readonly lockedOut = signal(this.user.lockedOut ?? false);
+  protected readonly unlocking = signal(false);
+
   protected readonly resetDone = signal(false);
   protected readonly newPassword = signal('');
   protected readonly resetting = signal(false);
@@ -240,6 +254,19 @@ export class UserDialog {
           if (e.status === 422 || e.status === 403 || !e.details) this.formError.set(e.message);
         },
       });
+  }
+
+  protected unlock(): void {
+    this.unlocking.set(true);
+    this.api.unlock(this.user.id).subscribe({
+      next: () => {
+        this.unlocking.set(false);
+        this.lockedOut.set(false);
+        this.userLookup.reload();
+        this.toast.success('تم فك قفل الحساب');
+      },
+      error: () => this.unlocking.set(false), // the interceptor already toasted the reason
+    });
   }
 
   protected reset(): void {

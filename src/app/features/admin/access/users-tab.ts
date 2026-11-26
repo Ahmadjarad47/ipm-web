@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Templ
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { CanDirective } from '@core/auth/can.directive';
-import { RoleLookup } from '@domain/users/user.api';
+import { ToastService } from '@core/notifications/toast.service';
+import { RoleLookup, UsersApi } from '@domain/users/user.api';
 import { User } from '@domain/users/user.models';
 import { Avatar } from '@shared/ui/avatar/avatar';
 import { Badge } from '@shared/ui/badge/badge';
@@ -81,6 +82,12 @@ import { UserListStore } from './user-list.store';
     </ng-template>
     <ng-template #activeTpl let-u>
       <app-badge [tone]="u.active ? 'success' : 'neutral'" [dot]="true">{{ u.active ? 'نشط' : 'معطّل' }}</app-badge>
+      @if (u.lockedOut) {
+        <app-badge tone="warning" [dot]="true">مقفل</app-badge>
+        <button *appCan="'permissions.assign'" type="button" class="btn btn--outline btn--sm" (click)="unlock(u, $event)">
+          <app-icon name="lock" [size]="14" /> فك القفل
+        </button>
+      }
     </ng-template>
   `,
   styles: `
@@ -94,6 +101,8 @@ export class UsersTab {
   protected readonly store = inject(UserListStore);
   protected readonly roles = inject(RoleLookup);
   private readonly dialog = inject(DialogService);
+  private readonly usersApi = inject(UsersApi);
+  private readonly toast = inject(ToastService);
 
   protected readonly search$ = new Subject<string>();
   protected readonly systemRoles = computed(() => this.roles.items().filter((r) => r.scope === 'system'));
@@ -130,6 +139,15 @@ export class UsersTab {
       .afterClosed.subscribe((created) => {
         if (created) this.store.reload();
       });
+  }
+
+  /** Lifts the sign-in lockout of a user straight from the list (the row click must not open the dialog). */
+  protected unlock(user: User, event: Event): void {
+    event.stopPropagation();
+    this.usersApi.unlock(user.id).subscribe(() => {
+      this.toast.success(`تم فك قفل حساب «${user.name}»`);
+      this.store.reload();
+    });
   }
 
   protected open(user: User): void {
