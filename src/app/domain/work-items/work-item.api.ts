@@ -9,6 +9,7 @@ import { LookupStore } from '@core/state/lookup.store';
 import { CloseRequest, ReopenRequest, TransitionRequest } from '@domain/workflow/workflow.models';
 import {
   BoardItem,
+  FieldValue,
   HierarchyPair,
   ImpactInfo,
   Priority,
@@ -77,14 +78,15 @@ export class WorkItemsApi extends BaseApiService<WorkItem, WorkItemCreate, Updat
   }
 
   /** Dry run of a type change: what would stop it (required fields, children that no longer fit). */
-  checkTypeChange(id: string, typeId: string): Observable<readonly TypeChangeConflict[]> {
+  checkTypeChange(id: string, typeId: string, fields?: Readonly<Record<string, FieldValue>>): Observable<readonly TypeChangeConflict[]> {
     return this.http
-      .post<{ readonly conflicts: readonly TypeChangeConflict[] }>(`${this.url}/${encodeURIComponent(id)}/type-change/check`, { typeId })
+      .post<{ readonly conflicts: readonly TypeChangeConflict[] }>(`${this.url}/${encodeURIComponent(id)}/type-change/check`, fields ? { typeId, fields } : { typeId })
       .pipe(map((r) => r.conflicts));
   }
 
-  changeType(id: string, typeId: string, version: number): Observable<WorkItem> {
-    return this.action(id, 'type-change', { typeId, version });
+  /** `fields` are values the new type needs that the item does not hold yet (for example its required fields). */
+  changeType(id: string, typeId: string, version: number, fields?: Readonly<Record<string, FieldValue>>): Observable<WorkItem> {
+    return this.action(id, 'type-change', fields ? { typeId, version, fields } : { typeId, version });
   }
 
   bulk(request: BulkRequest): Observable<readonly BulkResult[]> {

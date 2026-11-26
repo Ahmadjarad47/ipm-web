@@ -93,6 +93,33 @@ describe('API contract of the domain services', () => {
     expect(conflicts).toEqual([{ field: 'f', reason: 'r' }]);
   });
 
+  it('sends the typed values with the type check, and nothing extra when there are none', () => {
+    const api = TestBed.inject(WorkItemsApi);
+    api.checkTypeChange('w1', 't2', { severity: 'major' }).subscribe();
+    const withFields = http.expectOne((r) => r.url.endsWith('/work-items/w1/type-change/check'));
+    expect(withFields.request.body).toEqual({ typeId: 't2', fields: { severity: 'major' } });
+    withFields.flush({ conflicts: [] });
+
+    api.checkTypeChange('w1', 't2').subscribe();
+    const plain = http.expectOne((r) => r.url.endsWith('/work-items/w1/type-change/check'));
+    expect(plain.request.body).toEqual({ typeId: 't2' });
+    plain.flush({ conflicts: [] });
+  });
+
+  it('changes the type with the version in If-Match and the typed values in the body', () => {
+    const api = TestBed.inject(WorkItemsApi);
+    api.changeType('w1', 't2', 5, { severity: 'major' }).subscribe();
+    const withFields = http.expectOne((r) => r.method === 'POST' && r.url.endsWith('/work-items/w1/type-change'));
+    expect(withFields.request.headers.get('If-Match')).toBe('"5"');
+    expect(withFields.request.body).toEqual({ typeId: 't2', fields: { severity: 'major' } });
+    withFields.flush({});
+
+    api.changeType('w1', 't2', 6).subscribe();
+    const plain = http.expectOne((r) => r.method === 'POST' && r.url.endsWith('/work-items/w1/type-change'));
+    expect(plain.request.body).toEqual({ typeId: 't2' });
+    plain.flush({});
+  });
+
   it('sends a decision with the revision in the body and the record version in If-Match', () => {
     TestBed.inject(ApprovalRequestsApi).decide('a1', { decision: 'approve', comment: '', revision: 2 }).subscribe();
 
