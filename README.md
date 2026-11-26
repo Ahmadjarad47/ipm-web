@@ -5,6 +5,14 @@ It covers projects, work items, configurable workflows, sequential approvals, Gi
 
 > Backend: [`ipm-backend`](https://github.com/Ahmadjarad47/ipm-backend) (.NET 10, Clean Architecture, CQRS). This repo is the front end only.
 
+![Angular 22](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white) ![RTL](https://img.shields.io/badge/UI-Arabic%20RTL-2E7D32) ![License: MIT](https://img.shields.io/badge/license-MIT-green)
+
+## The idea
+
+Organisations run their projects across chat threads, spreadsheets and tools that each force a fixed process. **IPM** is one **single source of truth** for projects, tasks, owners and **approval decisions**. Every change records who made it, when and who approved it, and no workflow or status name is hard-coded: admins define types, fields, statuses, transitions, approval chains and roles from this UI.
+
+This app is the Arabic-first interface for it. Teams plan work on boards and trees, move items through their own workflows, approve requests from an approvals inbox, and get live notifications. Every screen respects the user's permissions.
+
 ## Highlights
 
 - **Projects & work items** — hierarchy, relations (cycle-safe), comments, bulk edit, board and list views, project progress.
